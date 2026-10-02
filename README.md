@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 006 轮 / P06：持久恢复与模拟动作**已通过本地 **429 个离线测试**，远程 CI 与阶段标签交付进行中。四个 Agent 的审核流程可跨进程恢复，人工输入、证据与预算持久保存，物流调查、退货登记和模拟退款通过事务动作账本执行。保留 single、serial 和 P05 reviewed 入口；下一轮为 P07：有界并行与预算完善。
+当前 **第 006 轮 / P06：持久恢复与模拟动作**已完成并上传 GitHub；本地 **429 个离线测试**与 [实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37041984137) 通过，达到 **M2 多 Agent MVP**。阶段交付标签为 [phase-p06](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p06)。四个 Agent 的审核流程可跨进程恢复，人工输入、证据与预算持久保存，物流调查、退货登记和模拟退款通过事务动作账本执行。保留 single、serial 和 P05 reviewed 入口；下一轮为 P07：有界并行与预算完善。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 

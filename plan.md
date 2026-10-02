@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00～P06 实现完成；P06 本地 429 个离线测试通过，远程 CI 与 phase-p06 交付进行中。下一轮为 P07。继续仅用离线脚本模型。
+当前状态：P00～P06 已完成并上传；P06 本地 429 个离线测试与 [实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37041984137) 通过，达到 M2。阶段交付标签为 phase-p06。下一轮为 P07。继续仅用离线脚本模型。
 
 前次 000～004 复核已完成。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
 
@@ -322,7 +322,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 演示：`uv run after-sales resume --run RUN-ID --model scripted`；查询模拟退款或退货记录数量。
 
-本地验收：429 passed，其中新增 59 项；真实独立进程退出/恢复、动作重复与并发、资料变更和金额上界通过；安装包和远端交付记录见 [第 006 轮](docs/rounds/006.md)。远端 CI 通过后确认 M2 并建立 phase-p06。
+本地验收：429 passed，其中新增 59 项；真实独立进程退出/恢复、动作重复与并发、资料变更和金额上界通过；安装包和远端交付记录见 [第 006 轮](docs/rounds/006.md)。远端实现 CI 已通过，M2 完成；phase-p06 在最终文档提交 CI 通过后建立，历史标签保留。
 
 验收门槛：跨进程恢复、幂等和金额并发测试通过。达到 M2。需要理解：检查点与业务事务的区别、节点重放、动作幂等和实际业务完成状态。
 
@@ -486,7 +486,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P03：单 Agent 离线基线。
 - [x] P04：多 Agent 串行主图。
 - [ ] P05：审核与人工介入。
-- [ ] P06：恢复与模拟动作。
+- [x] P06：恢复与模拟动作。
 - [ ] P07：并行、预算和事件。
 - [ ] P08：HTTP 服务。
 - [ ] P09：工单页面。
@@ -559,3 +559,13 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 修正：补充测试引用 Role 但缺导入，Ruff F821 与 pytest 收集 NameError 均指向同一处；补入导入并按退出码控制检查后，完整回归通过。按用户指定 SherlockPlatform 完成 SPAR，排查仅涉及本地命令与源码，无 HTTP 请求/traceId 或生产操作。
 - 限制：离线意图使用工单声明，不评价 NLU 或真实模型质量。交接为当前协议的完整事实摘要，后续可按任务裁剪；没有审核、暂停恢复、并行或业务动作。schema 修复共用默认 1 次，和后续审核返工分开；JSON 仅静态回看，案例故障名不自动激活通用故障执行器。
 - GitHub：实现提交 `9948cb8616c5caf71342ca6ac1cd9676fc63f975` 已推送，[P04 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37021920152) 为 success，完成 Linux 锁定依赖安装、250 个离线测试、三类多 Agent 和缺订单演示、报告回看、单 Agent 回归及 wheel 构建；阶段快照为 [phase-p04](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p04)，包含本轮记录与完成状态。
+
+
+2026-10-03，第 006 轮 / P06 验收：
+
+- 实现：AsyncSqliteSaver、持久运行/证据/预算/方案/待办/人工答复、CLI resume、事务动作账本、物流调查/退货/模拟退款、最新资料与写锁内执行时钟复核、版本拒绝和真实业务状态。
+- 验证：429 passed（新增 59 项），Ruff 格式/lint 通过。真实临时 SQLite、独立进程 os._exit 的人工输入/事务/图检查点空隙、同动作重复并发、同 key 不同金额、两个工单争余额、资料/政策/时钟变更、预算延续、旧 schema 数据保留与 v1→v2 迁移通过。
+- 打包：37 模块 wheel＋demo JSON，实际归档排除缓存/业务库/测试。独立环境项目外 CLI 验证旧入口、持久退款与物流登记、另一进程恢复、金额查询及静态回看。生成图和教学轨迹的可复现脚本只使用临时库。
+- 文档：[第 006 轮](docs/rounds/006.md)、[ADR 006](docs/decisions/006-durable-review-and-action-ledger.md)、[实际图](docs/graphs/p06-durable.mmd)、[独立进程轨迹](docs/graphs/p06-demo-traces.json)。
+- GitHub：实现提交 0b00a0fc29360eebfcc47fe4fe85dbafc3f7a7e4 已推送，[CI 37041984137](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37041984137) completed/success；Linux 429 项、旧入口、durable 跨进程批准/恢复/回看/业务查询和 wheel 构建通过。最终文档提交验证后建立 phase-p06，P00～P05 与复核标签不移动。
+- 范围：达到离线 M2；POSIX 文件锁支持 macOS/Linux，本地模拟身份；不接真实退款/模型，没有取消、分布式租约或旧 workflow 的自动迁移。P07 再做有界并行、token 预算与事件完善。
