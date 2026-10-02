@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00 完成；第 001 轮 / P01 本地验收通过，正在交付 GitHub。
+当前状态：P00 与第 001 轮 / P01 均已完成，本地检查和 GitHub CI 通过；下一轮为 P02。
 
 ## 1. 使用方式
 
@@ -144,7 +144,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P01.4 固定 `as_of_time` 与 fixture seed，统一存 UTC、展示 Asia/Shanghai。
 - [x] P01.5 编写开发案例和独立 gold，留出 10 个评估案例，记录版本。
 - [x] P01.6 实现 `seed`、`ticket show` 等只读演示入口；重置仅允许目标演示库。
-- [ ] P01.7 推送本轮代码和学习记录，通过 GitHub CI，并建立 `phase-p01` 标签。
+- [x] P01.7 推送本轮代码和学习记录，通过 GitHub CI，并建立 `phase-p01` 标签。
 
 关键验证：
 
@@ -459,7 +459,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] 确定 LangGraph＋LangChain。
 - [x] 保存完整技术方案和分阶段计划。
 - [x] P00：工程基础。
-- [ ] P01：模型和模拟数据。
+- [x] P01：模型和模拟数据。
 - [ ] P02：工具和规则。
 - [ ] P03：单 Agent 基线。
 - [ ] P04：多 Agent 串行主图。
@@ -470,7 +470,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 001 轮 / P01 本地实现与验收已完成，正在推送 GitHub。完成远程交付后，下一步只推进第 002 轮 / P02：工具、规则和证据。真实模型配置在 P03 接入前确定。
+第 001 轮 / P01 已完成并上传。下一步只推进第 002 轮 / P02：工具、规则和证据。真实模型配置在 P03 接入前确定。
 
 ### 已完成工作记录
 
@@ -504,4 +504,4 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 打包：wheel 构建通过；独立环境使用锁文件安装依赖再安装 wheel，在另一个工作目录成功执行 seed 和查询。安装包包含业务资料，不包含 gold、数据库、测试或工具缓存。
 - 学习记录：[docs/rounds/001.md](docs/rounds/001.md)；设计变更：[ADR 001](docs/decisions/001-fixture-and-order-references.md)，区分用户订单引用与可信关联，业务资料随包分发。
 - 限制：P01 只有业务资料和查询；政策计算、证据、故障注入执行与 Agent 业务处理尚未实现，60 个测试通过不代表 30 个 Agent 场景已通过。
-- GitHub：待本轮推送和 CI 验证；完成后保存 `phase-p01`。
+- GitHub：实现提交 `5c871a329bdc4ff9ae5a41dcb394ec3adc61acc4` 已推送，[P01 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37012389696) 为 success；阶段快照为 `phase-p01`，包含本轮学习记录与完成状态。
