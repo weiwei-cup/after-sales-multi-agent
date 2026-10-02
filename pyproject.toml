@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "after-sales-multi-agent"
+version = "0.1.0"
+description = "A step-by-step LangGraph and LangChain after-sales learning project"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "langchain>=1,<2",
+  "langgraph>=1,<2",
+  "langgraph-checkpoint-sqlite>=3,<4",
+  "pydantic>=2,<3",
+  "pydantic-settings>=2,<3",
+]
+
+[project.scripts]
+after-sales = "after_sales.cli:main"
+
+[dependency-groups]
+dev = [
+  "pytest>=8,<10",
+  "pytest-socket>=0.7,<1",
+  "ruff>=0.12,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/after_sales"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".tools", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -m 'not live and not e2e' --disable-socket"
+markers = [
+  "unit: isolated configuration and domain checks",
+  "integration: framework and storage integration checks",
+  "recovery: persisted workflow recovery checks",
+  "api: HTTP contract checks",
+  "e2e: browser checks run separately",
+  "live: explicit real model checks requiring credentials",
+]

@@ -1,0 +1,15 @@
+#!/bin/sh
+# Prefer installed uv; use the isolated workspace tool when present.
+set -eu
+project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$project_dir"
+if command -v uv >/dev/null 2>&1; then
+    uv_command=$(command -v uv)
+elif [ -x "$project_dir/.tools/uv/bin/uv" ]; then
+    uv_command="$project_dir/.tools/uv/bin/uv"
+else
+    printf '%s\n' 'uv is required: https://docs.astral.sh/uv/getting-started/installation/' >&2
+    exit 127
+fi
+export UV_CACHE_DIR="${UV_CACHE_DIR:-$project_dir/.tools/uv-cache}"
+exec "$uv_command" "$@"
