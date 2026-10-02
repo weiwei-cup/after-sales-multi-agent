@@ -167,6 +167,18 @@ class BusinessRepository:
         with read_database(self.path) as connection:
             return _order(connection, order_id, customer_id)
 
+    def get_order_products(self, order_id: str, *, customer_id: str) -> list[Product]:
+        with read_database(self.path) as connection:
+            _order(connection, order_id, customer_id)
+            return [
+                Product.model_validate(dict(row))
+                for row in connection.execute(
+                    "SELECT p.* FROM products p JOIN order_items i ON i.product_id=p.id "
+                    "WHERE i.order_id=? ORDER BY p.id",
+                    (order_id,),
+                )
+            ]
+
     def get_tracking(self, order_id: str, *, customer_id: str) -> list[TrackingEvent]:
         with read_database(self.path) as connection:
             _order(connection, order_id, customer_id)

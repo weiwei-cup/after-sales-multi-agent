@@ -25,4 +25,6 @@ jobs:
       - run: uv run --locked after-sales doctor --json
       - run: uv run --locked after-sales seed --dataset demo --json
       - run: uv run --locked after-sales ticket show T-RETURN-001
+      - run: uv run --locked after-sales inspect --ticket T-RETURN-001
+      - run: uv run --locked after-sales inspect --ticket T-CONFLICT-001 --json
       - run: uv build --wheel

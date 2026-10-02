@@ -1,6 +1,7 @@
 """Small command-line entry point, extended one phase at a time."""
 
 import argparse
+import asyncio
 import json
 import sqlite3
 import sys
@@ -15,6 +16,8 @@ from after_sales.domain.models import TicketType, UtcTime
 from after_sales.repositories.errors import RepositoryError
 from after_sales.repositories.seed import seed_demo
 from after_sales.repositories.sqlite import BusinessRepository, migrate
+from after_sales.tools.inspection import inspect_ticket
+from after_sales.tools.service import ToolSession
 
 
 def _json_flag(parser: argparse.ArgumentParser) -> None:
@@ -26,6 +29,10 @@ def _parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
     doctor = commands.add_parser("doctor", help="检查本地配置与依赖，不调用模型")
     _json_flag(doctor)
+
+    inspection = commands.add_parser("inspect", help="用只读工具调查工单、计算规则和生成证据")
+    inspection.add_argument("--ticket", required=True, help="当前模拟工单 ID")
+    _json_flag(inspection)
 
     seed = commands.add_parser("seed", help="原子初始化模拟业务数据，重复执行保留已有数据")
     seed.add_argument("--dataset", choices=["demo"], default="demo")
@@ -102,11 +109,50 @@ def _render_ticket(view: dict[str, object]) -> None:
         print("尚无已核验归属的订单资料。")
     for policy in view["policy_candidates"]:
         print(f"候选政策：{policy['id']} v{policy['version']} | {policy['title']}")
-    print("P01 展示业务资料；政策适用性与处理建议在后续阶段实现。")
+    print("业务资料视图；可用 after-sales inspect --ticket 工单号查看规则与证据。")
+
+
+def _render_inspection(report: dict[str, object]) -> None:
+    print(f"工单 {report['ticket_id']} | P02 只读调查")
+    print(f"业务时间（Asia/Shanghai）：{_local_time(report['as_of_time'])}")
+    print("模型调用：0；仅计算条件和动作候选。")
+    for name, result in report["results"].items():
+        if not result["ok"]:
+            error = result["error"]
+            print(f"{name}：{error['code']} | {error['message']}")
+        elif name.startswith("evaluate_policy:"):
+            data = result["data"]
+            print(f"候选 {data['action']}：{data['disposition']}")
+            for evaluation in data["evaluations"]:
+                print(
+                    f"  {evaluation['policy_id']} v{evaluation['policy_version']}："
+                    f"{evaluation['eligibility']}"
+                )
+                print(f"  剩余可退：{evaluation['remaining_refund_cents']} 分")
+                for condition in evaluation["conditions"]:
+                    print(f"    {condition['name']} = {condition['value']} ({condition['reason']})")
+            if data["conflicts"]:
+                print(f"  政策冲突：{json.dumps(data['conflicts'], ensure_ascii=False)}")
+        else:
+            print(f"{name}：{json.dumps(result['data'], ensure_ascii=False)}")
+        for ref in result["evidence_refs"]:
+            print(f"  证据：{ref['evidence_id']} | 来源版本 {ref['source_version']}")
+    print(f"证据快照：{len(report['evidence'])}；本轮保存在调查会话内存，--json 可导出。")
 
 
 def _business_command(args: argparse.Namespace, settings: Settings) -> object:
     repository = BusinessRepository(settings.business_db_path)
+    if args.command == "inspect":
+        session = ToolSession.for_ticket(
+            repository,
+            args.ticket,
+            timeout_seconds=settings.tool_timeout_seconds,
+            max_result_bytes=settings.tool_max_result_bytes,
+        )
+        try:
+            return asyncio.run(inspect_ticket(session))
+        finally:
+            session.close()
     if args.command == "seed":
         return seed_demo(settings.business_db_path, reset=args.reset)
     if args.command == "db":
@@ -146,7 +192,9 @@ def main(argv: list[str] | None = None) -> int:
             report = build_report(settings)
         else:
             result = _business_command(args, settings)
-            if args.command == "ticket" and args.operation == "show" and not args.json:
+            if args.command == "inspect" and not args.json:
+                _render_inspection(result)
+            elif args.command == "ticket" and args.operation == "show" and not args.json:
                 _render_ticket(result)
             else:
                 print(json.dumps(result, ensure_ascii=False, indent=2))

@@ -39,7 +39,7 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra -m 'not live and not e2e' --disable-socket"
+addopts = "-ra -m 'not live and not e2e' --disable-socket --allow-unix-socket"
 markers = [
   "unit: isolated configuration and domain checks",
   "integration: framework and storage integration checks",

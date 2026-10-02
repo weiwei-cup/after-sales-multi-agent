@@ -1,6 +1,6 @@
 # 售后工单多 Agent 工作台：技术方案
 
-版本：0.3（P01 完成并上传）
+版本：0.4（P02 本地验收；远程交付待验证）
 
 日期：2026-10-02
 
@@ -230,16 +230,23 @@ errors, final_result
 | 工具 | 业务用途 | 重要检查 |
 | --- | --- | --- |
 | `get_order(order_id)` | 获取允许访问的订单 | 可信 customer_id 范围、只返回必要字段 |
+| `get_order_products(order_id)` | 查询订单商品类别 | 先核验订单归属，商品范围由订单推导 |
 | `get_tracking(order_id)` | 获取物流事件 | 与工单订单范围一致，保留事件时间 |
 | `get_delivery_proof(order_id)` | 获取签收凭证状态 | 区分凭证缺失、未查询成功、凭证存在 |
 | `get_after_sales_history(order_id)` | 查重复售后和已退款情况 | 归属与金额事实 |
-| `search_policies(intent, product_type)` | 按明确标签检索政策候选 | 只检索版本化政策目录；首版无向量检索 |
+| `search_policies(intent)` | 按明确标签检索政策候选 | 商品范围从订单推导，时间从应用注入；首版无向量检索 |
 | `get_policy(policy_id, version)` | 读取条款和条件 | 来源可追溯；不存在的 ID 明确报错 |
-| `evaluate_policy(policy_ref, fact_refs)` | 用可信事实计算适用性 | 模型只传引用，程序从事实存储读取值 |
-| `get_evidence(evidence_id)` | 审核证据 | 只能读取当前工单范围内证据 |
+| `evaluate_policy(order_ref, policy_refs, action, ...)` | 用可信事实计算适用性 | 商品/物流/历史只接受证据引用；退款候选金额为整数分 |
+| `get_evidence(ref)` | 审核证据 | 同时验证来源版本、工单和调查会话 |
 | `validate_evidence_refs(refs)` | 检查引用存在和版本匹配 | 引用结构有效不代表语义必然正确，仍需审核 |
 
-统一返回：`ok`、`data`、`evidence_ids`、`error_code`、`retryable`。超时、没有结果和业务拒绝使用不同错误码。工具结果中的外部文本作为资料处理，不能成为系统指令。
+P02 已实现统一 `ToolResult`：`schema_version`、`ok`、`data`、`evidence_refs`、`error`；引用为 `{evidence_id, source_version}`，错误为 `{code, message, retryable}`。失败结果不携带业务资料与证据。超时、没有记录、缺订单号和归属不符使用不同错误码。工具结果中的外部文本作为资料处理，不能成为系统指令。
+
+`ToolSession` 由应用读取工单后创建；可信上下文包括 customer_id、ticket_id、ticket_version、session_id、订单原始引用、工单类型、业务时间和资料版本。10 个 `StructuredTool` 绑定这份上下文，模型输入 schema 不暴露客户身份、业务时间或依赖对象。工具只接受当前工单订单号，repository 再检查客户归属。P03 将在 Agent 调用入口创建和传递这份调查会话。具体契约与测试见 [ADR 002](decisions/002-trusted-tools-and-evidence.md)。工具 schema 使用 LangChain 官方支持的 Pydantic 输入模型，异步结果通过 `ToolMessage` 与 call ID 关联。[LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
+
+证据是包含来源类型、来源 ID、来源版本、业务与观察时间、工单/会话范围及事实 JSON 的不可变快照。ID 由上述内容生成，重复读同一快照去重；内容变化生成新 ID。集合使用资料集版本，条目自身版本仍保留在事实里；assessment 使用 `rules-v1` 并保存输入引用。P02 演示的观察时钟与固定业务时钟一致，证据只保存在会话内存；`inspect --json` 可导出，但没有重新导入接口。P06 将随 run 持久化，写操作前须重新核验资料版本。
+
+默认单次结果限制为 12000 UTF-8 字节，超长返回 `RESULT_TOO_LARGE`，不截断 JSON、不注册未返回的证据。只读查询采用 3 秒等待时限、每会话 2 个工作槽，无任务积压队列；超时返回 `TOOL_TIMEOUT`，未结束的后台任务继续占用槽，满时返回 `TOOL_BUSY`。Python 线程不能强行终止，因此实际外部适配器也必须配置有限 I/O 时限；迟到结果不进入证据存储。全局调度、重试和运行统计在 P07 完善。
 
 ### 7.2 虚构政策与确定性规则
 
@@ -251,6 +258,8 @@ errors, final_result
 - 存在多份同时有效但互相冲突的政策时返回人工接手，不由模型随意选择。
 
 条件结果使用 `true / false / unknown`，未知不能按 false 自动拒绝，也不能按 true 自动批准。政策判断携带版本和事实引用，供执行前再次校验。
+
+P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`、`existing_application`、`policy_conflict` 或 `no_policy`。即便另一个条件已知失败，只要存在未确定条件，调查报告仍为 `needs_information`，保留所有条件值。冲突检测会重新检索同动作的适用政策，省略引用不能绕过冲突或获得资格。`eligible` 仅表示候选条件满足，所有结果均为 `candidate_only`。
 
 ### 7.3 写操作
 
