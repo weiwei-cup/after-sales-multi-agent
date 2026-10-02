@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     checkpoint_db_path: Path = Path("var/checkpoints.sqlite")
     max_model_calls: int = Field(default=20, gt=0)
     max_tool_calls: int = Field(default=30, gt=0)
-    review_repair_limit: int = Field(default=2, ge=0)
+    review_repair_limit: int = Field(default=2, ge=0, le=2)
     max_concurrency: int = Field(default=2, gt=0)
     token_budget: int = Field(default=50_000, gt=0)
     tool_timeout_seconds: float = Field(default=3.0, gt=0, allow_inf_nan=False)

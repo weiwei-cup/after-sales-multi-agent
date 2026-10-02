@@ -39,6 +39,8 @@ def test_repair_limit_allows_zero_but_rejects_negative():
     assert Settings(review_repair_limit=0).review_repair_limit == 0
     with pytest.raises(ValidationError):
         Settings(review_repair_limit=-1)
+    with pytest.raises(ValidationError):
+        Settings(review_repair_limit=3)
 
 
 @pytest.mark.parametrize(

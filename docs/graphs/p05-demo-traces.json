@@ -1,0 +1,509 @@
+{
+  "schema_version": "p05-observations-v1",
+  "dataset_version": "demo-v1",
+  "model_mode": "scripted",
+  "resume_scope": "same_process_only",
+  "runs": [
+    {
+      "ticket_id": "T-DELAY-001",
+      "run_id": "run-bf37bf64a6e64eb1a9a9292008ea7a8f",
+      "snapshots": [
+        {
+          "step": "start",
+          "status": "completed",
+          "pending_kind": null,
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "finish"
+          ],
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 9,
+            "agent_tool_calls": 9,
+            "validation_tool_calls": 0,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 14.474,
+            "tool_elapsed_ms": 7.32,
+            "elapsed_ms": 68.611,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 2,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 4,
+                "tool_calls": 3
+              },
+              "reviewer": {
+                "model_calls": 2,
+                "tool_calls": 1
+              }
+            }
+          },
+          "confirmation_decisions": []
+        }
+      ],
+      "decision": "inform_progress",
+      "executed_actions": []
+    },
+    {
+      "ticket_id": "T-RETURN-001",
+      "run_id": "run-9f44afdb4783462f9f2920c979d072f0",
+      "snapshots": [
+        {
+          "step": "start",
+          "status": "paused",
+          "pending_kind": "operator_decision",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "statistics": {
+            "model_calls": 13,
+            "tool_calls": 9,
+            "agent_tool_calls": 8,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 12.226,
+            "tool_elapsed_ms": 6.641,
+            "elapsed_ms": 58.683,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 2,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 3,
+                "tool_calls": 2
+              },
+              "reviewer": {
+                "model_calls": 2,
+                "tool_calls": 1
+              }
+            }
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_approval",
+          "status": "completed",
+          "pending_kind": null,
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "statistics": {
+            "model_calls": 13,
+            "tool_calls": 10,
+            "agent_tool_calls": 8,
+            "validation_tool_calls": 2,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 12.226,
+            "tool_elapsed_ms": 7.478,
+            "elapsed_ms": 81.084,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 2,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 3,
+                "tool_calls": 2
+              },
+              "reviewer": {
+                "model_calls": 2,
+                "tool_calls": 1
+              }
+            }
+          },
+          "confirmation_decisions": [
+            "approve"
+          ]
+        }
+      ],
+      "decision": "propose_return",
+      "executed_actions": []
+    },
+    {
+      "ticket_id": "T-MISSING-001",
+      "run_id": "run-849d413d484c4dbd933d0bc72147e561",
+      "snapshots": [
+        {
+          "step": "start",
+          "status": "paused",
+          "pending_kind": "customer_info",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer"
+          ],
+          "statistics": {
+            "model_calls": 3,
+            "tool_calls": 0,
+            "agent_tool_calls": 0,
+            "validation_tool_calls": 0,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 2.757,
+            "tool_elapsed_ms": 0.0,
+            "elapsed_ms": 20.359,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 2,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 0,
+                "tool_calls": 0
+              },
+              "policy_specialist": {
+                "model_calls": 0,
+                "tool_calls": 0
+              },
+              "reviewer": {
+                "model_calls": 1,
+                "tool_calls": 0
+              }
+            }
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "customer_order_answer",
+          "status": "paused",
+          "pending_kind": "operator_decision",
+          "input_revision": 2,
+          "proposal_revision": 2,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer",
+            "wait_customer",
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "statistics": {
+            "model_calls": 16,
+            "tool_calls": 9,
+            "agent_tool_calls": 8,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 15.058,
+            "tool_elapsed_ms": 6.72,
+            "elapsed_ms": 78.722,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 4,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 3,
+                "tool_calls": 2
+              },
+              "reviewer": {
+                "model_calls": 3,
+                "tool_calls": 1
+              }
+            }
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_approval",
+          "status": "completed",
+          "pending_kind": null,
+          "input_revision": 2,
+          "proposal_revision": 2,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer",
+            "wait_customer",
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "statistics": {
+            "model_calls": 16,
+            "tool_calls": 10,
+            "agent_tool_calls": 8,
+            "validation_tool_calls": 2,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 15.058,
+            "tool_elapsed_ms": 7.364,
+            "elapsed_ms": 86.862,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 4,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 3,
+                "tool_calls": 2
+              },
+              "reviewer": {
+                "model_calls": 3,
+                "tool_calls": 1
+              }
+            }
+          },
+          "confirmation_decisions": [
+            "approve"
+          ]
+        }
+      ],
+      "decision": "propose_return",
+      "executed_actions": []
+    },
+    {
+      "ticket_id": "T-NOTRECEIVED-002",
+      "run_id": "run-186a28f7ab75498594d38ab2872e72d5",
+      "snapshots": [
+        {
+          "step": "start",
+          "status": "paused",
+          "pending_kind": "operator_decision",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 10,
+            "agent_tool_calls": 9,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 14.237,
+            "tool_elapsed_ms": 8.194,
+            "elapsed_ms": 67.505,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 2,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 4,
+                "tool_calls": 3
+              },
+              "reviewer": {
+                "model_calls": 2,
+                "tool_calls": 1
+              }
+            }
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_amount_revision",
+          "status": "paused",
+          "pending_kind": "operator_decision",
+          "input_revision": 1,
+          "proposal_revision": 2,
+          "repair_count": 1,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "repair",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "statistics": {
+            "model_calls": 17,
+            "tool_calls": 12,
+            "agent_tool_calls": 10,
+            "validation_tool_calls": 2,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 17.041,
+            "tool_elapsed_ms": 9.209,
+            "elapsed_ms": 91.416,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 3,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 4,
+                "tool_calls": 3
+              },
+              "reviewer": {
+                "model_calls": 4,
+                "tool_calls": 2
+              }
+            }
+          },
+          "confirmation_decisions": [
+            "revise"
+          ]
+        },
+        {
+          "step": "operator_approval",
+          "status": "completed",
+          "pending_kind": null,
+          "input_revision": 1,
+          "proposal_revision": 2,
+          "repair_count": 1,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "repair",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "statistics": {
+            "model_calls": 17,
+            "tool_calls": 13,
+            "agent_tool_calls": 10,
+            "validation_tool_calls": 3,
+            "schema_repairs": 0,
+            "model_elapsed_ms": 17.041,
+            "tool_elapsed_ms": 9.961,
+            "elapsed_ms": 101.634,
+            "token_usage": null,
+            "token_usage_note": "not_reported",
+            "roles": {
+              "coordinator": {
+                "model_calls": 3,
+                "tool_calls": 0
+              },
+              "order_specialist": {
+                "model_calls": 6,
+                "tool_calls": 5
+              },
+              "policy_specialist": {
+                "model_calls": 4,
+                "tool_calls": 3
+              },
+              "reviewer": {
+                "model_calls": 4,
+                "tool_calls": 2
+              }
+            }
+          },
+          "confirmation_decisions": [
+            "revise",
+            "approve"
+          ]
+        }
+      ],
+      "decision": "propose_refund",
+      "executed_actions": []
+    }
+  ]
+}

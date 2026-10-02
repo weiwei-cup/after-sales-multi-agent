@@ -138,6 +138,18 @@ OrderInvestigation 包含独立来源的事实快照、引用和工具错误；P
 
 TicketState 保存 JSON 资料与节点轨迹，不含 repository、ToolSession、模型、数据库连接、密钥或子图 messages。运行依赖保存在节点闭包；JSON 与 LangGraph serializer 往返测试通过。P04 没有业务检查点、跨进程恢复或动作服务。multi-run-v1 报告包含角色输入/输出、角色统计、状态、事件及实际主图 Mermaid；原 baseline-run-v1 仍可读取。
 
+### 3.5 P05 已实现的审核与人工输入图
+
+`workflows/reviewed.py` 提供独立 review-v1 图；CLI 显式选择 `--architecture multi --workflow reviewed`，默认 serial 入口保留。前三个角色的输入、事实交接和代码校验继续复用；审核角色用 create_agent 输出 ReviewResult，只绑定 validate_evidence_refs / get_evidence。应用对规则失败、查询失败、必要缺口和受控中文模板计算最低要求，模型 accept 不能绕过代码检查。当前不验证真实模型质量或任意自然语言改写。
+
+repair / research 节点实现共享最多两次返工和定向补查。订单来源按实际读取结果合并；凭证补查保留已有政策 assessment，其他规则输入刷新后重算政策。纯措辞只改写；持续失败或调用预算耗尽转人工。操作员修改退款金额也消耗该计数，schema 修复仍独立按 P03 全局上限执行。
+
+prepare_customer / prepare_operator 创建绑定版本和内容的 PendingInput；wait_customer / wait_operator 使用真实 interrupt。InMemoryReviewRun 持有图与 InMemorySaver，恢复前检查 role / actor / pending / run / ticket / input_revision / proposal_revision / proposal_hash / action hashes，再用 Command(resume=...)。等待节点重执行不创建新待办；恢复锁和已消费集合防止重复或并发消费。
+
+客户补订单号后在原客户范围核验，其他回答只更新陈述。操作员 approve / reject / revise 当前退款金额；修改后动作逻辑 ID 保持稳定，方案版本、内容哈希与 pending ID 更新，旧批准失效。批准前重新复算当前运行可信快照，确认结果不写业务库。执行前最新数据、时钟与持久恢复留给 P06。
+
+review-run-v1 保留审核/版本/待办历史/确认，核对图状态、方案与批准内容一致。返回快照与运行对象隔离，保存文件不能恢复或授权动作。身份仅为本地演示，认证在 P08；checkpointer 文件路径在 P06 才使用。实现、测试与边界见 [ADR 005](decisions/005-bounded-review-and-human-input.md) 和 [第 005 轮记录](rounds/005.md)。
+
 所有角色共用 P03 的调用预算和默认 1 次 schema 修复预算，包含提前结束后的修复和验证器复算。单模型超时及工具查询限制继续生效；暂停后的预算恢复和全局并发仍是后续工作。实际图和三类轨迹见 [Mermaid](graphs/p04-serial.mmd)、[轨迹 JSON](graphs/p04-demo-traces.json)，设计依据见 [ADR 004](decisions/004-serial-role-handoffs.md)。
 
 ## 4. Agent 设计
@@ -153,7 +165,7 @@ TicketState 保存 JSON 资料与节点轨迹，不含 repository、ToolSession�
 
 提示词文件需要包含：职责、输入解释、工具用途、完成标准、输出 schema、缺失信息处理、引用要求和行动边界。提示词、schema、政策都记录版本，便于复现。
 
-P04 已实现前三个角色，角色提示词目前随 multi-serial-v1 代码版本保存于 serial.py。审核角色、定向补查和完整自然语言语义审核从 P05 开始；当前不声称三个角色已构成带人工确认的完整售后系统。
+P05 已实现四个角色，角色提示词随代码版本保存于 serial.py；review-v1 提供定向返工和同进程人工确认。离线审核以可信事实、确定性规则和受控中文模板为边界，完整自然语言语义评估与真实模型仍延期。此时只生成候选并记录确认，尚不构成持久恢复和业务执行系统。
 
 ## 5. 工单主流程
 
@@ -247,7 +259,7 @@ P04 已实现的交接契约为 IntakeSlots（原始订单引用、客户陈述�
 
 路由只接受枚举：`accept`、`research_more`、`revise`、`human_review`、`handoff`。非法结构最多修复一次，仍失败则结束为可诊断的失败或人工接手，不做无限 JSON 重试。[S3]
 
-P03 的 decision 为 inform_progress、propose_logistics_investigation、propose_return、propose_refund、request_information、existing_application、human_review、decline_request。FactClaim 只接受定义的事实字段及其引用；ActionCandidate 关联动作、订单、整数分金额、assessment_ref、policy_refs 和 evidence_refs，并要求操作员确认。schema 验证 decision/action 的一致性；真实事实是否支持、金额是否在余额内由随后代码判断。字符串草稿的完整语义审核留给 P05。
+P03 的 decision 为 inform_progress、propose_logistics_investigation、propose_return、propose_refund、request_information、existing_application、human_review、decline_request。FactClaim 只接受定义的事实字段及其引用；ActionCandidate 关联动作、订单、整数分金额、assessment_ref、policy_refs 和 evidence_refs，并要求操作员确认。schema 验证 decision/action 的一致性；真实事实是否支持、金额是否在余额内由随后代码判断。P05 的字符串草稿只接受受控中文模板；通用语义审核和真实模型验证仍延期。
 
 000～004 复核后，decline_request 只接纳当前退货请求的完整不符合条件依据，不能用退款候选失败拒绝物流调查诉求。decline_request 与 existing_application 都绑定订单、适合当前意图的 assessment 和完整规则输入，并在同一工具预算内复算。ProposalValidation 分别记录 rechecked_actions、rechecked_decisions，旧报告缺少后者时默认 0。运行报告校验已通过建议与原始建议一致、工单一致及状态 / 校验结果一致；失败的原始建议仍保留用于诊断。静态文件一致性不代表来源认证。
 
@@ -378,7 +390,7 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 这些是初始工程参数，不是已经验证的性能承诺。模型和工具调用次数是硬上限；token 预算采用估算预留和 usage 对账，存在误差，属于软上限，不能宣称严格限制实际计费 token。无法获得实际 token usage 时标记 unknown / estimated，不能填 0。费用基于用户配置的价格快照计算，无价格配置则不显示货币估算。
 
-当前只有 P02 单会话查询容量/超时及 P03 单运行调用上限、schema 修复上限和模型时限在执行；审核返工、全局并发、活动时长、token 预留/对账等在后续阶段实现。P03 保存模型提供的 usage，未报告时为 null / not_reported，不生成金额估计。recursion_limit 只作框架兜底。
+当前执行 P02 查询容量/超时、P03 全局调用/schema 修复/模型时限和 P05 共享审核返工上限；全局并发、活动时长、token 预留/对账等在后续阶段实现。P03 保存模型提供的 usage，未报告时为 null / not_reported，不生成金额估计。recursion_limit 只作框架兜底。
 
 并发预算由统一控制器原子预留，恢复时从调用账本校正累计值。`recursion_limit` 作为兜底，不能代替业务预算。provider 的隐式重试需要关闭或纳入明确记录。
 
@@ -484,9 +496,9 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 │   ├── data/                      # 随安装包分发的虚构业务 JSON
 │   ├── repositories/              # sqlite / migrations / seed
 │   ├── tools/                     # orders / logistics / policies / evidence
-│   ├── agents/                    # P03 基线；P04 roles.py 定义离线角色脚本
+│   ├── agents/                    # P03 基线；P04 roles.py；P05 review.py / 审核契约
 │   ├── prompts/                   # 版本化角色提示词
-│   ├── workflows/                 # P04 contracts.py / serial.py；后续补充审核、恢复、reducers
+│   ├── workflows/                 # P04 serial.py；P05 reviewed.py / interactive.py
 │   ├── services/                  # tickets / runs / actions / approvals
 │   ├── runtime/                   # budgets / events / executor / clock
 │   ├── api/                       # app / routes / DTOs / demo_identity

@@ -21,6 +21,8 @@ from after_sales.repositories.seed import seed_demo
 from after_sales.repositories.sqlite import BusinessRepository, migrate
 from after_sales.tools.inspection import inspect_ticket
 from after_sales.tools.service import ToolSession
+from after_sales.workflows.interactive import run_interactive
+from after_sales.workflows.reviewed import run_reviewed
 from after_sales.workflows.serial import run_multi
 
 
@@ -38,9 +40,18 @@ def _parser() -> argparse.ArgumentParser:
     inspection.add_argument("--ticket", required=True, help="当前模拟工单 ID")
     _json_flag(inspection)
 
-    run = commands.add_parser("run", help="运行单 Agent 或串行多 Agent，保存建议、证据和调用记录")
+    run = commands.add_parser("run", help="运行单 Agent、串行或带审核的多 Agent，保存运行记录")
     run.add_argument("--ticket", required=True)
     run.add_argument("--architecture", choices=["single", "multi"], default="single")
+    run.add_argument(
+        "--workflow",
+        choices=["serial", "reviewed"],
+        default="serial",
+        help="multi 的执行图；默认保留 P04 串行入口",
+    )
+    run.add_argument(
+        "--interactive", action="store_true", help="P05 同进程内回答追问、确认或修改动作"
+    )
     run.add_argument(
         "--model", choices=["scripted", "live"], help="默认使用配置；本轮 live 显示 skipped"
     )
@@ -49,7 +60,7 @@ def _parser() -> argparse.ArgumentParser:
 
     reports = commands.add_parser("report", help="读取已保存的运行结果与事件")
     report_commands = reports.add_subparsers(dest="operation", required=True)
-    report_show = report_commands.add_parser("show", help="读取单 / 多 Agent JSON 运行记录")
+    report_show = report_commands.add_parser("show", help="读取单 / 多 / 审核 Agent JSON 运行记录")
     report_show.add_argument("path", type=Path)
     report_show.add_argument("--events-only", action="store_true")
     _json_flag(report_show)
@@ -187,7 +198,24 @@ def _render_run(report: dict[str, object]) -> None:
         f"模型调用：{stats['model_calls']}；工具调用：{stats['tool_calls']}"
         f"（含代码复算 {stats['validation_tool_calls']}）；schema 修复：{stats['schema_repairs']}"
     )
-    print("全部动作均为候选，尚待确认；执行动作数：0。")
+    if report["schema_version"] == "review-run-v1":
+        print(f"共享返工：{report['repair_count']}；人工确认记录：{len(report['confirmations'])}")
+        pending = report["pending_input"]
+        if pending:
+            print(f"等待 {pending['kind']}：{pending['pending_id']}；仅同进程可恢复。")
+            print("使用 --interactive 演示恢复；保存的 JSON 用于查看，跨进程恢复留给 P06。")
+            print(f"待确认草稿：{report['proposal']['customer_reply_draft']}")
+            for question in pending["questions"]:
+                print(f"待补资料：{question['field']} | {question['question']}")
+            for binding in pending["actions"]:
+                candidate = binding["candidate"]
+                print(
+                    f"待确认动作：{binding['action_id']} | {candidate['type']} | "
+                    f"{candidate['order_id']} | 金额 {candidate['amount_cents']} 分"
+                )
+        if report["graph_state"]["reason"]:
+            print(f"转人工原因：{report['graph_state']['reason']}")
+    print("全部动作均为候选；确认记录不代表业务执行；执行动作数：0。")
     print(f"运行记录：{report['artifact_path']}")
 
 
@@ -206,7 +234,13 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
         )
         return report["events"] if args.events_only else report
     if args.command == "run":
+        if args.workflow == "reviewed" and args.architecture != "multi":
+            raise ValueError("--workflow reviewed 要求 --architecture multi")
+        if args.interactive and (args.workflow != "reviewed" or args.json):
+            raise ValueError("--interactive 要求 --workflow reviewed，且不能与 --json 同用")
         runner = run_multi if args.architecture == "multi" else run_baseline
+        if args.workflow == "reviewed":
+            runner = run_interactive if args.interactive else run_reviewed
         report = asyncio.run(
             runner(repository, args.ticket, settings, mode=args.model or settings.model_mode)
         )
@@ -273,6 +307,8 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
             if args.command == "run" and result["status"] in {"failed", "validation_failed"}:
+                return 1
+            if args.command == "run" and result["status"] == "handed_off" and result["error"]:
                 return 1
             return 0
     except ValidationError as exc:

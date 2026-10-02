@@ -4,9 +4,9 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00～P04 已完成并上传；第 004 轮 / P04 串行多 Agent 本地与 GitHub CI 通过，阶段快照为 phase-p04。下一轮为 P05。继续仅用离线脚本模型。
+当前状态：P00～P04 已完成并上传；P05 实现完成，本地 370 个离线测试通过，GitHub CI 和 phase-p05 交付验证进行中。下一轮为 P06。继续仅用离线脚本模型。
 
-本轮 000～004 复核已完成，暂不开发 P05。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，完整本地回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。
+前次 000～004 复核已完成。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
 
 ## 1. 使用方式
 
@@ -266,13 +266,14 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 实现清单：
 
-- [ ] P05.1 增加审核角色、ReviewResult 和确定性引用 / 动作合法性检查。
-- [ ] P05.2 实现定向补查和改写；审核与代码校验共享最多 2 次返工计数。
-- [ ] P05.3 只有缺少必要事实时追问，PendingInput 区分 customer_info 与 operator_decision。
-- [ ] P05.4 实现 `interrupt()` 与 resume；本阶段先以同一进程内的 checkpointer 演示。
-- [ ] P05.5 为 pending input、input_revision、proposal_revision 和 action_id 建立稳定对应关系。
-- [ ] P05.6 操作员可批准或拒绝；修改动作内容产生新版本并重新展示。
-- [ ] P05.7 等待节点不执行业务写动作；本阶段只记录确认结果。
+- [x] P05.1 增加审核角色、ReviewResult 和确定性引用 / 动作合法性检查。
+- [x] P05.2 实现定向补查和改写；审核与代码校验共享最多 2 次返工计数。
+- [x] P05.3 只有缺少必要事实时追问，PendingInput 区分 customer_info 与 operator_decision。
+- [x] P05.4 实现 `interrupt()` 与 resume；本阶段先以同一进程内的 checkpointer 演示。
+- [x] P05.5 为 pending input、input_revision、proposal_revision 和 action_id 建立稳定对应关系。
+- [x] P05.6 操作员可批准或拒绝；修改当前退款金额产生新版本并重新展示。
+- [x] P05.7 等待节点不执行业务写动作；本阶段只记录确认结果。
+- [ ] P05.8 上传第 005 轮实现与记录，验证 GitHub CI，保存 `phase-p05` 标签。
 
 关键验证：
 
@@ -284,7 +285,9 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 暂停节点恢复重执行不会重复创建 pending 记录。
 - 硬性规则失败时，模型审核通过也不能授权动作。
 
-演示：交互式 CLI 暂停，输入订单号继续；展示动作明细，选择批准或拒绝。
+演示：`uv run after-sales run --ticket T-MISSING-001 --architecture multi --workflow reviewed --interactive`，输入 `ORD-019` 后查看退货候选，再选 `approve` / `reject`。
+
+实现与验证：[第 005 轮记录](docs/rounds/005.md)、[ADR 005](docs/decisions/005-bounded-review-and-human-input.md)、[实际图](docs/graphs/p05-reviewed.mmd)、[实测轨迹](docs/graphs/p05-demo-traces.json)。新增 85 个测试实例，完整本地套件 370 passed。代码、审核和操作员金额修改共享最多两次返工；身份只用于本地演示，中文措辞只验证受控模板。静态 JSON 不能恢复，数据库无业务变更。
 
 验收门槛：四种职责闭环通过；当前只保证同进程暂停恢复，不能宣称已支持重启。需要理解：evaluator feedback、有限循环、interrupt、人工输入契约。
 

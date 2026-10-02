@@ -27,12 +27,19 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P04",
+        "phase": "P05",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
         "model_connectivity": "not_checked",
-        "agent_execution": "single_and_serial_multi_agent_scripted",
+        "agent_execution": "single_serial_multi_and_reviewed_multi_scripted",
+        "human_input": {
+            "workflow": "after-sales run --architecture multi --workflow reviewed --interactive",
+            "resume_scope": "same_process_only",
+            "checkpointer": "InMemorySaver",
+            "business_writes": "available_from_P06",
+            "identity": "local_demo_customer_and_operator; authenticated_transport_from_P08",
+        },
         "live_smoke": "skipped_provider_deferred_by_user",
         "readonly_tools": {
             "inspection": "after-sales inspect --ticket T-RETURN-001",
@@ -51,8 +58,9 @@ def build_report(settings: Settings) -> dict[str, object]:
             "review_repairs": settings.review_repair_limit,
             "concurrency": settings.max_concurrency,
             "tokens_soft_limit": settings.token_budget,
-            "enforcement": "available_from_P05_and_P07",
+            "enforcement": "call_and_review_limits_enforced; concurrency_and_tokens_from_P07",
             "call_limits": "enforced_in_P03_including_rule_rechecks",
+            "review_repair_enforcement": "P05_shared_by_code_review_and_operator_edits",
             "proposal_schema_repairs": settings.proposal_repair_limit,
             "model_timeout_seconds": settings.model_timeout_seconds,
         },

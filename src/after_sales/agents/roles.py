@@ -23,14 +23,10 @@ ORDER_QUESTION = "核验当前工单订单及商品、物流、凭证、售后�
 POLICY_QUESTION = "根据已核验订单证据检索适用政策并计算条件，保留未知条件和冲突。"
 
 
-def business_outputs(messages: list[BaseMessage]) -> dict[str, ToolResult]:
-    return outputs(
-        [
-            m
-            for m in messages
-            if not isinstance(m, ToolMessage) or m.name in (*ORDER_TOOLS, *POLICY_TOOLS)
-        ]
-    )
+def business_outputs(
+    messages: list[BaseMessage], tools: tuple[str, ...] = (*ORDER_TOOLS, *POLICY_TOOLS)
+) -> dict[str, ToolResult]:
+    return outputs([m for m in messages if not isinstance(m, ToolMessage) or m.name in tools])
 
 
 def schema_feedback(messages, schema: str) -> bool:

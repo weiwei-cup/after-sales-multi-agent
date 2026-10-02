@@ -26,6 +26,7 @@ class Role(StrEnum):
     COORDINATOR = "coordinator"
     ORDER = "order_specialist"
     POLICY = "policy_specialist"
+    REVIEW = "reviewer"
 
 
 class Route(StrEnum):

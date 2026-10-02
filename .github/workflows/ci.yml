@@ -35,5 +35,11 @@ jobs:
       - run: uv run --locked after-sales run --ticket T-RETURN-001 --architecture multi --model scripted --output var/runs/ci-multi-return.json
       - run: uv run --locked after-sales report show var/runs/ci-multi-return.json --events-only
       - run: uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --model scripted
+      - run: uv run --locked after-sales run --ticket T-DELAY-001 --architecture multi --workflow reviewed --model scripted
+      - run: uv run --locked after-sales run --ticket T-RETURN-001 --architecture multi --workflow reviewed --output var/runs/ci-reviewed-pending.json
+      - run: uv run --locked after-sales report show var/runs/ci-reviewed-pending.json --events-only
+      - run: printf 'ORD-019\napprove\n' | uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --workflow reviewed --interactive --output var/runs/ci-reviewed-completed.json
+      - run: uv run --locked after-sales report show var/runs/ci-reviewed-completed.json --json
+      - run: printf 'revise\n9000\nreject\n' | uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow reviewed --interactive
       - run: uv run --locked after-sales live-smoke --json
       - run: uv build --wheel
