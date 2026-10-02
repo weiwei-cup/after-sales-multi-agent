@@ -32,11 +32,11 @@ def snapshot(path):
 
 def test_migrations_are_repeatable_and_foreign_keys_are_enabled(tmp_path):
     path = tmp_path / "business.sqlite"
-    assert migrate(path) == 2
-    assert migrate(path) == 2
+    assert migrate(path) == 3
+    assert migrate(path) == 3
     with connect(path) as connection:
         assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
-        assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0] == 2
+        assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0] == 3
         with pytest.raises(sqlite3.IntegrityError):
             connection.execute(
                 "INSERT INTO order_items VALUES (?,?,?,?,?)", ("absent", "absent", 1, 1, 1)
@@ -242,11 +242,12 @@ def test_v1_migration_preserves_existing_business_data(tmp_path, monkeypatch):
     path = tmp_path / "legacy.sqlite"
     with monkeypatch.context() as patch:
         patch.delitem(MIGRATIONS, 2)
+        patch.delitem(MIGRATIONS, 3)
         seed_demo(path)
     repository = BusinessRepository(path)
     original = repository.get_ticket("T-RETURN-001")
     assert repository.get_order("ORD-005", customer_id="CUST-B").id == "ORD-005"
-    assert migrate(path) == 2
+    assert migrate(path) == 3
     assert repository.get_ticket("T-RETURN-001") == original
     assert seed_demo(path)["changed"] is False
     with connect(path) as db:

@@ -149,11 +149,23 @@ class PersistentRuntime(ReviewRuntime):
                 )
                 receipt = self.owner.actions.lookup(payload)
                 if receipt is None:
-                    self.trace.reserve_tool("executor")
-                    self.trace.event("action_started", role="executor", action_id=binding.action_id)
-                    receipt = self.owner.actions.execute(
-                        self.owner.run_id, pending.pending_id, binding, clock=self.owner.clock
-                    )
+                    if hasattr(self.trace, "action"):
+                        receipt = await self.trace.action(
+                            lambda binding=binding: self.owner.actions.execute(
+                                self.owner.run_id,
+                                pending.pending_id,
+                                binding,
+                                clock=self.owner.clock,
+                            )
+                        )
+                    else:
+                        self.trace.reserve_tool("executor")
+                        self.trace.event(
+                            "action_started", role="executor", action_id=binding.action_id
+                        )
+                        receipt = self.owner.actions.execute(
+                            self.owner.run_id, pending.pending_id, binding, clock=self.owner.clock
+                        )
                     self.trace.event(
                         "action_committed", role="executor", receipt=receipt.model_dump(mode="json")
                     )
@@ -222,6 +234,14 @@ class PersistentRuntime(ReviewRuntime):
 
 class PersistentReviewRun(InMemoryReviewRun):
     workflow_version = WORKFLOW_VERSION
+    state_version = STATE_VERSION
+    state_schema = PersistentState
+    store_class = RunStore
+    telemetry_class = DurableTelemetry
+    runtime_class = PersistentRuntime
+    limit_fields = LIMIT_FIELDS
+    report_version = "persistent-run-v1"
+    phase = "P06"
 
     def __init__(self, repository, ticket_id, settings, *, clock=None, fault=None, **kwargs):
         self.clock = clock or (lambda: datetime.now(UTC))
@@ -230,13 +250,13 @@ class PersistentReviewRun(InMemoryReviewRun):
         self.fault = fault or (lambda stage: None)
         super().__init__(repository, ticket_id, settings, **kwargs)
         self.runtime.session.close()
-        self.trace = DurableTelemetry(self, settings)
-        self.runtime = PersistentRuntime(
+        self.trace = self.telemetry_class(self, settings)
+        self.runtime = self.runtime_class(
             self, self.new_session(), self.trace, kwargs.get("model_factory", create_review_model)
         )
-        self.store = RunStore(repository.path, self.run_id)
+        self.store = self.store_class(repository.path, self.run_id)
         self.actions = ActionService(repository.path, fault=self.fault)
-        self.state.update(schema_version=STATE_VERSION, executed_actions=[])
+        self.state.update(schema_version=self.state_version, executed_actions=[])
         self.checkpoint_state = copy.deepcopy(self.state)
         self.saver_context = self.process_lock = self.ticket_lock = None
         self.replaying = False
@@ -301,7 +321,11 @@ class PersistentReviewRun(InMemoryReviewRun):
         self.checkpointer = await self.saver_context.__aenter__()
         await self.checkpointer.setup()
         self.graph = build_review_graph(
-            self.runtime, self.checkpointer, state_schema=PersistentState, persistent=True
+            self.runtime,
+            self.checkpointer,
+            state_schema=self.state_schema,
+            persistent=True,
+            parallel=getattr(self, "parallel", False),
         )
 
     @classmethod
@@ -320,7 +344,7 @@ class PersistentReviewRun(InMemoryReviewRun):
                 run.ticket,
                 run.runtime.session.context,
                 settings.checkpoint_db_path,
-                {name: getattr(settings, name) for name in LIMIT_FIELDS},
+                {name: getattr(settings, name) for name in run.limit_fields},
                 run.payload(),
             )
             run.registered = True
@@ -331,7 +355,7 @@ class PersistentReviewRun(InMemoryReviewRun):
 
     @classmethod
     async def load(cls, repository, run_id, settings, **kwargs):
-        stored = RunStore(repository.path, run_id).load(settings.checkpoint_db_path)
+        stored = cls.store_class(repository.path, run_id).load(settings.checkpoint_db_path)
         checkpoint_file(settings.checkpoint_db_path, create=False)
         settings = settings.model_copy(update=stored["limits"])
         payload = stored["runtime"]
@@ -365,11 +389,13 @@ class PersistentReviewRun(InMemoryReviewRun):
             await run.open_saver()
             snapshot = await run.graph.aget_state(run.config)
             run.started = run.registered = True
-            if snapshot.values and snapshot.values.get("schema_version") != STATE_VERSION:
+            if snapshot.values and snapshot.values.get("schema_version") != run.state_version:
                 raise IncompatibleRun("stored graph state version unsupported")
             run.checkpoint_state = copy.deepcopy(snapshot.values)
             run.state = copy.deepcopy(snapshot.values) if snapshot.values else run.state
-            if stored["terminal_error"]:
+            if stored["status"] == "cancelled" and run.phase == "P07":
+                run.state.update(status="cancelled", pending_input=None, reason="CANCEL_REQUESTED")
+            elif stored["terminal_error"]:
                 run.state.update(status="handed_off", pending_input=None, reason=run.error["code"])
             elif snapshot.next:
                 pending = run.state.get("pending_input")
@@ -377,6 +403,8 @@ class PersistentReviewRun(InMemoryReviewRun):
                 if not is_wait or not pending or run.store.reply(pending["pending_id"]):
                     run.state.update(status="interrupted", pending_input=None)
             elif not snapshot.values:
+                run.state.update(status="interrupted", pending_input=None)
+            if run.state["status"] in {"running", "queued"}:
                 run.state.update(status="interrupted", pending_input=None)
             run.persist(status=run.state["status"])
             return run
@@ -484,12 +512,13 @@ class PersistentReviewRun(InMemoryReviewRun):
             }
             if terminal:
                 self.store.invalidate()
-                with transaction(self.repository.path) as connection:
-                    connection.execute(
-                        "UPDATE tickets SET status='handed_off',version=version+1 "
-                        "WHERE id=? AND status<>'handed_off'",
-                        (self.ticket.id,),
-                    )
+                if not self.store.receipts():
+                    with transaction(self.repository.path) as connection:
+                        connection.execute(
+                            "UPDATE tickets SET status='handed_off',version=version+1 "
+                            "WHERE id=? AND status<>'handed_off'",
+                            (self.ticket.id,),
+                        )
             self.persist(terminal_error=terminal)
         self.persist(status=self.state["status"])
         return self.report()
@@ -519,7 +548,7 @@ class PersistentReviewRun(InMemoryReviewRun):
             pending = snapshot.values.get("pending_input") if snapshot.values else None
             reply = self.store.reply(pending["pending_id"]) if pending else None
             command = Command(resume=json.loads(reply["envelope_json"])) if reply else None
-            if not snapshot.values:
+            if not snapshot.values or (not snapshot.next and not snapshot.values.get("node_trace")):
                 command = {**self.state, "status": "running"}
             self.error = None
             self.replaying = True
@@ -536,14 +565,14 @@ class PersistentReviewRun(InMemoryReviewRun):
             if not any(r["operation_key"] == row["operation_key"] for r in receipts):
                 receipts.append(row)
         report.update(
-            schema_version="persistent-run-v1",
-            phase="P06",
-            workflow_version=WORKFLOW_VERSION,
+            schema_version=self.report_version,
+            phase=self.phase,
+            workflow_version=self.workflow_version,
             candidate_only=not receipts,
             executed_actions=receipts,
             resume_scope="cross_process",
             checkpointer="AsyncSqliteSaver",
-            checkpoint_schema=STATE_VERSION,
+            checkpoint_schema=self.state_version,
             checkpoint_state=copy.deepcopy(self.checkpoint_state),
             business_status=self.repository.get_ticket(self.ticket.id).status.value,
         )

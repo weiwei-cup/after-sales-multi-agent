@@ -402,36 +402,48 @@ class ReviewRuntime(MultiRuntime):
         }
 
 
-def build_review_graph(runtime, checkpointer, *, state_schema=ReviewState, persistent=False):
+def build_review_graph(
+    runtime, checkpointer, *, state_schema=ReviewState, persistent=False, parallel=False
+):
     graph = StateGraph(state_schema)
     names = (
-        "intake",
-        "order",
-        "policy",
-        "draft",
-        "validate",
-        "review",
-        "repair",
-        "research",
-        "prepare_customer",
-        "wait_customer",
-        "refresh_input",
-        "prepare_operator",
-        "wait_operator",
-        "approve",
-        "finish",
-        "handoff",
-    ) + (("refresh",) if persistent else ())
+        (
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "repair",
+            "research",
+            "prepare_customer",
+            "wait_customer",
+            "refresh_input",
+            "prepare_operator",
+            "wait_operator",
+            "approve",
+            "finish",
+            "handoff",
+        )
+        + (("refresh",) if persistent else ())
+        + (("order_branch", "candidate_branch", "join") if parallel else ())
+    )
     for name in names:
+        if parallel and name == "order":
+            continue
         operation = getattr(runtime, name)
 
         async def node(state, config: RunnableConfig, name=name, operation=operation):
             runtime.trace.event("node_started", role="application", node=name)
             try:
+                if parallel:
+                    runtime.trace.ledger.check()
                 update = await operation(state, config)
                 update = json.loads(json.dumps(update, ensure_ascii=False))
-                update["node_trace"] = [*state["node_trace"], name]
-                if persistent:
+                is_branch = name in {"order_branch", "candidate_branch"}
+                if not is_branch:
+                    update["node_trace"] = [*state["node_trace"], name]
+                if persistent and not is_branch:
                     runtime.owner.after_node({**state, **update}, name)
                 runtime.trace.event("node_finished", role="application", node=name)
                 return update
@@ -446,12 +458,23 @@ def build_review_graph(runtime, checkpointer, *, state_schema=ReviewState, persi
 
         graph.add_node(name, node)
     graph.add_edge(START, "intake")
-    graph.add_conditional_edges(
-        "intake", lambda s: s["route"], {"order": "order", "draft": "draft"}
-    )
-    graph.add_conditional_edges(
-        "order", lambda s: s["route"], {"policy": "policy", "draft": "draft"}
-    )
+    if parallel:
+        graph.add_conditional_edges(
+            "intake",
+            lambda s: ["order_branch", "candidate_branch"] if s["route"] == "order" else ["draft"],
+            {name: name for name in ("order_branch", "candidate_branch", "draft")},
+        )
+        graph.add_edge(["order_branch", "candidate_branch"], "join")
+        graph.add_conditional_edges(
+            "join", lambda s: s["route"], {name: name for name in ("policy", "draft", "handoff")}
+        )
+    else:
+        graph.add_conditional_edges(
+            "intake", lambda s: s["route"], {"order": "order", "draft": "draft"}
+        )
+        graph.add_conditional_edges(
+            "order", lambda s: s["route"], {"policy": "policy", "draft": "draft"}
+        )
     graph.add_edge("policy", "draft")
     graph.add_edge("draft", "validate")
     graph.add_edge("validate", "review")
@@ -758,14 +781,20 @@ class InMemoryReviewRun:
         stats["roles"] = {
             role.value: {
                 "model_calls": sum(
-                    r["model_calls"] for r in self.runtime.agent_runs if r["role"] == role.value
+                    r.get("model_calls", 0)
+                    for r in self.runtime.agent_runs
+                    if r["role"] == role.value
                 ),
                 "tool_calls": sum(
-                    r["tool_calls"] for r in self.runtime.agent_runs if r["role"] == role.value
+                    r.get("tool_calls", 0)
+                    for r in self.runtime.agent_runs
+                    if r["role"] == role.value
                 ),
             }
             for role in Role
         }
+        if hasattr(self.trace, "role_statistics"):
+            stats["roles"] = self.trace.role_statistics()
         report = {
             "schema_version": "review-run-v1",
             "phase": "P05",

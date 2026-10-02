@@ -18,11 +18,12 @@ from after_sales.doctor import build_report
 from after_sales.domain.models import TicketType, UtcTime
 from after_sales.repositories.errors import RepositoryError
 from after_sales.repositories.seed import seed_demo
-from after_sales.repositories.sqlite import BusinessRepository, migrate
+from after_sales.repositories.sqlite import BusinessRepository, migrate, read_database
 from after_sales.tools.inspection import inspect_ticket
 from after_sales.tools.service import ToolSession
 from after_sales.workflows.durable import PersistentReviewRun
 from after_sales.workflows.interactive import interact, run_interactive
+from after_sales.workflows.parallel import ParallelReviewRun, request_cancel
 from after_sales.workflows.reviewed import run_reviewed
 from after_sales.workflows.serial import run_multi
 
@@ -46,7 +47,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--architecture", choices=["single", "multi"], default="single")
     run.add_argument(
         "--workflow",
-        choices=["serial", "reviewed", "durable"],
+        choices=["serial", "reviewed", "durable", "parallel"],
         default="serial",
         help="multi 的执行图；默认保留 P04 串行入口",
     )
@@ -66,6 +67,9 @@ def _parser() -> argparse.ArgumentParser:
     resume.add_argument("--response-file", type=Path, help="完整待办答复 JSON，绑定身份与版本")
     resume.add_argument("--output", type=Path, help="另存静态报告，禁止覆盖")
     _json_flag(resume)
+    cancel = commands.add_parser("cancel", help="P07 请求取消；已提交动作保留")
+    cancel.add_argument("--run", required=True)
+    _json_flag(cancel)
 
     reports = commands.add_parser("report", help="读取已保存的运行结果与事件")
     report_commands = reports.add_subparsers(dest="operation", required=True)
@@ -259,16 +263,18 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
         )
         return report["events"] if args.events_only else report
     if args.command == "run":
-        if args.workflow in {"reviewed", "durable"} and args.architecture != "multi":
+        if args.workflow in {"reviewed", "durable", "parallel"} and args.architecture != "multi":
             raise ValueError("reviewed/durable 工作流要求 --architecture multi")
-        if args.interactive and (args.workflow not in {"reviewed", "durable"} or args.json):
+        if args.interactive and (
+            args.workflow not in {"reviewed", "durable", "parallel"} or args.json
+        ):
             raise ValueError("--interactive 要求 reviewed/durable，且不能与 --json 同用")
-        if args.run_id and args.workflow != "durable":
+        if args.run_id and args.workflow not in {"durable", "parallel"}:
             raise ValueError("--run-id 要求 --workflow durable")
         runner = run_multi if args.architecture == "multi" else run_baseline
         if args.workflow == "reviewed":
             runner = run_interactive if args.interactive else run_reviewed
-        if args.workflow == "durable":
+        if args.workflow in {"durable", "parallel"}:
             report = asyncio.run(_durable_command(repository, settings, args))
         else:
             report = asyncio.run(
@@ -286,6 +292,8 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
         report["artifact_path"] = str(path.resolve())
         save_run(report, path)
         return report
+    if args.command == "cancel":
+        return request_cancel(repository, args.run, settings)
     if args.command == "inspect":
         session = ToolSession.for_ticket(
             repository,
@@ -329,9 +337,19 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
 
 async def _durable_command(repository, settings, args):
     if args.command == "resume":
-        run = await PersistentReviewRun.load(repository, args.run, settings)
+        with read_database(repository.path) as connection:
+            row = connection.execute(
+                "SELECT workflow_version FROM workflow_runtime WHERE run_id=?", (args.run,)
+            ).fetchone()
+        run_class = (
+            ParallelReviewRun
+            if row and row[0] == ParallelReviewRun.workflow_version
+            else PersistentReviewRun
+        )
+        run = await run_class.load(repository, args.run, settings)
     else:
-        run = await PersistentReviewRun.create(
+        run_class = ParallelReviewRun if args.workflow == "parallel" else PersistentReviewRun
+        run = await run_class.create(
             repository,
             args.ticket,
             settings,

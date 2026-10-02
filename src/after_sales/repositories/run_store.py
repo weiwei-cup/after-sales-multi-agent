@@ -51,8 +51,14 @@ def validate_bindings(request: ResumeInput, pending: PendingInput):
 
 
 class RunStore:
+    workflow_version = WORKFLOW_VERSION
+    state_version = STATE_VERSION
+
     def __init__(self, path: Path, run_id: str):
         self.path, self.run_id = path, run_id
+
+    def register_extra(self, connection):
+        pass
 
     def register(self, ticket, context, checkpoint_path, limits, runtime):
         with transaction(self.path) as connection:
@@ -81,18 +87,21 @@ class RunStore:
                 "INSERT INTO workflow_runtime VALUES (?,?,?,?,?,?,?,0)",
                 (
                     self.run_id,
-                    WORKFLOW_VERSION,
-                    STATE_VERSION,
+                    self.workflow_version,
+                    self.state_version,
                     "scripted",
                     str(checkpoint_path.resolve()),
                     canonical(limits),
                     canonical(runtime),
                 ),
             )
+            self.register_extra(connection)
 
     def load(self, checkpoint_path):
         with read_database(self.path) as connection:
-            if connection.execute("SELECT max(version) FROM schema_migrations").fetchone()[0] != 2:
+            if connection.execute("SELECT max(version) FROM schema_migrations").fetchone()[
+                0
+            ] not in (2, 3):
                 raise IncompatibleRun(
                     "P06 requires business schema v2; use db migrate before starting"
                 )
@@ -105,8 +114,8 @@ class RunStore:
                 raise RecordNotFound("persistent run not found; a JSON report cannot restore it")
             values = dict(row)
         if (values["workflow_version"], values["schema_version"], values["model_mode"]) != (
-            WORKFLOW_VERSION,
-            STATE_VERSION,
+            self.workflow_version,
+            self.state_version,
             "scripted",
         ):
             raise IncompatibleRun(
@@ -231,8 +240,11 @@ class RunStore:
         return results
 
     def accept(self, request: ResumeInput, ticket: Ticket, now: datetime):
+        from after_sales.repositories.budgets import check_cancelled
+
         encoded = canonical(request.model_dump(mode="json"))
         with transaction(self.path) as connection:
+            check_cancelled(connection, self.run_id)
             row = connection.execute(
                 "SELECT * FROM pending_inputs WHERE pending_id=? AND run_id=?",
                 (request.pending_id, self.run_id),

@@ -547,3 +547,12 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 - [LangChain Middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in)
 - [FastAPI Testing](https://fastapi.tiangolo.com/tutorial/testing/)
 - [pytest markers](https://docs.pytest.org/en/stable/how-to/mark.html)
+
+
+## P07 已落地的并行与预算
+
+实现为独立 `parallel-review-v1` / `parallel-state-v1` / `parallel-run-v1`，兼容保留 P06。订单调查和只按可信类型/时间检索的政策候选并行，join 检查重复、任务及证据冲突，再按已确认订单计算适用性。候选 Agent、真实 fan-out 与应用 branch_results 账本见 ADR007；完成结果可在异步 checkpoint 前退出时复用。
+
+业务 schema v3 新增 branch_results、run_budget、call_reservations、run_events、run_control；累计调用、schema/审核返工及事件以 SQL 为准。每次 attempt 先原子预留再等待模型/工具共用的 semaphore，validator/executor 和失败重试均计数。未知 token usage 保留预留额度、实际总量为 null，费用无已验证价格也为 null。正常人工暂停不计活动时间；异常开放 segment 保守计到恢复，可能包含停机。
+
+CLI `cancel --run` 不取得运行锁，仅提交信号；resume/节点/预留/人工输入事务/新动作事务检查信号。已提交动作先读账本，取消不逆转余额、业务回执与真实工单状态。详细事件、界限、测试和演示见 [第007轮](rounds/007.md) 和 [ADR007](decisions/007-parallel-joins-and-durable-budgets.md)。HTTP/鉴权和实际模型 token 上限、价格仍属于后续工作。

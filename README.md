@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 006 轮 / P06：持久恢复与模拟动作**已完成并上传 GitHub；本地 **429 个离线测试**与 [实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37041984137) 通过，达到 **M2 多 Agent MVP**。阶段交付标签为 [phase-p06](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p06)。四个 Agent 的审核流程可跨进程恢复，人工输入、证据与预算持久保存，物流调查、退货登记和模拟退款通过事务动作账本执行。保留 single、serial 和 P05 reviewed 入口；下一轮为 P07：有界并行与预算完善。
+当前 **第 007 轮 / P07：有界并行与预算**已实现；本地 **488 个离线测试**通过，GitHub 交付验收进行中。订单调查与独立政策候选检索并行，适用性等待事实齐备后计算；调用/usage/活动时间与返工额度从持久账本恢复，取消保留已提交动作。保留 single、serial、reviewed、durable 入口；下一轮为 P08 HTTP 服务。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 
@@ -13,6 +13,7 @@
 - [第 003 轮学习记录](docs/rounds/003.md)：实际工具循环、结构化建议、有限修复、代码复算和运行记录。
 - [第 004 轮学习记录](docs/rounds/004.md)：主图状态、有限路由、专员工具与上下文隔离、结构化交接。
 - [第 005 轮学习记录](docs/rounds/005.md)：审核反馈、定向返工、interrupt、版本绑定和人工输入。
+- [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
 - [第 006 轮学习记录](docs/rounds/006.md)：跨进程恢复、事务边界、动作幂等、执行前复核与业务状态。
 - [模拟资料与案例](fixtures/README.md)：数据来源、20 个开发案例与 10 个留出案例。
 
@@ -150,3 +151,16 @@ P06 新增 59 个测试实例，完整套件 429 passed：真实进程退出与�
 仓库：[weiwei-cup/after-sales-multi-agent](https://github.com/weiwei-cup/after-sales-multi-agent)。每个完成阶段保留 `phase-p00`～`phase-p10` 标签，可在独立目录检出对应标签学习。
 
 只上传代码、模拟资料和文档。运行时数据库、`.env`、密钥和虚拟环境由 `.gitignore` 排除。
+
+
+P07 学习入口：
+
+```bash
+uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow parallel --run-id learning-007 --json
+uv run --locked after-sales resume --run learning-007
+uv run --locked after-sales cancel --run learning-007 --json
+uv run --locked after-sales resume --run learning-007 --json
+uv run --locked python scripts/demo_p07.py
+```
+
+cancel 提交信号，暂停运行在下一次 resume 应用。已提交退款仍保留回执与余额。unknown usage 保留 token 预留，实际用量及费用为 null。候选与订单并行不保证每次都更快；实测时间线与教学注入延迟详见第 007 轮记录。

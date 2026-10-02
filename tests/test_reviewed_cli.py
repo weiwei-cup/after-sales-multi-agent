@@ -152,7 +152,7 @@ def test_reviewed_live_is_skipped_without_network(tmp_path, capsys):
 def test_doctor_reports_actual_scope_without_creating_db(capsys, tmp_path):
     assert main(["doctor", "--json"]) == 0
     report = json.loads(capsys.readouterr().out)
-    assert report["phase"] == "P06"
+    assert report["phase"] == "P07"
     assert report["human_input"]["resume_scope"] == "cross_process"
     assert report["budgets"]["review_repairs"] == 2
     assert not (tmp_path / "var").exists()

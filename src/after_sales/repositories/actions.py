@@ -16,6 +16,7 @@ from after_sales.domain.models import (
     utc_text,
 )
 from after_sales.domain.rules import RULES_VERSION, Truth, evaluate_policy, policy_conflicts
+from after_sales.repositories.budgets import check_cancelled
 from after_sales.repositories.run_store import DurableInputConflict, validate_bindings
 from after_sales.repositories.sqlite import _order, _policies, _ticket, read_database, transaction
 from after_sales.tools.evidence import canonical
@@ -109,9 +110,7 @@ class ActionService:
                 "h USING(pending_id) WHERE pending_id=? AND run_id=?",
                 (pending_id, run_id),
             ).fetchone()
-            if stored is not None and stored["status"] == "invalidated":
-                raise ApprovalStale("approval already invalidated; refresh required")
-            if stored is None or stored["status"] != "consumed":
+            if stored is None or stored["status"] not in {"consumed", "invalidated"}:
                 raise DurableInputConflict("execution requires a consumed durable approval")
             pending = PendingInput.model_validate_json(stored["payload_json"])
             request = ResumeInput.model_validate_json(stored["envelope_json"])
@@ -128,6 +127,9 @@ class ActionService:
             existing = self._existing(connection, payload)
             if existing:
                 return existing
+            check_cancelled(connection, run_id)
+            if stored["status"] == "invalidated":
+                raise ApprovalStale("approval already invalidated; refresh required")
             plan = connection.execute(
                 "SELECT * FROM proposal_plans WHERE run_id=? AND active=1", (run_id,)
             ).fetchone()

@@ -44,6 +44,7 @@ TOOL_SPECS = {
     "get_delivery_proof": (OrderQuery, "查询凭证；not_collected/unknown 不等于明确 missing。"),
     "get_after_sales_history": (OrderQuery, "查询已有售后记录，防止重复申请；空记录是成功查询。"),
     "search_policies": (PolicySearch, "按工单类型标签检索当前业务时间有效的政策，保留冲突版本。"),
+    "search_policy_candidates": (PolicySearch, "只检索政策候选；尚未计算订单商品范围与适用性。"),
     "get_policy": (PolicyQuery, "读取指定政策版本；读到过期或未来版本不代表现在适用。"),
     "evaluate_policy": (
         AssessmentQuery,
@@ -181,10 +182,14 @@ class ToolSession:
         if isinstance(query, PolicySearch):
             if query.intent != self.context.intent:
                 raise ToolFailure(ErrorCode.INVALID_ARGUMENT, "政策标签必须匹配当前工单类型")
-            if self.context.supplied_order_id is None:
+            if name != "search_policy_candidates" and self.context.supplied_order_id is None:
                 raise ToolFailure(ErrorCode.MISSING_REFERENCE, "先补充工单订单号，再检索适用政策")
 
             def search():
+                if name == "search_policy_candidates":
+                    return self.repository.list_policies(
+                        intent=query.intent, as_of_time=self.context.as_of_time
+                    )
                 order = self.repository.get_order(
                     self.context.supplied_order_id, customer_id=self.context.customer_id
                 )

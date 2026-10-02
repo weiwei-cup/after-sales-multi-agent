@@ -1,0 +1,2888 @@
+{
+  "schema_version": "p07-observations-v1",
+  "observed_at": "2026-10-02T19:01:16.845489+00:00",
+  "model_mode": "scripted",
+  "business_clock": "2026-10-02T04:00:00+00:00",
+  "ticket_id": "T-NOTRECEIVED-002",
+  "measurement_note": "Single local observation per variant; 500 ms delays are injected into two independent reads. Learning traces do not measure real provider performance or statistical benchmarks.",
+  "runs": [
+    {
+      "workflow": "persistent-review-v1",
+      "status": "paused",
+      "decision": "propose_refund",
+      "injected_read_delay_ms": 0,
+      "measured_wall_ms": 227.1,
+      "statistics": {
+        "model_calls": 14,
+        "tool_calls": 10,
+        "agent_tool_calls": 9,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "model_elapsed_ms": 31.619,
+        "tool_elapsed_ms": 21.196,
+        "elapsed_ms": 216.427,
+        "token_usage": null,
+        "token_usage_note": "not_reported",
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 4,
+            "tool_calls": 3
+          },
+          "reviewer": {
+            "model_calls": 2,
+            "tool_calls": 1
+          }
+        }
+      },
+      "timeline": [
+        {
+          "sequence": 2,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 12.009,
+          "node": "intake"
+        },
+        {
+          "sequence": 4,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 18.232
+        },
+        {
+          "sequence": 5,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 20.785,
+          "duration_ms": 1.774
+        },
+        {
+          "sequence": 7,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 25.166,
+          "node": "intake"
+        },
+        {
+          "sequence": 8,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 26.365,
+          "node": "order"
+        },
+        {
+          "sequence": 10,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 36.001
+        },
+        {
+          "sequence": 11,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 39.346,
+          "duration_ms": 2.52
+        },
+        {
+          "sequence": 12,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 41.631,
+          "tool": "get_order"
+        },
+        {
+          "sequence": 13,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 44.072,
+          "tool": "get_order",
+          "duration_ms": 1.731
+        },
+        {
+          "sequence": 14,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 46.25
+        },
+        {
+          "sequence": 15,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 47.671,
+          "duration_ms": 0.664
+        },
+        {
+          "sequence": 16,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 50.693,
+          "tool": "get_order_products"
+        },
+        {
+          "sequence": 17,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 52.584,
+          "tool": "get_order_products",
+          "duration_ms": 1.045
+        },
+        {
+          "sequence": 18,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 54.892
+        },
+        {
+          "sequence": 19,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 56.331,
+          "duration_ms": 0.639
+        },
+        {
+          "sequence": 20,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 58.523,
+          "tool": "get_tracking"
+        },
+        {
+          "sequence": 21,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 60.28,
+          "tool": "get_tracking",
+          "duration_ms": 0.989
+        },
+        {
+          "sequence": 22,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 62.481
+        },
+        {
+          "sequence": 23,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 63.866,
+          "duration_ms": 0.638
+        },
+        {
+          "sequence": 24,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 66.101,
+          "tool": "get_delivery_proof"
+        },
+        {
+          "sequence": 25,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 67.74,
+          "tool": "get_delivery_proof",
+          "duration_ms": 0.878
+        },
+        {
+          "sequence": 26,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 69.958
+        },
+        {
+          "sequence": 27,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 71.403,
+          "duration_ms": 0.655
+        },
+        {
+          "sequence": 28,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 73.619,
+          "tool": "get_after_sales_history"
+        },
+        {
+          "sequence": 29,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 75.284,
+          "tool": "get_after_sales_history",
+          "duration_ms": 0.85
+        },
+        {
+          "sequence": 30,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 77.454
+        },
+        {
+          "sequence": 31,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 79.056,
+          "duration_ms": 0.813
+        },
+        {
+          "sequence": 33,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 83.136,
+          "node": "order"
+        },
+        {
+          "sequence": 34,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 84.532,
+          "node": "policy"
+        },
+        {
+          "sequence": 36,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 92.826
+        },
+        {
+          "sequence": 37,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 96.166,
+          "duration_ms": 2.402
+        },
+        {
+          "sequence": 38,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 98.862,
+          "tool": "search_policies"
+        },
+        {
+          "sequence": 39,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 101.269,
+          "tool": "search_policies",
+          "duration_ms": 1.482
+        },
+        {
+          "sequence": 40,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 103.855
+        },
+        {
+          "sequence": 41,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 105.59,
+          "duration_ms": 0.734
+        },
+        {
+          "sequence": 42,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 108.272,
+          "tool": "evaluate_policy"
+        },
+        {
+          "sequence": 43,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 110.466,
+          "tool": "evaluate_policy",
+          "duration_ms": 1.15
+        },
+        {
+          "sequence": 44,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 113.158
+        },
+        {
+          "sequence": 45,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 114.992,
+          "duration_ms": 0.781
+        },
+        {
+          "sequence": 46,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 117.743,
+          "tool": "evaluate_policy"
+        },
+        {
+          "sequence": 47,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 120.007,
+          "tool": "evaluate_policy",
+          "duration_ms": 1.167
+        },
+        {
+          "sequence": 48,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 123.105
+        },
+        {
+          "sequence": 49,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 125.434,
+          "duration_ms": 1.108
+        },
+        {
+          "sequence": 51,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 130.993,
+          "node": "policy"
+        },
+        {
+          "sequence": 52,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 132.605,
+          "node": "draft"
+        },
+        {
+          "sequence": 54,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 140.877
+        },
+        {
+          "sequence": 55,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 143.384,
+          "duration_ms": 1.056
+        },
+        {
+          "sequence": 57,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 150.108,
+          "node": "draft"
+        },
+        {
+          "sequence": 58,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 151.892,
+          "node": "validate"
+        },
+        {
+          "sequence": 60,
+          "kind": "tool_started",
+          "role": "validator",
+          "elapsed_ms": 156.239,
+          "tool": "evaluate_policy"
+        },
+        {
+          "sequence": 61,
+          "kind": "tool_finished",
+          "role": "validator",
+          "elapsed_ms": 158.737,
+          "tool": "evaluate_policy",
+          "duration_ms": 0.851
+        },
+        {
+          "sequence": 63,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 164.001,
+          "node": "validate"
+        },
+        {
+          "sequence": 64,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 165.749,
+          "node": "review"
+        },
+        {
+          "sequence": 66,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 175.366
+        },
+        {
+          "sequence": 67,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 178.604,
+          "duration_ms": 1.394
+        },
+        {
+          "sequence": 68,
+          "kind": "tool_started",
+          "role": "reviewer",
+          "elapsed_ms": 182.34,
+          "tool": "validate_evidence_refs"
+        },
+        {
+          "sequence": 69,
+          "kind": "tool_finished",
+          "role": "reviewer",
+          "elapsed_ms": 184.221,
+          "tool": "validate_evidence_refs",
+          "duration_ms": 0.365
+        },
+        {
+          "sequence": 70,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 188.014
+        },
+        {
+          "sequence": 71,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 190.539,
+          "duration_ms": 0.736
+        },
+        {
+          "sequence": 73,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 197.984,
+          "node": "review"
+        },
+        {
+          "sequence": 74,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 200.429,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 76,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 207.47,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 77,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 209.426,
+          "node": "wait_operator"
+        }
+      ]
+    },
+    {
+      "workflow": "parallel-review-v1",
+      "status": "paused",
+      "decision": "propose_refund",
+      "injected_read_delay_ms": 0,
+      "measured_wall_ms": 424.178,
+      "statistics": {
+        "model_calls": 16,
+        "tool_calls": 11,
+        "agent_tool_calls": 10,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "model_elapsed_ms": 58.126,
+        "tool_elapsed_ms": 36.63,
+        "elapsed_ms": 405.273,
+        "token_usage": null,
+        "token_usage_note": "not_reported",
+        "active_elapsed_ms": 405.273,
+        "token_usage_state": "unknown",
+        "actual_total_tokens": null,
+        "known_total_tokens": 0,
+        "unknown_usage_calls": 16,
+        "review_repairs_reserved": 0,
+        "token_budget_charged": 32768,
+        "monetary_cost": null,
+        "price_state": "unknown",
+        "max_concurrency": 2,
+        "peak_in_flight": 2,
+        "reservations": [
+          {
+            "run_id": "learning-p07",
+            "sequence": 1,
+            "kind": "model",
+            "role": "coordinator",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.072
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 2,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 3.481
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 3,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 4.896
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 4,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 8.087
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 5,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 7.29
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 6,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 7.753
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 7,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 5.793
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 8,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.266
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 9,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.042
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 10,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.361
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 11,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 1.987
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 12,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.368
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 13,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.327
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 14,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.748
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 15,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 9.374
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 16,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 4.518
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 17,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.892
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 18,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 1.994
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 19,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.569
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 20,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.463
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 21,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.473
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 22,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.46
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 23,
+            "kind": "model",
+            "role": "coordinator",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.282
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 24,
+            "kind": "tool",
+            "role": "validator",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.081
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 25,
+            "kind": "model",
+            "role": "reviewer",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.809
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 26,
+            "kind": "tool",
+            "role": "reviewer",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 1.495
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 27,
+            "kind": "model",
+            "role": "reviewer",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 1.875
+          }
+        ],
+        "stop_reason": null,
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 6,
+            "tool_calls": 4
+          },
+          "reviewer": {
+            "model_calls": 2,
+            "tool_calls": 1
+          }
+        }
+      },
+      "timeline": [
+        {
+          "sequence": 3,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1.598,
+          "node": "intake"
+        },
+        {
+          "sequence": 6,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 9.695,
+          "tool": null,
+          "attempt_id": 1
+        },
+        {
+          "sequence": 7,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 12.152,
+          "tool": null,
+          "attempt_id": 1,
+          "duration_ms": 2.072
+        },
+        {
+          "sequence": 9,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 22.14,
+          "node": "intake"
+        },
+        {
+          "sequence": 10,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 23.751,
+          "node": "candidate_branch"
+        },
+        {
+          "sequence": 11,
+          "kind": "branch_started",
+          "role": "application",
+          "elapsed_ms": 25.188,
+          "task_id": "1:policy_candidates"
+        },
+        {
+          "sequence": 13,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 29.77,
+          "node": "order_branch"
+        },
+        {
+          "sequence": 14,
+          "kind": "branch_started",
+          "role": "application",
+          "elapsed_ms": 31.14,
+          "task_id": "1:order"
+        },
+        {
+          "sequence": 17,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 59.544,
+          "tool": null,
+          "attempt_id": 2
+        },
+        {
+          "sequence": 18,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 63.321,
+          "tool": null,
+          "attempt_id": 2,
+          "duration_ms": 3.481
+        },
+        {
+          "sequence": 20,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 67.985,
+          "tool": null,
+          "attempt_id": 3
+        },
+        {
+          "sequence": 21,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 73.369,
+          "tool": null,
+          "attempt_id": 3,
+          "duration_ms": 4.896
+        },
+        {
+          "sequence": 23,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 79.281,
+          "tool": "search_policy_candidates",
+          "attempt_id": 4
+        },
+        {
+          "sequence": 25,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 84.96,
+          "tool": "get_order",
+          "attempt_id": 5
+        },
+        {
+          "sequence": 26,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 88.548,
+          "tool": "search_policy_candidates",
+          "attempt_id": 4,
+          "duration_ms": 8.087
+        },
+        {
+          "sequence": 27,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 92.614,
+          "tool": "get_order",
+          "attempt_id": 5,
+          "duration_ms": 7.29
+        },
+        {
+          "sequence": 29,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 98.44,
+          "tool": null,
+          "attempt_id": 6
+        },
+        {
+          "sequence": 31,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 104.1,
+          "tool": null,
+          "attempt_id": 7
+        },
+        {
+          "sequence": 32,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 106.527,
+          "tool": null,
+          "attempt_id": 6,
+          "duration_ms": 7.753
+        },
+        {
+          "sequence": 33,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 109.808,
+          "tool": null,
+          "attempt_id": 7,
+          "duration_ms": 5.793
+        },
+        {
+          "sequence": 35,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 115.085,
+          "tool": "get_order_products",
+          "attempt_id": 8
+        },
+        {
+          "sequence": 36,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 117.808,
+          "tool": "get_order_products",
+          "attempt_id": 8,
+          "duration_ms": 2.266
+        },
+        {
+          "sequence": 38,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 124.567,
+          "tool": null,
+          "attempt_id": 9
+        },
+        {
+          "sequence": 39,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 126.913,
+          "tool": null,
+          "attempt_id": 9,
+          "duration_ms": 2.042
+        },
+        {
+          "sequence": 41,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 132.329,
+          "tool": "get_tracking",
+          "attempt_id": 10
+        },
+        {
+          "sequence": 42,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 135.283,
+          "tool": "get_tracking",
+          "attempt_id": 10,
+          "duration_ms": 2.361
+        },
+        {
+          "sequence": 44,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 140.887,
+          "tool": null,
+          "attempt_id": 11
+        },
+        {
+          "sequence": 45,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 143.142,
+          "tool": null,
+          "attempt_id": 11,
+          "duration_ms": 1.987
+        },
+        {
+          "sequence": 47,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 148.686,
+          "tool": "get_delivery_proof",
+          "attempt_id": 12
+        },
+        {
+          "sequence": 48,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 151.37,
+          "tool": "get_delivery_proof",
+          "attempt_id": 12,
+          "duration_ms": 2.368
+        },
+        {
+          "sequence": 50,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 157.475,
+          "tool": null,
+          "attempt_id": 13
+        },
+        {
+          "sequence": 51,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 159.841,
+          "tool": null,
+          "attempt_id": 13,
+          "duration_ms": 2.327
+        },
+        {
+          "sequence": 53,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 166.169,
+          "tool": "get_after_sales_history",
+          "attempt_id": 14
+        },
+        {
+          "sequence": 54,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 168.962,
+          "tool": "get_after_sales_history",
+          "attempt_id": 14,
+          "duration_ms": 2.748
+        },
+        {
+          "sequence": 56,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 175.169,
+          "tool": null,
+          "attempt_id": 15
+        },
+        {
+          "sequence": 58,
+          "kind": "branch_finished",
+          "role": "application",
+          "elapsed_ms": 180.644,
+          "task_id": "1:policy_candidates"
+        },
+        {
+          "sequence": 59,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 183.428,
+          "node": "candidate_branch"
+        },
+        {
+          "sequence": 60,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 184.811,
+          "tool": null,
+          "attempt_id": 15,
+          "duration_ms": 9.374
+        },
+        {
+          "sequence": 62,
+          "kind": "branch_finished",
+          "role": "application",
+          "elapsed_ms": 195.401,
+          "task_id": "1:order"
+        },
+        {
+          "sequence": 63,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 198.338,
+          "node": "order_branch"
+        },
+        {
+          "sequence": 64,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 200.029,
+          "node": "join"
+        },
+        {
+          "sequence": 65,
+          "kind": "join_decided",
+          "role": "application",
+          "elapsed_ms": 201.241
+        },
+        {
+          "sequence": 66,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 205.141,
+          "node": "join"
+        },
+        {
+          "sequence": 67,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 206.851,
+          "node": "policy"
+        },
+        {
+          "sequence": 70,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 216.523,
+          "tool": null,
+          "attempt_id": 16
+        },
+        {
+          "sequence": 71,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 221.335,
+          "tool": null,
+          "attempt_id": 16,
+          "duration_ms": 4.518
+        },
+        {
+          "sequence": 73,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 227.789,
+          "tool": "search_policies",
+          "attempt_id": 17
+        },
+        {
+          "sequence": 74,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 230.989,
+          "tool": "search_policies",
+          "attempt_id": 17,
+          "duration_ms": 2.892
+        },
+        {
+          "sequence": 76,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 237.262,
+          "tool": null,
+          "attempt_id": 18
+        },
+        {
+          "sequence": 77,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 239.556,
+          "tool": null,
+          "attempt_id": 18,
+          "duration_ms": 1.994
+        },
+        {
+          "sequence": 79,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 245.613,
+          "tool": "evaluate_policy",
+          "attempt_id": 19
+        },
+        {
+          "sequence": 80,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 248.494,
+          "tool": "evaluate_policy",
+          "attempt_id": 19,
+          "duration_ms": 2.569
+        },
+        {
+          "sequence": 82,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 254.448,
+          "tool": null,
+          "attempt_id": 20
+        },
+        {
+          "sequence": 83,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 257.336,
+          "tool": null,
+          "attempt_id": 20,
+          "duration_ms": 2.463
+        },
+        {
+          "sequence": 85,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 264.226,
+          "tool": "evaluate_policy",
+          "attempt_id": 21
+        },
+        {
+          "sequence": 86,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 266.996,
+          "tool": "evaluate_policy",
+          "attempt_id": 21,
+          "duration_ms": 2.473
+        },
+        {
+          "sequence": 88,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 273.199,
+          "tool": null,
+          "attempt_id": 22
+        },
+        {
+          "sequence": 89,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 275.995,
+          "tool": null,
+          "attempt_id": 22,
+          "duration_ms": 2.46
+        },
+        {
+          "sequence": 91,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 288.17,
+          "node": "policy"
+        },
+        {
+          "sequence": 92,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 289.427,
+          "node": "draft"
+        },
+        {
+          "sequence": 95,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 298.147,
+          "tool": null,
+          "attempt_id": 23
+        },
+        {
+          "sequence": 96,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 300.699,
+          "tool": null,
+          "attempt_id": 23,
+          "duration_ms": 2.282
+        },
+        {
+          "sequence": 98,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 313.784,
+          "node": "draft"
+        },
+        {
+          "sequence": 99,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 314.869,
+          "node": "validate"
+        },
+        {
+          "sequence": 102,
+          "kind": "tool_started",
+          "role": "validator",
+          "elapsed_ms": 319.158,
+          "tool": "evaluate_policy",
+          "attempt_id": 24
+        },
+        {
+          "sequence": 103,
+          "kind": "tool_finished",
+          "role": "validator",
+          "elapsed_ms": 321.533,
+          "tool": "evaluate_policy",
+          "attempt_id": 24,
+          "duration_ms": 2.081
+        },
+        {
+          "sequence": 105,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 330.724,
+          "node": "validate"
+        },
+        {
+          "sequence": 106,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 331.705,
+          "node": "review"
+        },
+        {
+          "sequence": 109,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 341.252,
+          "tool": null,
+          "attempt_id": 25
+        },
+        {
+          "sequence": 110,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 344.429,
+          "tool": null,
+          "attempt_id": 25,
+          "duration_ms": 2.809
+        },
+        {
+          "sequence": 112,
+          "kind": "tool_started",
+          "role": "reviewer",
+          "elapsed_ms": 351.587,
+          "tool": "validate_evidence_refs",
+          "attempt_id": 26
+        },
+        {
+          "sequence": 113,
+          "kind": "tool_finished",
+          "role": "reviewer",
+          "elapsed_ms": 353.518,
+          "tool": "validate_evidence_refs",
+          "attempt_id": 26,
+          "duration_ms": 1.495
+        },
+        {
+          "sequence": 115,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 360.826,
+          "tool": null,
+          "attempt_id": 27
+        },
+        {
+          "sequence": 116,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 362.985,
+          "tool": null,
+          "attempt_id": 27,
+          "duration_ms": 1.875
+        },
+        {
+          "sequence": 118,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 377.441,
+          "node": "review"
+        },
+        {
+          "sequence": 119,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 378.651,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 121,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 386.018,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 122,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 387.013,
+          "node": "wait_operator"
+        }
+      ],
+      "resume_model_calls": 16,
+      "approved": {
+        "status": "completed",
+        "business_status": "resolved",
+        "executed_actions": [
+          {
+            "operation_key": "op-5a5be83bee6234302fcaeef2d6e78ed511efab63",
+            "payload_hash": "5831d8aace0b779d54b980d5f044f0b88e1b07072b88e50466d99da1039930a9",
+            "run_id": "learning-p07",
+            "ticket_id": "T-NOTRECEIVED-002",
+            "action_id": "action-8623888b32f9f5d662881df23a63bc3e",
+            "input_revision": 1,
+            "type": "issue_mock_refund",
+            "order_id": "ORD-004",
+            "amount_cents": 10000,
+            "business_record_id": "act-66fd97e57994fcdfc294edc8d0543da3",
+            "business_status": "resolved",
+            "committed_at": "2026-10-02T04:00:00Z"
+          }
+        ]
+      },
+      "cancel_completed": {
+        "run_id": "learning-p07",
+        "cancel_requested": false,
+        "new_request": false,
+        "acknowledged": false,
+        "run_status": "completed"
+      }
+    },
+    {
+      "workflow": "persistent-review-v1",
+      "status": "paused",
+      "decision": "propose_refund",
+      "injected_read_delay_ms": 500.0,
+      "measured_wall_ms": 1273.111,
+      "statistics": {
+        "model_calls": 14,
+        "tool_calls": 10,
+        "agent_tool_calls": 9,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "model_elapsed_ms": 39.459,
+        "tool_elapsed_ms": 1042.368,
+        "elapsed_ms": 1275.32,
+        "token_usage": null,
+        "token_usage_note": "not_reported",
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 4,
+            "tool_calls": 3
+          },
+          "reviewer": {
+            "model_calls": 2,
+            "tool_calls": 1
+          }
+        }
+      },
+      "timeline": [
+        {
+          "sequence": 2,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 10.555,
+          "node": "intake"
+        },
+        {
+          "sequence": 4,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 16.284
+        },
+        {
+          "sequence": 5,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 17.659,
+          "duration_ms": 0.73
+        },
+        {
+          "sequence": 7,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 21.326,
+          "node": "intake"
+        },
+        {
+          "sequence": 8,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 22.669,
+          "node": "order"
+        },
+        {
+          "sequence": 10,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 32.137
+        },
+        {
+          "sequence": 11,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 34.975,
+          "duration_ms": 2.104
+        },
+        {
+          "sequence": 12,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 37.085,
+          "tool": "get_order"
+        },
+        {
+          "sequence": 13,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 545.107,
+          "tool": "get_order",
+          "duration_ms": 507.157
+        },
+        {
+          "sequence": 14,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 556.687
+        },
+        {
+          "sequence": 15,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 560.81,
+          "duration_ms": 1.727
+        },
+        {
+          "sequence": 16,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 565.803,
+          "tool": "get_order_products"
+        },
+        {
+          "sequence": 17,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 569.356,
+          "tool": "get_order_products",
+          "duration_ms": 2.004
+        },
+        {
+          "sequence": 18,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 573.466
+        },
+        {
+          "sequence": 19,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 575.79,
+          "duration_ms": 0.999
+        },
+        {
+          "sequence": 20,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 579.586,
+          "tool": "get_tracking"
+        },
+        {
+          "sequence": 21,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 582.405,
+          "tool": "get_tracking",
+          "duration_ms": 1.582
+        },
+        {
+          "sequence": 22,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 585.6
+        },
+        {
+          "sequence": 23,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 587.622,
+          "duration_ms": 0.848
+        },
+        {
+          "sequence": 24,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 590.763,
+          "tool": "get_delivery_proof"
+        },
+        {
+          "sequence": 25,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 593.111,
+          "tool": "get_delivery_proof",
+          "duration_ms": 1.268
+        },
+        {
+          "sequence": 26,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 596.084
+        },
+        {
+          "sequence": 27,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 597.893,
+          "duration_ms": 0.78
+        },
+        {
+          "sequence": 28,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 600.665,
+          "tool": "get_after_sales_history"
+        },
+        {
+          "sequence": 29,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 603.035,
+          "tool": "get_after_sales_history",
+          "duration_ms": 1.277
+        },
+        {
+          "sequence": 30,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 605.667
+        },
+        {
+          "sequence": 31,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 607.596,
+          "duration_ms": 0.957
+        },
+        {
+          "sequence": 33,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 612.52,
+          "node": "order"
+        },
+        {
+          "sequence": 34,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 614.346,
+          "node": "policy"
+        },
+        {
+          "sequence": 36,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 624.985
+        },
+        {
+          "sequence": 37,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 629.273,
+          "duration_ms": 3.01
+        },
+        {
+          "sequence": 38,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 632.345,
+          "tool": "search_policies"
+        },
+        {
+          "sequence": 39,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 1137.284,
+          "tool": "search_policies",
+          "duration_ms": 503.843
+        },
+        {
+          "sequence": 40,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 1143.189
+        },
+        {
+          "sequence": 41,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 1146.781,
+          "duration_ms": 1.665
+        },
+        {
+          "sequence": 42,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 1151.482,
+          "tool": "evaluate_policy"
+        },
+        {
+          "sequence": 43,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 1154.991,
+          "tool": "evaluate_policy",
+          "duration_ms": 1.859
+        },
+        {
+          "sequence": 44,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 1159.659
+        },
+        {
+          "sequence": 45,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 1162.844,
+          "duration_ms": 1.418
+        },
+        {
+          "sequence": 46,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 1167.05,
+          "tool": "evaluate_policy"
+        },
+        {
+          "sequence": 47,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 1170.288,
+          "tool": "evaluate_policy",
+          "duration_ms": 1.642
+        },
+        {
+          "sequence": 48,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 1174.279
+        },
+        {
+          "sequence": 49,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 1177.417,
+          "duration_ms": 1.634
+        },
+        {
+          "sequence": 51,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 1184.934,
+          "node": "policy"
+        },
+        {
+          "sequence": 52,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1186.944,
+          "node": "draft"
+        },
+        {
+          "sequence": 54,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 1197.364
+        },
+        {
+          "sequence": 55,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 1200.08,
+          "duration_ms": 1.165
+        },
+        {
+          "sequence": 57,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 1207.554,
+          "node": "draft"
+        },
+        {
+          "sequence": 58,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1209.561,
+          "node": "validate"
+        },
+        {
+          "sequence": 60,
+          "kind": "tool_started",
+          "role": "validator",
+          "elapsed_ms": 1214.325,
+          "tool": "evaluate_policy"
+        },
+        {
+          "sequence": 61,
+          "kind": "tool_finished",
+          "role": "validator",
+          "elapsed_ms": 1217.095,
+          "tool": "evaluate_policy",
+          "duration_ms": 1.252
+        },
+        {
+          "sequence": 63,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 1222.935,
+          "node": "validate"
+        },
+        {
+          "sequence": 64,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1224.841,
+          "node": "review"
+        },
+        {
+          "sequence": 66,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 1234.978
+        },
+        {
+          "sequence": 67,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 1238.114,
+          "duration_ms": 1.531
+        },
+        {
+          "sequence": 68,
+          "kind": "tool_started",
+          "role": "reviewer",
+          "elapsed_ms": 1242.2,
+          "tool": "validate_evidence_refs"
+        },
+        {
+          "sequence": 69,
+          "kind": "tool_finished",
+          "role": "reviewer",
+          "elapsed_ms": 1244.632,
+          "tool": "validate_evidence_refs",
+          "duration_ms": 0.822
+        },
+        {
+          "sequence": 70,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 1248.756
+        },
+        {
+          "sequence": 71,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 1250.99,
+          "duration_ms": 0.65
+        },
+        {
+          "sequence": 73,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 1258.201,
+          "node": "review"
+        },
+        {
+          "sequence": 74,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1260.236,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 76,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 1266.941,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 77,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1268.812,
+          "node": "wait_operator"
+        }
+      ]
+    },
+    {
+      "workflow": "parallel-review-v1",
+      "status": "paused",
+      "decision": "propose_refund",
+      "injected_read_delay_ms": 500.0,
+      "measured_wall_ms": 958.988,
+      "statistics": {
+        "model_calls": 16,
+        "tool_calls": 11,
+        "agent_tool_calls": 10,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "model_elapsed_ms": 56.18,
+        "tool_elapsed_ms": 1056.516,
+        "elapsed_ms": 941.261,
+        "token_usage": null,
+        "token_usage_note": "not_reported",
+        "active_elapsed_ms": 941.261,
+        "token_usage_state": "unknown",
+        "actual_total_tokens": null,
+        "known_total_tokens": 0,
+        "unknown_usage_calls": 16,
+        "review_repairs_reserved": 0,
+        "token_budget_charged": 32768,
+        "monetary_cost": null,
+        "price_state": "unknown",
+        "max_concurrency": 2,
+        "peak_in_flight": 2,
+        "reservations": [
+          {
+            "run_id": "learning-p07",
+            "sequence": 1,
+            "kind": "model",
+            "role": "coordinator",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.414
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 2,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.992
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 3,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 3.541
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 4,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 507.313
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 5,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 518.352
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 6,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 10.691
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 7,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 8.58
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 8,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 3.246
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 9,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.346
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 10,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 9.376
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 11,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 1.988
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 12,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.911
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 13,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.15
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 14,
+            "kind": "tool",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.666
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 15,
+            "kind": "model",
+            "role": "order_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.698
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 16,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 4.562
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 17,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 3.045
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 18,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.27
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 19,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.724
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 20,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.135
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 21,
+            "kind": "tool",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.783
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 22,
+            "kind": "model",
+            "role": "policy_specialist",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.483
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 23,
+            "kind": "model",
+            "role": "coordinator",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 2.347
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 24,
+            "kind": "tool",
+            "role": "validator",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 2.351
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 25,
+            "kind": "model",
+            "role": "reviewer",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 3.054
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 26,
+            "kind": "tool",
+            "role": "reviewer",
+            "status": "succeeded",
+            "token_hold": 0,
+            "actual_tokens": null,
+            "duration_ms": 1.749
+          },
+          {
+            "run_id": "learning-p07",
+            "sequence": 27,
+            "kind": "model",
+            "role": "reviewer",
+            "status": "succeeded",
+            "token_hold": 2048,
+            "actual_tokens": null,
+            "duration_ms": 1.929
+          }
+        ],
+        "stop_reason": null,
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 6,
+            "tool_calls": 4
+          },
+          "reviewer": {
+            "model_calls": 2,
+            "tool_calls": 1
+          }
+        }
+      },
+      "timeline": [
+        {
+          "sequence": 3,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 1.262,
+          "node": "intake"
+        },
+        {
+          "sequence": 6,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 8.791,
+          "tool": null,
+          "attempt_id": 1
+        },
+        {
+          "sequence": 7,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 11.684,
+          "tool": null,
+          "attempt_id": 1,
+          "duration_ms": 2.414
+        },
+        {
+          "sequence": 9,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 19.317,
+          "node": "intake"
+        },
+        {
+          "sequence": 10,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 20.62,
+          "node": "candidate_branch"
+        },
+        {
+          "sequence": 11,
+          "kind": "branch_started",
+          "role": "application",
+          "elapsed_ms": 21.923,
+          "task_id": "1:policy_candidates"
+        },
+        {
+          "sequence": 13,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 26.235,
+          "node": "order_branch"
+        },
+        {
+          "sequence": 14,
+          "kind": "branch_started",
+          "role": "application",
+          "elapsed_ms": 27.5,
+          "task_id": "1:order"
+        },
+        {
+          "sequence": 17,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 37.006,
+          "tool": null,
+          "attempt_id": 2
+        },
+        {
+          "sequence": 18,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 40.214,
+          "tool": null,
+          "attempt_id": 2,
+          "duration_ms": 2.992
+        },
+        {
+          "sequence": 20,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 44.238,
+          "tool": null,
+          "attempt_id": 3
+        },
+        {
+          "sequence": 21,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 48.106,
+          "tool": null,
+          "attempt_id": 3,
+          "duration_ms": 3.541
+        },
+        {
+          "sequence": 23,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 52.582,
+          "tool": "search_policy_candidates",
+          "attempt_id": 4
+        },
+        {
+          "sequence": 25,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 56.806,
+          "tool": "get_order",
+          "attempt_id": 5
+        },
+        {
+          "sequence": 26,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 564.806,
+          "tool": "search_policy_candidates",
+          "attempt_id": 4,
+          "duration_ms": 507.313
+        },
+        {
+          "sequence": 27,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 577.041,
+          "tool": "get_order",
+          "attempt_id": 5,
+          "duration_ms": 518.352
+        },
+        {
+          "sequence": 29,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 589.085,
+          "tool": null,
+          "attempt_id": 6
+        },
+        {
+          "sequence": 31,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 596.262,
+          "tool": null,
+          "attempt_id": 7
+        },
+        {
+          "sequence": 32,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 599.91,
+          "tool": null,
+          "attempt_id": 6,
+          "duration_ms": 10.691
+        },
+        {
+          "sequence": 33,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 605.073,
+          "tool": null,
+          "attempt_id": 7,
+          "duration_ms": 8.58
+        },
+        {
+          "sequence": 35,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 612.398,
+          "tool": "get_order_products",
+          "attempt_id": 8
+        },
+        {
+          "sequence": 36,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 616.058,
+          "tool": "get_order_products",
+          "attempt_id": 8,
+          "duration_ms": 3.246
+        },
+        {
+          "sequence": 38,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 622.587,
+          "tool": null,
+          "attempt_id": 9
+        },
+        {
+          "sequence": 39,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 625.18,
+          "tool": null,
+          "attempt_id": 9,
+          "duration_ms": 2.346
+        },
+        {
+          "sequence": 41,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 631.35,
+          "tool": "get_tracking",
+          "attempt_id": 10
+        },
+        {
+          "sequence": 43,
+          "kind": "branch_finished",
+          "role": "application",
+          "elapsed_ms": 636.77,
+          "task_id": "1:policy_candidates"
+        },
+        {
+          "sequence": 44,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 639.523,
+          "node": "candidate_branch"
+        },
+        {
+          "sequence": 45,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 641.293,
+          "tool": "get_tracking",
+          "attempt_id": 10,
+          "duration_ms": 9.376
+        },
+        {
+          "sequence": 47,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 646.854,
+          "tool": null,
+          "attempt_id": 11
+        },
+        {
+          "sequence": 48,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 649.117,
+          "tool": null,
+          "attempt_id": 11,
+          "duration_ms": 1.988
+        },
+        {
+          "sequence": 50,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 654.852,
+          "tool": "get_delivery_proof",
+          "attempt_id": 12
+        },
+        {
+          "sequence": 51,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 658.134,
+          "tool": "get_delivery_proof",
+          "attempt_id": 12,
+          "duration_ms": 2.911
+        },
+        {
+          "sequence": 53,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 664.662,
+          "tool": null,
+          "attempt_id": 13
+        },
+        {
+          "sequence": 54,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 667.183,
+          "tool": null,
+          "attempt_id": 13,
+          "duration_ms": 2.15
+        },
+        {
+          "sequence": 56,
+          "kind": "tool_started",
+          "role": "order_specialist",
+          "elapsed_ms": 673.314,
+          "tool": "get_after_sales_history",
+          "attempt_id": 14
+        },
+        {
+          "sequence": 57,
+          "kind": "tool_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 676.37,
+          "tool": "get_after_sales_history",
+          "attempt_id": 14,
+          "duration_ms": 2.666
+        },
+        {
+          "sequence": 59,
+          "kind": "model_started",
+          "role": "order_specialist",
+          "elapsed_ms": 689.555,
+          "tool": null,
+          "attempt_id": 15
+        },
+        {
+          "sequence": 60,
+          "kind": "model_finished",
+          "role": "order_specialist",
+          "elapsed_ms": 692.404,
+          "tool": null,
+          "attempt_id": 15,
+          "duration_ms": 2.698
+        },
+        {
+          "sequence": 62,
+          "kind": "branch_finished",
+          "role": "application",
+          "elapsed_ms": 708.332,
+          "task_id": "1:order"
+        },
+        {
+          "sequence": 63,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 716.083,
+          "node": "order_branch"
+        },
+        {
+          "sequence": 64,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 719.19,
+          "node": "join"
+        },
+        {
+          "sequence": 65,
+          "kind": "join_decided",
+          "role": "application",
+          "elapsed_ms": 722.003
+        },
+        {
+          "sequence": 66,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 728.452,
+          "node": "join"
+        },
+        {
+          "sequence": 67,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 730.471,
+          "node": "policy"
+        },
+        {
+          "sequence": 70,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 742.025,
+          "tool": null,
+          "attempt_id": 16
+        },
+        {
+          "sequence": 71,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 746.982,
+          "tool": null,
+          "attempt_id": 16,
+          "duration_ms": 4.562
+        },
+        {
+          "sequence": 73,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 754.041,
+          "tool": "search_policies",
+          "attempt_id": 17
+        },
+        {
+          "sequence": 74,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 757.474,
+          "tool": "search_policies",
+          "attempt_id": 17,
+          "duration_ms": 3.045
+        },
+        {
+          "sequence": 76,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 764.394,
+          "tool": null,
+          "attempt_id": 18
+        },
+        {
+          "sequence": 77,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 766.885,
+          "tool": null,
+          "attempt_id": 18,
+          "duration_ms": 2.27
+        },
+        {
+          "sequence": 79,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 773.588,
+          "tool": "evaluate_policy",
+          "attempt_id": 19
+        },
+        {
+          "sequence": 80,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 777.093,
+          "tool": "evaluate_policy",
+          "attempt_id": 19,
+          "duration_ms": 2.724
+        },
+        {
+          "sequence": 82,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 783.681,
+          "tool": null,
+          "attempt_id": 20
+        },
+        {
+          "sequence": 83,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 786.18,
+          "tool": null,
+          "attempt_id": 20,
+          "duration_ms": 2.135
+        },
+        {
+          "sequence": 85,
+          "kind": "tool_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 792.824,
+          "tool": "evaluate_policy",
+          "attempt_id": 21
+        },
+        {
+          "sequence": 86,
+          "kind": "tool_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 795.912,
+          "tool": "evaluate_policy",
+          "attempt_id": 21,
+          "duration_ms": 2.783
+        },
+        {
+          "sequence": 88,
+          "kind": "model_started",
+          "role": "policy_specialist",
+          "elapsed_ms": 802.662,
+          "tool": null,
+          "attempt_id": 22
+        },
+        {
+          "sequence": 89,
+          "kind": "model_finished",
+          "role": "policy_specialist",
+          "elapsed_ms": 805.754,
+          "tool": null,
+          "attempt_id": 22,
+          "duration_ms": 2.483
+        },
+        {
+          "sequence": 91,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 818.643,
+          "node": "policy"
+        },
+        {
+          "sequence": 92,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 819.756,
+          "node": "draft"
+        },
+        {
+          "sequence": 95,
+          "kind": "model_started",
+          "role": "coordinator",
+          "elapsed_ms": 828.839,
+          "tool": null,
+          "attempt_id": 23
+        },
+        {
+          "sequence": 96,
+          "kind": "model_finished",
+          "role": "coordinator",
+          "elapsed_ms": 831.458,
+          "tool": null,
+          "attempt_id": 23,
+          "duration_ms": 2.347
+        },
+        {
+          "sequence": 98,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 844.697,
+          "node": "draft"
+        },
+        {
+          "sequence": 99,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 845.744,
+          "node": "validate"
+        },
+        {
+          "sequence": 102,
+          "kind": "tool_started",
+          "role": "validator",
+          "elapsed_ms": 849.684,
+          "tool": "evaluate_policy",
+          "attempt_id": 24
+        },
+        {
+          "sequence": 103,
+          "kind": "tool_finished",
+          "role": "validator",
+          "elapsed_ms": 852.404,
+          "tool": "evaluate_policy",
+          "attempt_id": 24,
+          "duration_ms": 2.351
+        },
+        {
+          "sequence": 105,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 861.994,
+          "node": "validate"
+        },
+        {
+          "sequence": 106,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 863.064,
+          "node": "review"
+        },
+        {
+          "sequence": 109,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 873.012,
+          "tool": null,
+          "attempt_id": 25
+        },
+        {
+          "sequence": 110,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 876.628,
+          "tool": null,
+          "attempt_id": 25,
+          "duration_ms": 3.054
+        },
+        {
+          "sequence": 112,
+          "kind": "tool_started",
+          "role": "reviewer",
+          "elapsed_ms": 884.656,
+          "tool": "validate_evidence_refs",
+          "attempt_id": 26
+        },
+        {
+          "sequence": 113,
+          "kind": "tool_finished",
+          "role": "reviewer",
+          "elapsed_ms": 886.662,
+          "tool": "validate_evidence_refs",
+          "attempt_id": 26,
+          "duration_ms": 1.749
+        },
+        {
+          "sequence": 115,
+          "kind": "model_started",
+          "role": "reviewer",
+          "elapsed_ms": 894.09,
+          "tool": null,
+          "attempt_id": 27
+        },
+        {
+          "sequence": 116,
+          "kind": "model_finished",
+          "role": "reviewer",
+          "elapsed_ms": 896.249,
+          "tool": null,
+          "attempt_id": 27,
+          "duration_ms": 1.929
+        },
+        {
+          "sequence": 118,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 910.954,
+          "node": "review"
+        },
+        {
+          "sequence": 119,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 912.22,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 121,
+          "kind": "node_finished",
+          "role": "application",
+          "elapsed_ms": 919.9,
+          "node": "prepare_operator"
+        },
+        {
+          "sequence": 122,
+          "kind": "node_started",
+          "role": "application",
+          "elapsed_ms": 921.136,
+          "node": "wait_operator"
+        }
+      ]
+    }
+  ]
+}

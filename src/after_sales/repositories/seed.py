@@ -24,6 +24,11 @@ SEED_TABLES = (
     "after_sales_history",
 )
 RESET_TABLES = (
+    "branch_results",
+    "run_events",
+    "call_reservations",
+    "run_budget",
+    "run_control",
     "action_events",
     "human_inputs",
     "pending_inputs",

@@ -118,8 +118,11 @@ class TraceMiddleware(AgentMiddleware):
 
     async def awrap_model_call(self, request, handler):
         trace = self.telemetry
+        if hasattr(trace, "model"):
+            return await trace.model(lambda: handler(request), role=self.role)
         trace.reserve_model(self.role)
-        trace.event("model_started", role=self.role, call=trace.model_calls)
+        call_number = trace.model_calls
+        trace.event("model_started", role=self.role, call=call_number)
         started = perf_counter()
         try:
             response = await asyncio.wait_for(
@@ -136,7 +139,7 @@ class TraceMiddleware(AgentMiddleware):
             trace.event(
                 "model_finished",
                 role=self.role,
-                call=trace.model_calls,
+                call=call_number,
                 duration_ms=duration,
                 tool_calls=[
                     call
@@ -150,7 +153,7 @@ class TraceMiddleware(AgentMiddleware):
             trace.event(
                 "model_failed",
                 role=self.role,
-                call=trace.model_calls,
+                call=call_number,
                 error_code=type(error).__name__,
                 duration_ms=round((perf_counter() - started) * 1000, 3),
             )

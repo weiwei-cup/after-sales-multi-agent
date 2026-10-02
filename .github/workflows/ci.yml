@@ -49,4 +49,17 @@ jobs:
       - run: uv run --locked after-sales ticket show T-NOTRECEIVED-002
       - run: uv run --locked after-sales order show ORD-004 --customer CUST-A --json
       - run: uv run --locked after-sales live-smoke --json
+      - name: P07 parallel resume and cancellation
+        env:
+          AFTER_SALES_BUSINESS_DB_PATH: var/p07-business.sqlite
+          AFTER_SALES_CHECKPOINT_DB_PATH: var/p07-checkpoints.sqlite
+        run: |
+          uv run --locked after-sales seed --json
+          uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow parallel --run-id ci-parallel-refund --json --output var/runs/ci-parallel-pending.json
+          uv run --locked after-sales resume --run ci-parallel-refund --json
+          printf 'approve\n' | uv run --locked after-sales resume --run ci-parallel-refund --output var/runs/ci-parallel-completed.json
+          uv run --locked after-sales report show var/runs/ci-parallel-completed.json --json
+          uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --workflow parallel --run-id ci-parallel-cancel --json
+          uv run --locked after-sales cancel --run ci-parallel-cancel --json
+          uv run --locked after-sales resume --run ci-parallel-cancel --json
       - run: uv build --wheel

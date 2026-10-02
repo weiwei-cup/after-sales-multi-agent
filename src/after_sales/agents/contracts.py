@@ -523,7 +523,7 @@ class StoredPersistentRunReport(StoredReviewRunReport):
 
     @model_validator(mode="after")
     def validate_acceptance(self) -> Self:
-        if self.status == "interrupted":
+        if self.status in {"interrupted", "cancelled"}:
             if self.accepted_proposal is not None or self.pending_input is not None:
                 raise ValueError("interrupted execution is recoverable, without a new human prompt")
             if self.graph_state.get("status") != self.status:
@@ -575,8 +575,52 @@ class StoredPersistentRunReport(StoredReviewRunReport):
         return self
 
 
+class StoredParallelRunReport(StoredPersistentRunReport):
+    schema_version: Literal["parallel-run-v1"]
+    phase: Literal["P07"]
+    status: Literal[
+        "paused", "completed", "handed_off", "interrupted", "failed", "skipped", "cancelled"
+    ]
+    checkpoint_schema: Literal["parallel-state-v1"]
+
+    @model_validator(mode="after")
+    def validate_acceptance(self) -> Self:
+        from after_sales.workflows.reducers import result_conflicts
+
+        super().validate_acceptance()
+        if self.graph_state.get("schema_version") != self.checkpoint_schema:
+            raise ValueError("parallel graph state schema must match its declared version")
+        tasks = self.graph_state.get("task_results")
+        evidence = self.graph_state.get("evidence_join")
+        if not isinstance(tasks, list) or not isinstance(evidence, dict):
+            raise ValueError("parallel reports require task results and evidence join")
+        current = [
+            t
+            for t in tasks
+            if isinstance(t, dict)
+            and str(t.get("task_id", "")).startswith(f"{self.input_revision}:")
+        ]
+        if self.status == "completed" and (result_conflicts(current) or evidence.get("conflicts")):
+            raise ValueError("completed parallel reports cannot hide join conflicts")
+        calls = self.statistics.get("reservations")
+        if not isinstance(calls, list) or len(calls) != self.statistics.get(
+            "model_calls", 0
+        ) + self.statistics.get("tool_calls", 0):
+            raise ValueError("parallel call statistics must match reservation ledger")
+        unknown = any(c["kind"] == "model" and c["actual_tokens"] is None for c in calls)
+        if unknown and self.statistics.get("actual_total_tokens") is not None:
+            raise ValueError("unreported tokens cannot be presented as zero usage")
+        if self.statistics.get("monetary_cost") is not None:
+            raise ValueError("scripted workflow has no verified monetary price")
+        return self
+
+
 RunReport = Annotated[
-    StoredRunReport | StoredMultiRunReport | StoredReviewRunReport | StoredPersistentRunReport,
+    StoredRunReport
+    | StoredMultiRunReport
+    | StoredReviewRunReport
+    | StoredPersistentRunReport
+    | StoredParallelRunReport,
     Field(discriminator="schema_version"),
 ]
 REPORT_ADAPTER = TypeAdapter(RunReport)

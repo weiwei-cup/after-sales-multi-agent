@@ -140,7 +140,38 @@ SCHEMA_V2 = (
     "CREATE UNIQUE INDEX idx_history_operation ON after_sales_history(operation_key)",
 )
 
-MIGRATIONS = {1: SCHEMA_V1, 2: SCHEMA_V2}
+SCHEMA_V3 = (
+    """CREATE TABLE branch_results (
+        run_id TEXT NOT NULL REFERENCES runs(id), task_id TEXT NOT NULL,
+        result_hash TEXT NOT NULL, result_json TEXT NOT NULL CHECK(json_valid(result_json)),
+        evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json)),
+        PRIMARY KEY(run_id,task_id,result_hash)
+    )""",
+    """CREATE TABLE run_control (
+        run_id TEXT PRIMARY KEY REFERENCES runs(id), cancel_requested INTEGER NOT NULL
+        DEFAULT 0 CHECK(cancel_requested IN (0,1)), cancel_reason TEXT
+    )""",
+    """CREATE TABLE run_budget (
+        run_id TEXT PRIMARY KEY REFERENCES runs(id), active_ms REAL NOT NULL DEFAULT 0,
+        segment_started TEXT, schema_repairs INTEGER NOT NULL DEFAULT 0,
+        review_repairs INTEGER NOT NULL DEFAULT 0
+    )""",
+    """CREATE TABLE call_reservations (
+        run_id TEXT NOT NULL REFERENCES runs(id), sequence INTEGER NOT NULL,
+        kind TEXT NOT NULL CHECK(kind IN ('model','tool')), role TEXT NOT NULL,
+        status TEXT NOT NULL CHECK(status IN ('reserved','succeeded','failed')),
+        token_hold INTEGER NOT NULL CHECK(token_hold>=0), actual_tokens INTEGER,
+        usage_json TEXT CHECK(usage_json IS NULL OR json_valid(usage_json)),
+        duration_ms REAL NOT NULL DEFAULT 0, PRIMARY KEY(run_id,sequence)
+    )""",
+    """CREATE TABLE run_events (
+        run_id TEXT NOT NULL REFERENCES runs(id), sequence INTEGER NOT NULL,
+        payload_json TEXT NOT NULL CHECK(json_valid(payload_json)),
+        PRIMARY KEY(run_id,sequence)
+    )""",
+)
+
+MIGRATIONS = {1: SCHEMA_V1, 2: SCHEMA_V2, 3: SCHEMA_V3}
 
 
 def ensure_application_database(connection: sqlite3.Connection) -> None:
