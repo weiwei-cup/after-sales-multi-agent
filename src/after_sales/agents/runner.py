@@ -13,7 +13,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from langgraph.errors import GraphRecursionError
 
-from after_sales.agents.contracts import ResolutionProposal, StoredRunReport
+from after_sales.agents.contracts import REPORT_ADAPTER, ResolutionProposal
 from after_sales.agents.factory import LiveModelDeferred, create_model
 from after_sales.agents.scripted import ScriptError
 from after_sales.agents.telemetry import (
@@ -173,7 +173,7 @@ async def run_baseline(
 
 def save_run(report: dict[str, object], path: Path) -> Path:
     """Atomically publish a unique run report; never overwrite an existing artifact."""
-    StoredRunReport.model_validate(report)
+    REPORT_ADAPTER.validate_python(report)
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(report, ensure_ascii=False, indent=2).encode()
     temporary = None

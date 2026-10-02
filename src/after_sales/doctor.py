@@ -27,12 +27,12 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P03",
+        "phase": "P04",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
         "model_connectivity": "not_checked",
-        "agent_execution": "single_agent_scripted",
+        "agent_execution": "single_and_serial_multi_agent_scripted",
         "live_smoke": "skipped_provider_deferred_by_user",
         "readonly_tools": {
             "inspection": "after-sales inspect --ticket T-RETURN-001",

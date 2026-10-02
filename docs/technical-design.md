@@ -1,6 +1,6 @@
 # 售后工单多 Agent 工作台：技术方案
 
-版本：0.5（P03 离线基线完成并上传）
+版本：0.6（P04 串行多 Agent 本地验收通过，远程交付待完成）
 
 日期：2026-10-02
 
@@ -124,18 +124,34 @@ Pydantic 校验通过后，独立代码验证工单/订单范围、事实声明�
 
 用户选择当前只用离线脚本模型，因此 live 工厂边界及 live-smoke 返回 skipped / LIVE_PROVIDER_DEFERRED。真实 provider、网络 smoke 及语言质量评估均未实现或执行。
 
+### 3.4 P04 已实现的串行主图
+
+`workflows/serial.py` 用 StateGraph(TicketState) 建立 intake、order、policy、draft、validate 五个节点。intake 和 draft 是协调角色的两个独立调用，order 和 policy 包装各自的 create_agent 子图；validate 是代码节点。每次角色调用都创建新模型脚本和 messages，父图仅投影必要输入、提取 Pydantic 输出后转为 JSON 更新。[LangGraph Subgraphs](https://docs.langchain.com/oss/python/langgraph/use-subgraphs)
+
+正常路线为 intake→order→policy→draft→validate→END。缺订单号或未知意图走 intake→draft→validate；无法读取订单走 intake→order→draft→validate。Route 和 TRANSITIONS 限定合法路径，图没有返工环路；P05 才加入审核和 interrupt。
+
+协调角色整理声明意图、原始订单引用和客户陈述，输出 IntakeResult / InvestigationPlan，再依据专员摘要输出共享 ResolutionProposal。当前离线协议要求这些槽位和固定计划与可信输入一致，不把“按类型编排”当作自由文本 NLU 验证。订单角色只有 5 个事实工具；政策角色只有 search_policies、get_policy、evaluate_policy；协调没有业务工具。
+
+OrderInvestigation 包含独立来源的事实快照、引用和工具错误；PolicyAssessment 包含政策快照、规则 assessment 和查询错误。父图核对来源/会话/版本、事实内容，以及摘要与实际子图工具结果是否一致。模型增添事实、替换订单或伪造引用会在交接处停止，已有节点的结果和错误位置保留。政策只接收订单摘要，不接收客服或订单角色的内部 messages。
+
+TicketState 保存 JSON 资料与节点轨迹，不含 repository、ToolSession、模型、数据库连接、密钥或子图 messages。运行依赖保存在节点闭包；JSON 与 LangGraph serializer 往返测试通过。P04 没有业务检查点、跨进程恢复或动作服务。multi-run-v1 报告包含角色输入/输出、角色统计、状态、事件及实际主图 Mermaid；原 baseline-run-v1 仍可读取。
+
+所有角色共用 P03 的调用预算和默认 1 次 schema 修复预算，包含提前结束后的修复和验证器复算。单模型超时及工具查询限制继续生效；暂停后的预算恢复和全局并发仍是后续工作。实际图和三类轨迹见 [Mermaid](graphs/p04-serial.mmd)、[轨迹 JSON](graphs/p04-demo-traces.json)，设计依据见 [ADR 004](decisions/004-serial-role-handoffs.md)。
+
 ## 4. Agent 设计
 
 | 角色 | 接收的上下文 | 允许工具 | 输出契约 | 可决定的事情 |
 | --- | --- | --- | --- | --- |
 | 客服协调 | 用户诉求、已知槽位、各专员结果、审核意见 | 初期通过图委派专员；不暴露写工具 | `IntakeResult`、`InvestigationPlan`、`ResolutionProposal` | 业务分类、所需调查、追问、回复草稿 |
-| 订单物流 | 一个工单对应的可信客户范围、订单 ID、调查问题 | `get_order`、`get_tracking`、`get_delivery_proof`、`get_after_sales_history` | `OrderInvestigation` | 查询顺序、是否需要更多订单证据 |
+| 订单物流 | 一个工单对应的可信客户范围、订单 ID、调查问题 | `get_order`、`get_order_products`、`get_tracking`、`get_delivery_proof`、`get_after_sales_history` | `OrderInvestigation` | 查询顺序、是否需要更多订单证据 |
 | 售后政策 | 意图、订单事实、商品条件、有效政策目录 | `search_policies`、`get_policy`、`evaluate_policy` | `PolicyAssessment` | 查哪些政策、哪些条件仍缺失 |
 | 审核 | 候选方案、规则检查结果、可见证据和审核标准 | `get_evidence`、`validate_evidence_refs` | `ReviewResult` | 接受、要求补查、要求修改或建议人工接手 |
 
 同一模型可承担不同角色。每个专员使用自己的 messages 和工具集，结束后仅返回结构化摘要与引用，不把完整内部对话复制给所有角色。[S2]
 
 提示词文件需要包含：职责、输入解释、工具用途、完成标准、输出 schema、缺失信息处理、引用要求和行动边界。提示词、schema、政策都记录版本，便于复现。
+
+P04 已实现前三个角色，角色提示词目前随 multi-serial-v1 代码版本保存于 serial.py。审核角色、定向补查和完整自然语言语义审核从 P05 开始；当前不声称三个角色已构成带人工确认的完整售后系统。
 
 ## 5. 工单主流程
 
@@ -224,6 +240,8 @@ P01 区分 `Ticket.supplied_order_id`（用户填写，可能缺失、错误或�
 - `PolicyAssessment`：policy_refs、条件计算结果、allowed_actions、missing_facts、conflicts。
 - `ResolutionProposal`（P03 已实现）：ticket_id、order_id、decision、claims、evidence_refs、customer_reply_draft、actions、unresolved_questions、candidate_only。
 - `ReviewResult`：outcome、issues、targeted_tasks、revision_instructions。
+
+P04 已实现的交接契约为 IntakeSlots（原始订单引用、客户陈述）、IntakeResult（声明意图、缺口、固定计划）、InvestigationPlan（order-facts→policy-rules 两项任务及工具权限）、OrderInvestigation（outcome、事实快照、错误）、PolicyAssessment（search_completed、政策证据、规则 assessment、错误）。事实快照使用 source_type、source_id、ref、facts，来源和内容与 ToolSession 中的证据核对。后续补查协议需要显式新增版本，不将模型输出任意字符串当路由或工具授权。
 
 路由只接受枚举：`accept`、`research_more`、`revise`、`human_review`、`handoff`。非法结构最多修复一次，仍失败则结束为可诊断的失败或人工接手，不做无限 JSON 重试。[S3]
 
@@ -376,6 +394,8 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 P03 已保存本地最小事件序号、角色、模型/业务工具开始与结束、结果、耗时、schema 修复、代码复算及停止原因；JSON 中同时保留模型输出和工具消息，供学习回看。ResolutionProposal 是框架的结构化输出工具，不算业务工具调用；输出它的模型调用计入模型预算。完整节点/返工/人工输入/动作事件和持久事件表在后续阶段补齐。
 
+P04 增加父图节点开始/结束/失败、角色开始/结束和角色调用统计；消息日志标注 agent_role，日志汇总不意味着消息被传给其他专员。JSON 的 graph_state / node_trace 表示最后完成的节点更新；失败节点另在事件和 error.node 中标记。IntakeResult、OrderInvestigation、PolicyAssessment 同样属于结构化输出合成工具，不算业务工具调用。
+
 ## 10. API 与界面
 
 ### 10.1 API 草案
@@ -458,10 +478,9 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 │   ├── data/                      # 随安装包分发的虚构业务 JSON
 │   ├── repositories/              # sqlite / migrations / seed
 │   ├── tools/                     # orders / logistics / policies / evidence
-│   ├── agents/                    # P03 factory / scripted / contracts / runner / validation / telemetry
-│   │                              # P04 起加入 coordinator / order / policy / reviewer
+│   ├── agents/                    # P03 基线；P04 roles.py 定义离线角色脚本
 │   ├── prompts/                   # 版本化角色提示词
-│   ├── workflows/                 # state / graph / nodes / reducers
+│   ├── workflows/                 # P04 contracts.py / serial.py；后续补充审核、恢复、reducers
 │   ├── services/                  # tickets / runs / actions / approvals
 │   ├── runtime/                   # budgets / events / executor / clock
 │   ├── api/                       # app / routes / DTOs / demo_identity

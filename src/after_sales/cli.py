@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 from pydantic import TypeAdapter, ValidationError
 
-from after_sales.agents.contracts import StoredRunReport
+from after_sales.agents.contracts import REPORT_ADAPTER
 from after_sales.agents.runner import run_baseline, save_run
 from after_sales.config import Settings
 from after_sales.doctor import build_report
@@ -21,6 +21,7 @@ from after_sales.repositories.seed import seed_demo
 from after_sales.repositories.sqlite import BusinessRepository, migrate
 from after_sales.tools.inspection import inspect_ticket
 from after_sales.tools.service import ToolSession
+from after_sales.workflows.serial import run_multi
 
 
 def _json_flag(parser: argparse.ArgumentParser) -> None:
@@ -37,9 +38,9 @@ def _parser() -> argparse.ArgumentParser:
     inspection.add_argument("--ticket", required=True, help="当前模拟工单 ID")
     _json_flag(inspection)
 
-    run = commands.add_parser("run", help="运行单 Agent 离线基线并保存建议、证据和调用记录")
+    run = commands.add_parser("run", help="运行单 Agent 或串行多 Agent，保存建议、证据和调用记录")
     run.add_argument("--ticket", required=True)
-    run.add_argument("--architecture", choices=["single"], default="single")
+    run.add_argument("--architecture", choices=["single", "multi"], default="single")
     run.add_argument(
         "--model", choices=["scripted", "live"], help="默认使用配置；本轮 live 显示 skipped"
     )
@@ -48,7 +49,7 @@ def _parser() -> argparse.ArgumentParser:
 
     reports = commands.add_parser("report", help="读取已保存的运行结果与事件")
     report_commands = reports.add_subparsers(dest="operation", required=True)
-    report_show = report_commands.add_parser("show", help="读取一个 baseline-run-v1 JSON 文件")
+    report_show = report_commands.add_parser("show", help="读取单 / 多 Agent JSON 运行记录")
     report_show.add_argument("path", type=Path)
     report_show.add_argument("--events-only", action="store_true")
     _json_flag(report_show)
@@ -180,6 +181,8 @@ def _render_run(report: dict[str, object]) -> None:
     if report["error"]:
         print(f"{report['error']['code']}：{report['error']['message']}")
     stats = report["statistics"]
+    if report["architecture"] == "multi":
+        print("节点轨迹：" + " → ".join(report["node_trace"]))
     print(
         f"模型调用：{stats['model_calls']}；工具调用：{stats['tool_calls']}"
         f"（含代码复算 {stats['validation_tool_calls']}）；schema 修复：{stats['schema_repairs']}"
@@ -198,13 +201,14 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
             "reason": "用户选择 P03 仅使用离线脚本模型；真实模型适配与 smoke 验证待后续确定。",
         }
     if args.command == "report":
-        report = StoredRunReport.model_validate_json(
-            args.path.read_text(encoding="utf-8")
-        ).model_dump(mode="json")
+        report = REPORT_ADAPTER.validate_json(args.path.read_text(encoding="utf-8")).model_dump(
+            mode="json"
+        )
         return report["events"] if args.events_only else report
     if args.command == "run":
+        runner = run_multi if args.architecture == "multi" else run_baseline
         report = asyncio.run(
-            run_baseline(repository, args.ticket, settings, mode=args.model or settings.model_mode)
+            runner(repository, args.ticket, settings, mode=args.model or settings.model_mode)
         )
         path = args.output or Path("var/runs") / f"{report['run_id']}.json"
         report["artifact_path"] = str(path.resolve())

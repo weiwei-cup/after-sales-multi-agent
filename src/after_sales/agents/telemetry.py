@@ -40,9 +40,9 @@ class RunTelemetry:
             }
         )
 
-    def reserve_model(self):
+    def reserve_model(self, role: str = "single_agent"):
         if self.model_calls >= self.settings.max_model_calls:
-            self.event("call_limit_reached", limit="model_calls")
+            self.event("call_limit_reached", role=role, limit="model_calls")
             raise CallLimitExceeded("model call limit reached")
         self.model_calls += 1
 
@@ -54,13 +54,13 @@ class RunTelemetry:
         if role == "validator":
             self.validation_tool_calls += 1
 
-    def repair_schema(self, error: Exception) -> str:
-        self.event("schema_invalid", error_code=type(error).__name__)
+    def repair_schema(self, error: Exception, *, role: str = "single_agent") -> str:
+        self.event("schema_invalid", role=role, error_code=type(error).__name__)
         if self.schema_repairs >= self.settings.proposal_repair_limit:
             raise SchemaRepairExceeded("proposal schema repair limit reached") from error
         self.schema_repairs += 1
-        self.event("schema_repair", attempt=self.schema_repairs)
-        return "结构化建议不符合 ResolutionProposal schema。请修复字段与决策约束，再提交一次。"
+        self.event("schema_repair", role=role, attempt=self.schema_repairs)
+        return "结构化结果不符合当前输出 schema。请修复字段与业务约束，再提交一次。"
 
     async def tool(self, name: str, call_id: str, operation: Callable[[], Awaitable], *, role: str):
         self.reserve_tool(role)
@@ -112,13 +112,14 @@ class RunTelemetry:
 
 
 class TraceMiddleware(AgentMiddleware):
-    def __init__(self, telemetry: RunTelemetry):
+    def __init__(self, telemetry: RunTelemetry, *, role: str = "single_agent"):
         self.telemetry = telemetry
+        self.role = role
 
     async def awrap_model_call(self, request, handler):
         trace = self.telemetry
-        trace.reserve_model()
-        trace.event("model_started", call=trace.model_calls)
+        trace.reserve_model(self.role)
+        trace.event("model_started", role=self.role, call=trace.model_calls)
         started = perf_counter()
         try:
             response = await asyncio.wait_for(
@@ -126,11 +127,15 @@ class TraceMiddleware(AgentMiddleware):
             )
             duration = round((perf_counter() - started) * 1000, 3)
             for message in response.result:
-                trace.messages.append(message.model_dump(mode="json"))
+                entry = message.model_dump(mode="json")
+                if self.role != "single_agent":
+                    entry["agent_role"] = self.role
+                trace.messages.append(entry)
                 if isinstance(message, AIMessage) and message.usage_metadata:
                     trace.usage.append(dict(message.usage_metadata))
             trace.event(
                 "model_finished",
+                role=self.role,
                 call=trace.model_calls,
                 duration_ms=duration,
                 tool_calls=[
@@ -144,6 +149,7 @@ class TraceMiddleware(AgentMiddleware):
         except Exception as error:
             trace.event(
                 "model_failed",
+                role=self.role,
                 call=trace.model_calls,
                 error_code=type(error).__name__,
                 duration_ms=round((perf_counter() - started) * 1000, 3),
@@ -157,8 +163,11 @@ class TraceMiddleware(AgentMiddleware):
             request.tool_call["name"],
             request.tool_call["id"],
             lambda: handler(request),
-            role="single_agent",
+            role=self.role,
         )
         if isinstance(result, ToolMessage):
-            self.telemetry.messages.append(result.model_dump(mode="json"))
+            entry = result.model_dump(mode="json")
+            if self.role != "single_agent":
+                entry["agent_role"] = self.role
+            self.telemetry.messages.append(entry)
         return result

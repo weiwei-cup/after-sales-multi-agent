@@ -21,6 +21,7 @@ class ScriptStep:
     expected_tools: tuple[str, ...] = ()
     response: AIMessage | Callable[[list[BaseMessage]], AIMessage] | None = None
     error: Exception | None = None
+    expected_tool_alternatives: tuple[tuple[str, ...], ...] = ()
 
 
 class ScriptedChatModel(BaseChatModel):
@@ -58,7 +59,10 @@ class ScriptedChatModel(BaseChatModel):
         )
         returned = messages[previous + 1 :] if previous is not None else []
         tools = [message for message in returned if isinstance(message, ToolMessage)]
-        if tuple(message.name for message in tools) != step.expected_tools:
+        if tuple(message.name for message in tools) not in (
+            step.expected_tools,
+            *step.expected_tool_alternatives,
+        ):
             raise ScriptError(f"unexpected tool response sequence for step {step.name}")
         if previous is not None:
             calls = messages[previous].tool_calls

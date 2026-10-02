@@ -53,7 +53,13 @@ def call(name: str, arguments: dict, call_id: str) -> AIMessage:
 
 
 def proposal_payload(ticket: Ticket, context: ToolContext, messages: list[BaseMessage]) -> dict:
-    results = outputs(messages)
+    return proposal_from_results(ticket.id, ticket.type, outputs(messages))
+
+
+def proposal_from_results(
+    ticket_id: str, intent: TicketType, results: dict[str, ToolResult]
+) -> dict:
+    """Share business drafting across architectures without sharing their internal messages."""
     refs = {
         ref.evidence_id: ref.model_dump(mode="json")
         for result in results.values()
@@ -63,7 +69,7 @@ def proposal_payload(ticket: Ticket, context: ToolContext, messages: list[BaseMe
     order_result = results.get("get_order")
     order = order_result.data if order_result is not None and order_result.ok else None
     proposal = {
-        "ticket_id": ticket.id,
+        "ticket_id": ticket_id,
         "order_id": order["id"] if order else None,
         "decision": Decision.HUMAN_REVIEW.value,
         "claims": [],
@@ -191,12 +197,12 @@ def proposal_payload(ticket: Ticket, context: ToolContext, messages: list[BaseMe
             }
         ]
         return proposal
-    if ticket.type == TicketType.RETURN and assessments:
+    if intent == TicketType.RETURN and assessments:
         proposal["decision"] = Decision.DECLINE.value
         proposal["customer_reply_draft"] = (
             "根据已核验资料，当前退货条件不符合演示政策。请查看具体条件与依据。"
         )
-    elif ticket.type == TicketType.DELAY and assessments:
+    elif intent == TicketType.DELAY and assessments:
         proposal["decision"] = Decision.INFORM.value
         proposal["customer_reply_draft"] = (
             "当前资料不支持创建新的物流调查或退款候选，可继续关注物流进度。"

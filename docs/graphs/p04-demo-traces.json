@@ -1,0 +1,117 @@
+{
+  "schema_version": "p04-demo-traces-v1",
+  "dataset_version": "demo-v1",
+  "as_of_time": "2026-10-02T04:00:00Z",
+  "workflow_version": "multi-serial-v1",
+  "note": "Observed offline demo runs; not evaluation gold or a resumable checkpoint.",
+  "cases": [
+    {
+      "ticket_id": "T-DELAY-001",
+      "source_run_id": "run-fb3066d7553c4cfea854977e8fad4de3",
+      "command": "after-sales run --ticket T-DELAY-001 --architecture multi --model scripted",
+      "status": "completed",
+      "decision": "inform_progress",
+      "node_trace": [
+        "intake",
+        "order",
+        "policy",
+        "draft",
+        "validate"
+      ],
+      "statistics": {
+        "model_calls": 12,
+        "tool_calls": 8,
+        "validation_tool_calls": 0,
+        "schema_repairs": 0,
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 4,
+            "tool_calls": 3
+          }
+        },
+        "token_usage": null
+      },
+      "executed_actions": []
+    },
+    {
+      "ticket_id": "T-NOTRECEIVED-002",
+      "source_run_id": "run-0e7c64cc6bbb4d2eb104aa5c0ea1c1f8",
+      "command": "after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --model scripted",
+      "status": "completed",
+      "decision": "propose_refund",
+      "node_trace": [
+        "intake",
+        "order",
+        "policy",
+        "draft",
+        "validate"
+      ],
+      "statistics": {
+        "model_calls": 12,
+        "tool_calls": 9,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 4,
+            "tool_calls": 3
+          }
+        },
+        "token_usage": null
+      },
+      "executed_actions": []
+    },
+    {
+      "ticket_id": "T-RETURN-001",
+      "source_run_id": "run-dfe7283167d54435b0fd9e25bec1f8f6",
+      "command": "after-sales run --ticket T-RETURN-001 --architecture multi --model scripted",
+      "status": "completed",
+      "decision": "propose_return",
+      "node_trace": [
+        "intake",
+        "order",
+        "policy",
+        "draft",
+        "validate"
+      ],
+      "statistics": {
+        "model_calls": 11,
+        "tool_calls": 8,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "roles": {
+          "coordinator": {
+            "model_calls": 2,
+            "tool_calls": 0
+          },
+          "order_specialist": {
+            "model_calls": 6,
+            "tool_calls": 5
+          },
+          "policy_specialist": {
+            "model_calls": 3,
+            "tool_calls": 2
+          }
+        },
+        "token_usage": null
+      },
+      "executed_actions": []
+    }
+  ]
+}

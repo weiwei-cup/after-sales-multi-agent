@@ -1,9 +1,9 @@
 """Shared proposal contract for the single and later multi-Agent implementations."""
 
 from enum import StrEnum
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, JsonValue, model_validator
+from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
 from after_sales.domain.models import ActionType, Cents, DomainModel, Identifier, PositiveInt
 from after_sales.tools.contracts import EvidenceRef
@@ -152,3 +152,17 @@ class StoredRunReport(DomainModel):
         elif self.accepted_proposal is not None:
             raise ValueError("failed or skipped run cannot contain an accepted proposal")
         return self
+
+
+class StoredMultiRunReport(StoredRunReport):
+    schema_version: Literal["multi-run-v1"]
+    phase: Literal["P04"]
+    architecture: Literal["multi"]
+    graph_state: dict[str, JsonValue]
+    node_trace: tuple[Literal["intake", "order", "policy", "draft", "validate"], ...]
+    agent_runs: tuple[dict[str, JsonValue], ...]
+    graph_mermaid: str
+
+
+RunReport = Annotated[StoredRunReport | StoredMultiRunReport, Field(discriminator="schema_version")]
+REPORT_ADAPTER = TypeAdapter(RunReport)

@@ -30,5 +30,10 @@ jobs:
       - run: uv run --locked after-sales run --ticket T-DELAY-001 --architecture single --model scripted
       - run: uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --model scripted
       - run: uv run --locked after-sales run --ticket T-RETURN-001 --model scripted
+      - run: uv run --locked after-sales run --ticket T-DELAY-001 --architecture multi --model scripted
+      - run: uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --model scripted
+      - run: uv run --locked after-sales run --ticket T-RETURN-001 --architecture multi --model scripted --output var/runs/ci-multi-return.json
+      - run: uv run --locked after-sales report show var/runs/ci-multi-return.json --events-only
+      - run: uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --model scripted
       - run: uv run --locked after-sales live-smoke --json
       - run: uv build --wheel

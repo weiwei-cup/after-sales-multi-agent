@@ -350,8 +350,11 @@ class ToolSession:
         result, evidence = self._snapshot("assessment", order.id, RULES_VERSION, data)
         return result, (*discovered, *evidence)
 
-    def langchain_tools(self) -> list[StructuredTool]:
+    def langchain_tools(self, names: tuple[str, ...] | None = None) -> list[StructuredTool]:
         """Bind per-run dependencies without exposing customer identity in model schemas."""
+        names = tuple(TOOL_SPECS) if names is None else names
+        if len(names) != len(set(names)) or any(name not in TOOL_SPECS for name in names):
+            raise ValueError("tool allowlist must contain unique known tool names")
 
         def bind(name: str) -> Callable:
             async def invoke(**arguments):
@@ -371,5 +374,6 @@ class ToolSession:
                 ).model_dump_json(),
                 metadata={"readonly": True, "result_schema": ToolResult.model_json_schema()},
             )
-            for name, (schema, description) in TOOL_SPECS.items()
+            for name in names
+            for schema, description in [TOOL_SPECS[name]]
         ]
