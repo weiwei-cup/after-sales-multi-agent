@@ -27,12 +27,13 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P02",
+        "phase": "P03",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
         "model_connectivity": "not_checked",
-        "agent_execution": "available_from_P03",
+        "agent_execution": "single_agent_scripted",
+        "live_smoke": "skipped_provider_deferred_by_user",
         "readonly_tools": {
             "inspection": "after-sales inspect --ticket T-RETURN-001",
             "timeout_seconds": settings.tool_timeout_seconds,
@@ -51,5 +52,8 @@ def build_report(settings: Settings) -> dict[str, object]:
             "concurrency": settings.max_concurrency,
             "tokens_soft_limit": settings.token_budget,
             "enforcement": "available_from_P05_and_P07",
+            "call_limits": "enforced_in_P03_including_rule_rechecks",
+            "proposal_schema_repairs": settings.proposal_repair_limit,
+            "model_timeout_seconds": settings.model_timeout_seconds,
         },
     }

@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     token_budget: int = Field(default=50_000, gt=0)
     tool_timeout_seconds: float = Field(default=3.0, gt=0, allow_inf_nan=False)
     tool_max_result_bytes: int = Field(default=12_000, ge=512)
+    proposal_repair_limit: int = Field(default=1, ge=0, le=3)
+    model_timeout_seconds: float = Field(default=30.0, gt=0, allow_inf_nan=False)
 
     @model_validator(mode="after")
     def validate_database_paths(self) -> Self:

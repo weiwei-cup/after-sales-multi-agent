@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00、P01 与第 002 轮 / P02 均已完成，本地检查和 GitHub CI 通过；下一轮为 P03。
+当前状态：P00～P02 已完成并上传；第 003 轮 / P03 离线基线本地验收通过，GitHub CI 与阶段标签待验证。下一轮为 P04。用户选择暂缓真实模型接入。
 
 ## 1. 使用方式
 
@@ -55,8 +55,8 @@
 
 ### 3.1 默认离线运行
 
-- `AFTER_SALES_MODEL_MODE=scripted` 为默认配置；P03 实现脚本模型后用于测试和演示。
-- live 模式必须显式启用；服务商、模型标识和凭据在接入前确定。
+- `AFTER_SALES_MODEL_MODE=scripted` 为默认配置；P03 已实现脚本模型并用于测试和演示。
+- 用户选择本轮仅离线；当前 live 入口显示 skipped。服务商、模型标识、凭据和请求预算在后续接入前确定。
 - 测试使用临时数据库和注入时钟；不读写日常演示数据库。
 - 固定 fixture seed、政策版本、case ID 和预期结果，方便复现。
 - 测试验证业务结果、证据、权限、状态和停止条件，不匹配自然语言全文。
@@ -191,29 +191,38 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 ## 7. P03：单 Agent 基线
 
-目标：用一个 Agent 完成调查和建议，学习真实工具调用循环，并为后续架构对比留下基线。
+目标：用一个 Agent 完成调查和建议，学习实际 LangChain 工具调用循环，并为后续架构对比留下基线。
+
+本轮范围调整（用户于 2026-10-02 确认）：暂时只用离线脚本模型。模型工厂保留 live 模式边界，真实 provider 适配器与网络 smoke test 延后；M1 按离线基线验收，不宣称真实模型能力已经验证。
 
 实现清单：
 
-- [ ] P03.1 创建模型工厂，支持 scripted 和一个待选 live provider。
-- [ ] P03.2 实现兼容 LangChain 的 `ScriptedChatModel`：消息、工具调用 ID、返回脚本和异常脚本。
-- [ ] P03.3 定义结构化 `ResolutionProposal`，校验 decision、引用、动作候选和资料缺口。
-- [ ] P03.4 用 `create_agent` 暴露全部必要只读工具，约束基本调用次数。
-- [ ] P03.5 建立最小事件记录：角色、模型调用、工具调用、结果和耗时。
-- [ ] P03.6 单 Agent 同样经过代码规则校验；只输出建议和草稿，不执行动作。
-- [ ] P03.7 实现 baseline CLI，保存案例、结果、版本和统计。
-- [ ] P03.8 可选 live smoke：先验证服务商的工具调用和结构化输出能力，再运行三类样例。
+- [x] P03.1 创建模型工厂：scripted 可用；live 显式返回延期状态，未接入 provider。
+- [x] P03.2 实现兼容 LangChain 的 `ScriptedChatModel`：消息、工具调用 ID、返回脚本和异常脚本。
+- [x] P03.3 定义结构化 `ResolutionProposal`，校验 decision、引用、动作候选和资料缺口。
+- [x] P03.4 用 `create_agent` 暴露全部必要只读工具，执行基本调用次数硬上限。
+- [x] P03.5 建立最小事件记录：角色、模型调用、工具调用、结果和耗时。
+- [x] P03.6 单 Agent 同样经过代码事实与规则校验；只输出建议和草稿，不执行动作。
+- [x] P03.7 实现 baseline CLI，保存输入、结果、版本、证据与统计，并提供 report show。
+- [x] P03.8 实现 live smoke 状态入口，离线选择明确显示 skipped；网络验证未执行。
+- [ ] P03.9 上传第 003 轮代码与学习记录，通过 GitHub CI，并建立 `phase-p03` 标签。
+
+延期项：
+
+- [ ] 选择并接入一个真实 LangChain provider，验证工具调用及结构化输出兼容性，执行三类业务 live smoke。进入真实模型评估前完成；不阻塞当前离线 P04。
 
 关键验证：
 
 - scripted 模型发出工具调用，真实工具执行，工具结果以匹配的 call ID 返回模型。
 - 三类样例得到合法 proposal；缺订单号会要求补充，不能猜订单。
 - 模型输出无效 schema 能有限修复，持续无效有停止结果。
-- 模型提出不合法退款时，代码验证阻止该建议成为可执行动作。
+- 模型提出结构合法但超余额的退款时，代码验证阻止其成为通过校验的候选；本阶段所有建议均不可执行。
 - 对没有指定的脚本调用明确失败，防止测试悄悄绕过实际模型循环。
-- live 未配置时显示 skipped；已配置时检查中文输出、引用和 provider 能力，避免断言全文。
+- live 入口在用户选择离线时显示 skipped 且模型调用为 0；真实中文输出、引用和 provider 能力留待接入后验证。
 
 演示：`uv run after-sales run --ticket T-DELAY-001 --architecture single --model scripted`。
+
+已实现与验证：[第 003 轮记录](docs/rounds/003.md)、[ADR 003](docs/decisions/003-offline-agent-baseline.md)。69 个新增测试实例，完整套件 201 passed；代码复算计入工具预算，JSON 记录可跨进程读取但不能恢复 Agent。schema 修复默认 1 次，与 P05 的审核返工分开计数。
 
 验收门槛：离线基线可重复运行，结果和事件可读取。live smoke 状态单独记录，不把离线通过写成真实模型通过。达到 M1。
 
@@ -473,7 +482,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 002 轮 / P02 已完成并上传。下一步只推进第 003 轮 / P03：单 Agent 基线。真实模型配置在 P03 接入前确定。
+第 003 轮 / P03 已本地通过，远程交付待完成。下一步只推进第 004 轮 / P04：多 Agent 串行主图。真实模型接入延期，后续仍可离线学习职责拆分与图编排。
 
 ### 已完成工作记录
 
@@ -520,3 +529,13 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 文档：[docs/rounds/002.md](docs/rounds/002.md)、[ADR 002](docs/decisions/002-trusted-tools-and-evidence.md)；技术方案同步实际接口。
 - 限制：证据在会话内存中，未实现跨进程恢复或动作；仅验证代码规则和工具，不代表真实 Agent 的提示注入抵抗能力。全局并发/预算与运行事件按后续阶段实现。
 - GitHub：实现提交 `86fa6a49e0094b19f313fd0cecfeff3030f3cefd` 已推送，[P02 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37014887512) 为 success，完成 Linux 新环境安装、132 个离线测试、普通与冲突工单 inspect 演示、wheel 构建；阶段快照为 [phase-p02](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p02)，包含完成状态与学习记录。
+
+2026-10-02，第 003 轮 / P03 本地验收：
+
+- 实现：有限 ScriptedChatModel、实际 create_agent 循环、ToolStrategy＋Pydantic 建议、独立事实/动作验证、调用与超时边界、事件/消息/usage 状态、JSON 运行记录与回看 CLI。
+- 验证：201 passed（新增 69 个实例），ruff、格式检查通过；20 个既有工单的基础事实路径通过，单独注入无效 schema、过量退款、伪造事实/引用/政策/订单、模型异常和查询失败。测试前后业务库 dump 一致。
+- 演示：物流进度答复、丢件退款候选、退货候选、政策冲突转人工均通过；退货 8 次模型/8 次工具（含 1 次复算），退款 9/9（含 1 次复算），无动作执行。缺订单号不猜订单且不调业务工具。
+- 打包：构建并在独立锁文件环境重新安装 wheel；另一个工作目录运行退货基线通过。安装包包含 8 个 agents Python 模块与业务资料，不含 gold、运行库、测试或工具缓存。
+- 文档：[docs/rounds/003.md](docs/rounds/003.md)、[ADR 003](docs/decisions/003-offline-agent-baseline.md)，技术方案同步实际契约和当前预算行为。
+- 限制：脚本不评价真实模型质量；live provider 与网络 smoke 延期且显示 skipped。JSON 是静态报告，不是恢复检查点；复算依据本轮事实快照，动作前刷新留给 P06。自然语言草稿的完整语义审核在 P05，通用案例故障执行器及全局预算在 P07。
+- GitHub：本地验收通过，实现提交、远程 CI 与 `phase-p03` 标签待完成。

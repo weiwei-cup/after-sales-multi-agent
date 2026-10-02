@@ -1,6 +1,6 @@
 # 售后工单多 Agent 工作台：技术方案
 
-版本：0.4（P02 完成并上传）
+版本：0.5（P03 离线基线本地验收通过，远程交付待完成）
 
 日期：2026-10-02
 
@@ -53,7 +53,7 @@
 | Web 后端 | FastAPI | 工单、启动处理、补充信息、人工确认和事件接口 |
 | 首版界面 | 原生 HTML / CSS / JavaScript | 工单列表、详情、处理过程和审核表单，由后端服务静态资源 |
 | 自动化验证 | pytest，HTTPX；界面阶段增加 Playwright | 单元、图集成、HTTP 和浏览器测试 |
-| 模型接入 | 一个可配置的 LangChain provider adapter | 初期各角色使用同一模型，之后再比较角色模型配置 |
+| 模型接入 | 当前为 ScriptedChatModel；后续接入一个 LangChain provider adapter | 先验证离线循环；初期各角色使用同一模型，之后再比较配置 |
 
 依赖范围在 `pyproject.toml` 中声明，实际兼容版本由 P00 的 smoke test 验证并锁定到 `uv.lock`，后续升级需要通过回归检查。采用当前 `create_agent` 接口，不以旧教程中的 AgentExecutor 作为新项目入口。[S1]
 
@@ -99,6 +99,30 @@ flowchart TB
 图同时包含 Agent 节点和普通代码节点。数据库读取、状态更新、权限验证不需要额外调用模型。审核角色可以先实现为结构化评估节点，后续再增加证据读取工具；避免为了凑角色数量创建无实际职责的 Agent。
 
 第一版采用受约束的协调模式：客服协调 Agent 提出调查计划，外层主图执行允许的路径。后续仍保留明确终止规则，不允许模型生成任意节点名、任意 SQL 或任意工具。
+
+### 3.3 P03 已实现的单 Agent 基线
+
+外层工单主图从 P04 开始。P03 的 `agents/runner.py` 使用真实 `create_agent`，接入 10 个只读业务工具、`ToolStrategy(ResolutionProposal)` 和调用中间件：
+
+```mermaid
+flowchart LR
+    T[工单与可信上下文] --> A[create_agent]
+    A --> M[ScriptedChatModel]
+    M -->|业务 tool_calls| TOOLS[只读工具]
+    TOOLS -->|ToolMessage + call ID| M
+    M -->|结构化输出| S[Pydantic schema]
+    S -->|无效：有限反馈| M
+    S -->|有效| V[独立代码校验与规则复算]
+    V --> R[候选结果、证据、消息与事件 JSON]
+```
+
+脚本是有限的模型响应生成器，从收到的 ToolMessage 读取事实并生成下一步调用，不读取 repository 或 gold。它检查预期工具序列、工具是否绑定、call ID 是否匹配或重复；未定义路径直接失败。改动订单实付金额后，脚本会依据新工具结果生成相应退款候选。此机制验证框架和业务约束，不代表真实模型智能或质量。
+
+Pydantic 校验通过后，独立代码验证工单/订单范围、事实声明、引用来源与版本、动作和 assessment 对应关系、完整政策与规则输入，再使用候选金额重新调用 evaluate_policy。复算占用同一工具预算；不通过时保留原始 proposal 和问题，accepted_proposal 为 null。通过后仍是不可执行的候选，动作数为 0。
+
+结果保存在 baseline-run-v1 JSON，可由 report show 跨进程读取；不保存可恢复的运行检查点、不更改工单业务状态。写文件先落临时文件再原子发布且禁止覆盖。读取时验证报告结构，但文件本身不能证明来源，也不能授权动作。详见 [ADR 003](decisions/003-offline-agent-baseline.md) 与 [第 003 轮记录](rounds/003.md)。
+
+用户选择当前只用离线脚本模型，因此 live 工厂边界及 live-smoke 返回 skipped / LIVE_PROVIDER_DEFERRED。真实 provider、网络 smoke 及语言质量评估均未实现或执行。
 
 ## 4. Agent 设计
 
@@ -198,10 +222,12 @@ P01 区分 `Ticket.supplied_order_id`（用户填写，可能缺失、错误或�
 - `InvestigationPlan`：任务 ID、owner、目标、所需证据、依赖任务。
 - `OrderInvestigation`：verified_facts、user_claims、evidence_ids、gaps、tool_errors。
 - `PolicyAssessment`：policy_refs、条件计算结果、allowed_actions、missing_facts、conflicts。
-- `ResolutionProposal`：decision_code、claims、evidence_refs、customer_reply_draft、actions、unresolved_questions。
+- `ResolutionProposal`（P03 已实现）：ticket_id、order_id、decision、claims、evidence_refs、customer_reply_draft、actions、unresolved_questions、candidate_only。
 - `ReviewResult`：outcome、issues、targeted_tasks、revision_instructions。
 
 路由只接受枚举：`accept`、`research_more`、`revise`、`human_review`、`handoff`。非法结构最多修复一次，仍失败则结束为可诊断的失败或人工接手，不做无限 JSON 重试。[S3]
+
+P03 的 decision 为 inform_progress、propose_logistics_investigation、propose_return、propose_refund、request_information、existing_application、human_review、decline_request。FactClaim 只接受定义的事实字段及其引用；ActionCandidate 关联动作、订单、整数分金额、assessment_ref、policy_refs 和 evidence_refs，并要求操作员确认。schema 验证 decision/action 的一致性；真实事实是否支持、金额是否在余额内由随后代码判断。字符串草稿的完整语义审核留给 P05。
 
 ### 6.3 图状态
 
@@ -242,9 +268,11 @@ errors, final_result
 
 P02 已实现统一 `ToolResult`：`schema_version`、`ok`、`data`、`evidence_refs`、`error`；引用为 `{evidence_id, source_version}`，错误为 `{code, message, retryable}`。失败结果不携带业务资料与证据。超时、没有记录、缺订单号和归属不符使用不同错误码。工具结果中的外部文本作为资料处理，不能成为系统指令。
 
-`ToolSession` 由应用读取工单后创建；可信上下文包括 customer_id、ticket_id、ticket_version、session_id、订单原始引用、工单类型、业务时间和资料版本。10 个 `StructuredTool` 绑定这份上下文，模型输入 schema 不暴露客户身份、业务时间或依赖对象。工具只接受当前工单订单号，repository 再检查客户归属。P03 将在 Agent 调用入口创建和传递这份调查会话。具体契约与测试见 [ADR 002](decisions/002-trusted-tools-and-evidence.md)。工具 schema 使用 LangChain 官方支持的 Pydantic 输入模型，异步结果通过 `ToolMessage` 与 call ID 关联。[LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
+`ToolSession` 由应用读取工单后创建；可信上下文包括 customer_id、ticket_id、ticket_version、session_id、订单原始引用、工单类型、业务时间和资料版本。10 个 `StructuredTool` 绑定这份上下文，模型输入 schema 不暴露客户身份、业务时间或依赖对象。工具只接受当前工单订单号，repository 再检查客户归属。P03 已在 Agent 调用入口创建并传递这份会话，session_id 与 run_id 对应。具体契约与测试见 [ADR 002](decisions/002-trusted-tools-and-evidence.md)。工具 schema 使用 LangChain 官方支持的 Pydantic 输入模型，异步结果通过 `ToolMessage` 与 call ID 关联。[LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
 
 证据是包含来源类型、来源 ID、来源版本、业务与观察时间、工单/会话范围及事实 JSON 的不可变快照。ID 由上述内容生成，重复读同一快照去重；内容变化生成新 ID。集合使用资料集版本，条目自身版本仍保留在事实里；assessment 使用 `rules-v1` 并保存输入引用。P02 演示的观察时钟与固定业务时钟一致，证据只保存在会话内存；`inspect --json` 可导出，但没有重新导入接口。P06 将随 run 持久化，写操作前须重新核验资料版本。
+
+P03 将证据快照随静态运行报告保存；读取报告不重新注册为可信工具输入。当前候选复算使用本轮已取得的事实，不能替代执行前读取最新订单/政策、重新计算时间窗口与校验批准版本。
 
 默认单次结果限制为 12000 UTF-8 字节，超长返回 `RESULT_TOO_LARGE`，不截断 JSON、不注册未返回的证据。只读查询采用 3 秒等待时限、每会话 2 个工作槽，无任务积压队列；超时返回 `TOOL_TIMEOUT`，未结束的后台任务继续占用槽，满时返回 `TOOL_BUSY`。Python 线程不能强行终止，因此实际外部适配器也必须配置有限 I/O 时限；迟到结果不进入证据存储。全局调度、重试和运行统计在 P07 完善。
 
@@ -312,18 +340,21 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 | 限制 | 初始值 | 处理方式 |
 | --- | --- | --- |
-| 同 run 模型调用 | 20 次，包含重试和结构化修复 | 调用前占用预算，耗尽转人工 |
-| 同 run 工具调用 | 30 次，包含重试 | 记录停止原因 |
+| 同 run 模型调用 | 20 次，包含重试和结构化修复 | P03 调用前占用预算，耗尽为诊断失败；后续接人工介入 |
+| 同 run 工具调用 | 30 次，包含重试和代码规则复算 | P03 调用前检查，记录停止原因 |
+| proposal schema 修复 | 1 次，可配置 0～3 | P03 有限反馈，与审核返工分别计数 |
 | 审核返工 | 2 次 | 保存最后建议和未解决问题 |
 | 并发专员 | 2 个 | 限制模型并发 |
-| 单模型请求超时 | 30 秒 | 仅暂时性错误有限重试 |
-| 单工具调用超时 | 5 秒 | 标记资料未取得，不能伪造空结果 |
+| 单模型请求超时 | 30 秒 | P03 到时停止并保存失败；后续对暂时性错误有限重试 |
+| 单工具调用超时 | 3 秒 | P02 已实现，标记资料未取得，不能伪造空结果 |
 | 活动执行时长 | 120 秒 | 在可安全停止的边界终止 |
 | 单 Agent 输入 | 估算最多 6,000 token | 保留必要事实、摘要和引用 |
 | 单次输出 | 最多 1,200 token，按 provider 能力配置 | 避免无界输出 |
 | 全 run token 预算 | 初始 50,000，按实际 provider 校准 | 使用估算预留和实际 usage 对账 |
 
 这些是初始工程参数，不是已经验证的性能承诺。模型和工具调用次数是硬上限；token 预算采用估算预留和 usage 对账，存在误差，属于软上限，不能宣称严格限制实际计费 token。无法获得实际 token usage 时标记 unknown / estimated，不能填 0。费用基于用户配置的价格快照计算，无价格配置则不显示货币估算。
+
+当前只有 P02 单会话查询容量/超时及 P03 单运行调用上限、schema 修复上限和模型时限在执行；审核返工、全局并发、活动时长、token 预留/对账等在后续阶段实现。P03 保存模型提供的 usage，未报告时为 null / not_reported，不生成金额估计。recursion_limit 只作框架兜底。
 
 并发预算由统一控制器原子预留，恢复时从调用账本校正累计值。`recursion_limit` 作为兜底，不能代替业务预算。provider 的隐式重试需要关闭或纳入明确记录。
 
@@ -342,6 +373,8 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 事件覆盖 run_started、node_started/completed、model_called、tool_called、evidence_added、review_finished、input_requested、input_received、action_committed、run_finished/failed。
 
 早期就加入最小事件记录，后续再展示时间线。前端只接收经过筛选的事件 DTO；不直接透出整个图状态、模型密钥、完整联系方式或内部消息。决策依据记录可读摘要，不要求保存模型隐藏推理。
+
+P03 已保存本地最小事件序号、角色、模型/业务工具开始与结束、结果、耗时、schema 修复、代码复算及停止原因；JSON 中同时保留模型输出和工具消息，供学习回看。ResolutionProposal 是框架的结构化输出工具，不算业务工具调用；输出它的模型调用计入模型预算。完整节点/返工/人工输入/动作事件和持久事件表在后续阶段补齐。
 
 ## 10. API 与界面
 
@@ -425,8 +458,8 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 │   ├── data/                      # 随安装包分发的虚构业务 JSON
 │   ├── repositories/              # sqlite / migrations / seed
 │   ├── tools/                     # orders / logistics / policies / evidence
-│   ├── models/                    # factory / scripted / capabilities
-│   ├── agents/                    # coordinator / order / policy / reviewer
+│   ├── agents/                    # P03 factory / scripted / contracts / runner / validation / telemetry
+│   │                              # P04 起加入 coordinator / order / policy / reviewer
 │   ├── prompts/                   # 版本化角色提示词
 │   ├── workflows/                 # state / graph / nodes / reducers
 │   ├── services/                  # tickets / runs / actions / approvals
@@ -448,7 +481,7 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 
 默认设计：Python 3.12、uv、SQLite、FastAPI＋原生页面、中文业务交互。若后续偏好变化，在进入相关阶段前调整设计和 plan。
 
-待 P03 的 live 接入前确定：模型服务商、模型标识、凭据提供方式和实际请求预算。离线阶段可以独立完成，不需要提前选择或购买服务。
+已确认当前暂时只用离线脚本模型，P03 不接入 provider；多 Agent 编排可继续离线实现。未来 live 接入前确定模型服务商、模型标识、凭据提供方式和实际请求预算，再验证工具调用与结构化输出能力。
 
 ## 14. 官方资料与设计依据
 
@@ -464,5 +497,6 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 - [LangGraph Subgraphs](https://docs.langchain.com/oss/python/langgraph/use-subgraphs)
 - [LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
 - [LangChain Models](https://docs.langchain.com/oss/python/langchain/models)
+- [LangChain Middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in)
 - [FastAPI Testing](https://fastapi.tiangolo.com/tutorial/testing/)
 - [pytest markers](https://docs.pytest.org/en/stable/how-to/mark.html)

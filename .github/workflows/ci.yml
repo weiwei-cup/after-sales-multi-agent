@@ -27,4 +27,8 @@ jobs:
       - run: uv run --locked after-sales ticket show T-RETURN-001
       - run: uv run --locked after-sales inspect --ticket T-RETURN-001
       - run: uv run --locked after-sales inspect --ticket T-CONFLICT-001 --json
+      - run: uv run --locked after-sales run --ticket T-DELAY-001 --architecture single --model scripted
+      - run: uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --model scripted
+      - run: uv run --locked after-sales run --ticket T-RETURN-001 --model scripted
+      - run: uv run --locked after-sales live-smoke --json
       - run: uv build --wheel

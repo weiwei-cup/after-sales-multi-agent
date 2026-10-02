@@ -6,10 +6,13 @@ import json
 import sqlite3
 import sys
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from pydantic import TypeAdapter, ValidationError
 
+from after_sales.agents.contracts import StoredRunReport
+from after_sales.agents.runner import run_baseline, save_run
 from after_sales.config import Settings
 from after_sales.doctor import build_report
 from after_sales.domain.models import TicketType, UtcTime
@@ -33,6 +36,25 @@ def _parser() -> argparse.ArgumentParser:
     inspection = commands.add_parser("inspect", help="用只读工具调查工单、计算规则和生成证据")
     inspection.add_argument("--ticket", required=True, help="当前模拟工单 ID")
     _json_flag(inspection)
+
+    run = commands.add_parser("run", help="运行单 Agent 离线基线并保存建议、证据和调用记录")
+    run.add_argument("--ticket", required=True)
+    run.add_argument("--architecture", choices=["single"], default="single")
+    run.add_argument(
+        "--model", choices=["scripted", "live"], help="默认使用配置；本轮 live 显示 skipped"
+    )
+    run.add_argument("--output", type=Path, help="结果文件；默认 var/runs/运行ID.json，禁止覆盖")
+    _json_flag(run)
+
+    reports = commands.add_parser("report", help="读取已保存的运行结果与事件")
+    report_commands = reports.add_subparsers(dest="operation", required=True)
+    report_show = report_commands.add_parser("show", help="读取一个 baseline-run-v1 JSON 文件")
+    report_show.add_argument("path", type=Path)
+    report_show.add_argument("--events-only", action="store_true")
+    _json_flag(report_show)
+
+    live = commands.add_parser("live-smoke", help="报告真实模型验证状态；用户选择本轮延期")
+    _json_flag(live)
 
     seed = commands.add_parser("seed", help="原子初始化模拟业务数据，重复执行保留已有数据")
     seed.add_argument("--dataset", choices=["demo"], default="demo")
@@ -140,8 +162,54 @@ def _render_inspection(report: dict[str, object]) -> None:
     print(f"证据快照：{len(report['evidence'])}；本轮保存在调查会话内存，--json 可导出。")
 
 
+def _render_run(report: dict[str, object]) -> None:
+    print(f"运行 {report['run_id']} | 工单 {report['ticket_id']} | {report['status']}")
+    proposal = report["accepted_proposal"]
+    if proposal:
+        print(f"建议：{proposal['decision']}")
+        print(f"回复草稿：{proposal['customer_reply_draft']}")
+        for action in proposal["actions"]:
+            amount = f" | {action['amount_cents']} 分" if action["amount_cents"] is not None else ""
+            print(f"动作候选：{action['type']} | {action['order_id']}{amount}")
+        for question in proposal["unresolved_questions"]:
+            print(f"待补资料：{question['field']} | {question['question']}")
+    if report["validation"]:
+        print(f"代码校验：{report['validation']['ok']}")
+        for issue in report["validation"]["issues"]:
+            print(f"  {issue['code']}：{issue['message']}")
+    if report["error"]:
+        print(f"{report['error']['code']}：{report['error']['message']}")
+    stats = report["statistics"]
+    print(
+        f"模型调用：{stats['model_calls']}；工具调用：{stats['tool_calls']}"
+        f"（含代码复算 {stats['validation_tool_calls']}）；schema 修复：{stats['schema_repairs']}"
+    )
+    print("全部动作均为候选，尚待确认；执行动作数：0。")
+    print(f"运行记录：{report['artifact_path']}")
+
+
 def _business_command(args: argparse.Namespace, settings: Settings) -> object:
     repository = BusinessRepository(settings.business_db_path)
+    if args.command == "live-smoke":
+        return {
+            "status": "skipped",
+            "code": "LIVE_PROVIDER_DEFERRED",
+            "model_calls": 0,
+            "reason": "用户选择 P03 仅使用离线脚本模型；真实模型适配与 smoke 验证待后续确定。",
+        }
+    if args.command == "report":
+        report = StoredRunReport.model_validate_json(
+            args.path.read_text(encoding="utf-8")
+        ).model_dump(mode="json")
+        return report["events"] if args.events_only else report
+    if args.command == "run":
+        report = asyncio.run(
+            run_baseline(repository, args.ticket, settings, mode=args.model or settings.model_mode)
+        )
+        path = args.output or Path("var/runs") / f"{report['run_id']}.json"
+        report["artifact_path"] = str(path.resolve())
+        save_run(report, path)
+        return report
     if args.command == "inspect":
         session = ToolSession.for_ticket(
             repository,
@@ -192,12 +260,16 @@ def main(argv: list[str] | None = None) -> int:
             report = build_report(settings)
         else:
             result = _business_command(args, settings)
-            if args.command == "inspect" and not args.json:
+            if args.command == "run" and not args.json:
+                _render_run(result)
+            elif args.command == "inspect" and not args.json:
                 _render_inspection(result)
             elif args.command == "ticket" and args.operation == "show" and not args.json:
                 _render_ticket(result)
             else:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
+            if args.command == "run" and result["status"] in {"failed", "validation_failed"}:
+                return 1
             return 0
     except ValidationError as exc:
         errors = [
@@ -211,7 +283,7 @@ def main(argv: list[str] | None = None) -> int:
             for error in errors:
                 print(f"- {error['field']}: {error['message']}", file=sys.stderr)
         return 2
-    except (RepositoryError, sqlite3.DatabaseError) as exc:
+    except (RepositoryError, sqlite3.DatabaseError, OSError, ValueError) as exc:
         error = {"ok": False, "error": type(exc).__name__, "message": str(exc)}
         if args.json:
             print(json.dumps(error, ensure_ascii=False))
