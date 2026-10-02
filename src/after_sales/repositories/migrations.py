@@ -95,7 +95,52 @@ SCHEMA_V1 = (
     "CREATE INDEX idx_ticket_customer ON tickets(customer_id,id)",
 )
 
-MIGRATIONS = {1: SCHEMA_V1}
+SCHEMA_V2 = (
+    """CREATE TABLE workflow_runtime (
+        run_id TEXT PRIMARY KEY REFERENCES runs(id), workflow_version TEXT NOT NULL,
+        schema_version TEXT NOT NULL, model_mode TEXT NOT NULL,
+        checkpoint_path TEXT NOT NULL, limits_json TEXT NOT NULL CHECK(json_valid(limits_json)),
+        runtime_json TEXT NOT NULL CHECK(json_valid(runtime_json)), terminal_error INTEGER NOT
+        NULL DEFAULT 0
+    )""",
+    """CREATE TABLE proposal_plans (
+        run_id TEXT NOT NULL REFERENCES runs(id), proposal_revision INTEGER NOT NULL
+        CHECK(proposal_revision>0),
+        input_revision INTEGER NOT NULL CHECK(input_revision>0), proposal_hash TEXT NOT NULL,
+        payload_json TEXT NOT NULL CHECK(json_valid(payload_json)),
+        active INTEGER NOT NULL CHECK(active IN (0,1)), PRIMARY KEY(run_id,proposal_revision)
+    )""",
+    "CREATE UNIQUE INDEX idx_active_plan ON proposal_plans(run_id) WHERE active=1",
+    """CREATE TABLE pending_inputs (
+        pending_id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(id),
+        payload_json TEXT NOT NULL CHECK(json_valid(payload_json)),
+        status TEXT NOT NULL CHECK(status IN ('open','consumed','invalidated','superseded'))
+    )""",
+    "CREATE UNIQUE INDEX idx_open_pending ON pending_inputs(run_id) WHERE status='open'",
+    """CREATE TABLE human_inputs (
+        pending_id TEXT PRIMARY KEY REFERENCES pending_inputs(pending_id),
+        envelope_json TEXT NOT NULL CHECK(json_valid(envelope_json)),
+        ticket_json TEXT NOT NULL CHECK(json_valid(ticket_json)),
+        accepted_at TEXT NOT NULL CHECK(substr(accepted_at,-1)='Z')
+    )""",
+    """CREATE TABLE action_ledger (
+        operation_key TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(id),
+        ticket_id TEXT NOT NULL REFERENCES tickets(id), action_id TEXT NOT NULL,
+        payload_hash TEXT NOT NULL, payload_json TEXT NOT NULL CHECK(json_valid(payload_json)),
+        receipt_json TEXT NOT NULL CHECK(json_valid(receipt_json)),
+        committed_at TEXT NOT NULL CHECK(substr(committed_at,-1)='Z')
+    )""",
+    """CREATE TABLE action_events (
+        operation_key TEXT PRIMARY KEY REFERENCES action_ledger(operation_key),
+        event_type TEXT NOT NULL CHECK(event_type='action_committed'),
+        payload_json TEXT NOT NULL CHECK(json_valid(payload_json))
+    )""",
+    "ALTER TABLE after_sales_history ADD COLUMN operation_key TEXT REFERENCES "
+    "action_ledger(operation_key)",
+    "CREATE UNIQUE INDEX idx_history_operation ON after_sales_history(operation_key)",
+)
+
+MIGRATIONS = {1: SCHEMA_V1, 2: SCHEMA_V2}
 
 
 def ensure_application_database(connection: sqlite3.Connection) -> None:

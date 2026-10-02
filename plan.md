@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00～P05 已完成并上传；P05 本地 370 个离线测试与 [GitHub CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37031169435) 通过，学习快照为 phase-p05。下一轮为 P06。继续仅用离线脚本模型。
+当前状态：P00～P06 实现完成；P06 本地 429 个离线测试通过，远程 CI 与 phase-p06 交付进行中。下一轮为 P07。继续仅用离线脚本模型。
 
 前次 000～004 复核已完成。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
 
@@ -297,14 +297,14 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 实现清单：
 
-- [ ] P06.1 替换为文件型 SQLite checkpointer，固定 run/thread ID，记录 workflow/schema 版本。
-- [ ] P06.2 持久化 pending input、人工决定、动作方案及其版本。
-- [ ] P06.3 建立 action ledger、稳定 operation key、payload hash 和业务唯一约束。
-- [ ] P06.4 实现物流调查单、退货登记和模拟退款，所有写入经过动作服务。
-- [ ] P06.5 执行前读取最新事实与政策，并用执行时钟重算时间条件；版本或资格变化使批准失效并返回重新评估。
-- [ ] P06.6 动作账本、业务变更、动作事件在同一个业务事务提交。
-- [ ] P06.7 实现 interrupted 检测、CLI resume 和启动恢复规则。
-- [ ] P06.8 明确业务完成状态：退货登记后 waiting_return，退款完成后 resolved。
+- [x] P06.1 替换为文件型 SQLite checkpointer，固定 run/thread ID，记录 workflow/schema 版本。
+- [x] P06.2 持久化 pending input、人工决定、动作方案及其版本。
+- [x] P06.3 建立 action ledger、稳定 operation key、payload hash 和业务唯一约束。
+- [x] P06.4 实现物流调查单、退货登记和模拟退款，所有写入经过动作服务。
+- [x] P06.5 执行前读取最新事实与政策，并用执行时钟重算时间条件；版本或资格变化使批准失效并返回重新评估。
+- [x] P06.6 动作账本、业务变更、动作事件在同一个业务事务提交。
+- [x] P06.7 实现 interrupted 检测、CLI resume 和启动恢复规则。
+- [x] P06.8 明确业务完成状态：退货登记后 waiting_return，退款完成后 resolved。
 
 关键验证必须使用真实临时数据库，部分案例启动新 Python 进程：
 
@@ -321,6 +321,8 @@ GitHub 提交 / 阶段标签 / CI 结果：
 | 旧 schema 恢复 | 明确版本不兼容，数据保留 |
 
 演示：`uv run after-sales resume --run RUN-ID --model scripted`；查询模拟退款或退货记录数量。
+
+本地验收：429 passed，其中新增 59 项；真实独立进程退出/恢复、动作重复与并发、资料变更和金额上界通过；安装包和远端交付记录见 [第 006 轮](docs/rounds/006.md)。远端 CI 通过后确认 M2 并建立 phase-p06。
 
 验收门槛：跨进程恢复、幂等和金额并发测试通过。达到 M2。需要理解：检查点与业务事务的区别、节点重放、动作幂等和实际业务完成状态。
 

@@ -21,7 +21,8 @@ from after_sales.repositories.seed import seed_demo
 from after_sales.repositories.sqlite import BusinessRepository, migrate
 from after_sales.tools.inspection import inspect_ticket
 from after_sales.tools.service import ToolSession
-from after_sales.workflows.interactive import run_interactive
+from after_sales.workflows.durable import PersistentReviewRun
+from after_sales.workflows.interactive import interact, run_interactive
 from after_sales.workflows.reviewed import run_reviewed
 from after_sales.workflows.serial import run_multi
 
@@ -45,7 +46,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--architecture", choices=["single", "multi"], default="single")
     run.add_argument(
         "--workflow",
-        choices=["serial", "reviewed"],
+        choices=["serial", "reviewed", "durable"],
         default="serial",
         help="multi 的执行图；默认保留 P04 串行入口",
     )
@@ -56,7 +57,15 @@ def _parser() -> argparse.ArgumentParser:
         "--model", choices=["scripted", "live"], help="默认使用配置；本轮 live 显示 skipped"
     )
     run.add_argument("--output", type=Path, help="结果文件；默认 var/runs/运行ID.json，禁止覆盖")
+    run.add_argument("--run-id", help="P06 的稳定运行 ID")
     _json_flag(run)
+
+    resume = commands.add_parser("resume", help="P06 从可信数据库恢复运行")
+    resume.add_argument("--run", required=True)
+    resume.add_argument("--model", choices=["scripted"], default="scripted")
+    resume.add_argument("--response-file", type=Path, help="完整待办答复 JSON，绑定身份与版本")
+    resume.add_argument("--output", type=Path, help="另存静态报告，禁止覆盖")
+    _json_flag(resume)
 
     reports = commands.add_parser("report", help="读取已保存的运行结果与事件")
     report_commands = reports.add_subparsers(dest="operation", required=True)
@@ -215,12 +224,28 @@ def _render_run(report: dict[str, object]) -> None:
                 )
         if report["graph_state"]["reason"]:
             print(f"转人工原因：{report['graph_state']['reason']}")
-    print("全部动作均为候选；确认记录不代表业务执行；执行动作数：0。")
+    if report["phase"] == "P06":
+        print(
+            f"业务状态：{report['business_status']}；已提交动作：{len(report['executed_actions'])}"
+        )
+        for receipt in report["executed_actions"]:
+            print(f"动作账本：{receipt['operation_key']} | {receipt['business_record_id']}")
+        if report["pending_input"]:
+            print(
+                f"待办：{report['pending_input']['pending_id']}；"
+                f"可用 resume --run {report['run_id']} 继续。"
+            )
+        if report["status"] == "interrupted":
+            print(f"可恢复中断：resume --run {report['run_id']}")
+    else:
+        print("全部动作均为候选；确认记录不代表业务执行；执行动作数：0。")
     print(f"运行记录：{report['artifact_path']}")
 
 
 def _business_command(args: argparse.Namespace, settings: Settings) -> object:
     repository = BusinessRepository(settings.business_db_path)
+    if args.command in {"run", "resume"} and args.output and args.output.exists():
+        raise FileExistsError("result file already exists; choose a new --output")
     if args.command == "live-smoke":
         return {
             "status": "skipped",
@@ -234,17 +259,30 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
         )
         return report["events"] if args.events_only else report
     if args.command == "run":
-        if args.workflow == "reviewed" and args.architecture != "multi":
-            raise ValueError("--workflow reviewed 要求 --architecture multi")
-        if args.interactive and (args.workflow != "reviewed" or args.json):
-            raise ValueError("--interactive 要求 --workflow reviewed，且不能与 --json 同用")
+        if args.workflow in {"reviewed", "durable"} and args.architecture != "multi":
+            raise ValueError("reviewed/durable 工作流要求 --architecture multi")
+        if args.interactive and (args.workflow not in {"reviewed", "durable"} or args.json):
+            raise ValueError("--interactive 要求 reviewed/durable，且不能与 --json 同用")
+        if args.run_id and args.workflow != "durable":
+            raise ValueError("--run-id 要求 --workflow durable")
         runner = run_multi if args.architecture == "multi" else run_baseline
         if args.workflow == "reviewed":
             runner = run_interactive if args.interactive else run_reviewed
-        report = asyncio.run(
-            runner(repository, args.ticket, settings, mode=args.model or settings.model_mode)
-        )
+        if args.workflow == "durable":
+            report = asyncio.run(_durable_command(repository, settings, args))
+        else:
+            report = asyncio.run(
+                runner(repository, args.ticket, settings, mode=args.model or settings.model_mode)
+            )
         path = args.output or Path("var/runs") / f"{report['run_id']}.json"
+        report["artifact_path"] = str(path.resolve())
+        save_run(report, path)
+        return report
+    if args.command == "resume":
+        report = asyncio.run(_durable_command(repository, settings, args))
+        from uuid import uuid4
+
+        path = args.output or Path("var/runs") / f"{report['run_id']}-{uuid4().hex[:8]}.json"
         report["artifact_path"] = str(path.resolve())
         save_run(report, path)
         return report
@@ -289,6 +327,30 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
     ]
 
 
+async def _durable_command(repository, settings, args):
+    if args.command == "resume":
+        run = await PersistentReviewRun.load(repository, args.run, settings)
+    else:
+        run = await PersistentReviewRun.create(
+            repository,
+            args.ticket,
+            settings,
+            mode=args.model or settings.model_mode,
+            run_id=args.run_id,
+        )
+    try:
+        report = await run.recover() if args.command == "resume" else await run.start()
+        if args.command == "resume" and args.response_file:
+            report = await run.resume(json.loads(args.response_file.read_text(encoding="utf-8")))
+        if (args.command == "resume" and not args.json and not args.response_file) or (
+            args.command == "run" and args.interactive
+        ):
+            report = await interact(run, report)
+        return report
+    finally:
+        await run.aclose()
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
 
@@ -298,7 +360,7 @@ def main(argv: list[str] | None = None) -> int:
             report = build_report(settings)
         else:
             result = _business_command(args, settings)
-            if args.command == "run" and not args.json:
+            if args.command in {"run", "resume"} and not args.json:
                 _render_run(result)
             elif args.command == "inspect" and not args.json:
                 _render_inspection(result)
@@ -306,9 +368,16 @@ def main(argv: list[str] | None = None) -> int:
                 _render_ticket(result)
             else:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
-            if args.command == "run" and result["status"] in {"failed", "validation_failed"}:
+            if args.command in {"run", "resume"} and result["status"] in {
+                "failed",
+                "validation_failed",
+            }:
                 return 1
-            if args.command == "run" and result["status"] == "handed_off" and result["error"]:
+            if (
+                args.command in {"run", "resume"}
+                and result["status"] == "handed_off"
+                and result["error"]
+            ):
                 return 1
             return 0
     except ValidationError as exc:

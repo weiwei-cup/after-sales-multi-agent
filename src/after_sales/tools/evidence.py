@@ -54,6 +54,23 @@ class EvidenceStore:
                     raise ValueError("evidence ID collision with different content")
             self._items.update({item.id: item for item in evidence})
 
+    def restore_trusted(self, exported: list[dict], context: ToolContext) -> None:
+        """Restore only the application's durable run store, never a CLI report file."""
+        items = []
+        for row in exported:
+            values = {key: value for key, value in row.items() if key != "facts"}
+            item = Evidence.model_validate({**values, "facts_json": canonical(row["facts"])})
+            if (item.ticket_id, item.session_id) != (context.ticket_id, context.session_id):
+                raise ValueError("persisted evidence must belong to the restored run")
+            content = item.model_dump(mode="python", exclude={"id"})
+            for key in ("observed_at", "as_of_time"):
+                content[key] = content[key].isoformat()
+            expected = "E-" + hashlib.sha256(canonical(content).encode()).hexdigest()[:40]
+            if item.id != expected:
+                raise ValueError("persisted evidence content hash mismatch")
+            items.append(item)
+        self.register(tuple(items))
+
     def resolve(
         self, ref: EvidenceRef, context: ToolContext, source_type: str | None = None
     ) -> Evidence:

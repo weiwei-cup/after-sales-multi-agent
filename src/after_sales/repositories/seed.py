@@ -24,10 +24,16 @@ SEED_TABLES = (
     "after_sales_history",
 )
 RESET_TABLES = (
+    "action_events",
+    "human_inputs",
+    "pending_inputs",
+    "proposal_plans",
+    "workflow_runtime",
+    "after_sales_history",
+    "action_ledger",
     "runs",
     "ticket_messages",
     "tickets",
-    "after_sales_history",
     "delivery_proofs",
     "tracking_events",
     "order_items",

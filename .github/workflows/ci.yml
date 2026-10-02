@@ -41,5 +41,12 @@ jobs:
       - run: printf 'ORD-019\napprove\n' | uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --workflow reviewed --interactive --output var/runs/ci-reviewed-completed.json
       - run: uv run --locked after-sales report show var/runs/ci-reviewed-completed.json --json
       - run: printf 'revise\n9000\nreject\n' | uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow reviewed --interactive
+      - run: uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow durable --run-id ci-durable-refund --json --output var/runs/ci-durable-pending.json
+      - run: uv run --locked after-sales resume --run ci-durable-refund --json
+      - run: printf 'approve\n' | uv run --locked after-sales resume --run ci-durable-refund --output var/runs/ci-durable-completed.json
+      - run: uv run --locked after-sales resume --run ci-durable-refund --json
+      - run: uv run --locked after-sales report show var/runs/ci-durable-completed.json --json
+      - run: uv run --locked after-sales ticket show T-NOTRECEIVED-002
+      - run: uv run --locked after-sales order show ORD-004 --customer CUST-A --json
       - run: uv run --locked after-sales live-smoke --json
       - run: uv build --wheel

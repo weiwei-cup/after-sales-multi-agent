@@ -1,0 +1,523 @@
+{
+  "schema_version": "p06-observations-v1",
+  "dataset_version": "demo-v1",
+  "model_mode": "scripted",
+  "resume_scope": "cross_process",
+  "clock": "2026-10-02T04:00:00Z (trusted test injection)",
+  "runs": [
+    {
+      "ticket_id": "T-DELAY-002",
+      "run_id": "worker-run",
+      "snapshots": [
+        {
+          "step": "start_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 10,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "reopen_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 10,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_approval_new_process",
+          "status": "completed",
+          "business_status": "processing",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "executed_actions": [
+            {
+              "operation_key": "op-ac83644f6608880084c638d7a7ab5e0cef111092",
+              "payload_hash": "100fd48856e1d3d6fddd3504355198e9d12bb16cef7cb8ddc76cf4a2d7dbc1c9",
+              "run_id": "worker-run",
+              "ticket_id": "T-DELAY-002",
+              "action_id": "action-dfc0628d8cbe8153325ebb014550005e",
+              "input_revision": 1,
+              "type": "open_logistics_case",
+              "order_id": "ORD-002",
+              "amount_cents": null,
+              "business_record_id": "act-1a44a0f9f435a175cbabc072a3eee255",
+              "business_status": "processing",
+              "committed_at": "2026-10-02T04:00:00Z"
+            }
+          ],
+          "pending_kind": null,
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 11,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": [
+            "approve"
+          ]
+        }
+      ]
+    },
+    {
+      "ticket_id": "T-RETURN-001",
+      "run_id": "worker-run",
+      "snapshots": [
+        {
+          "step": "start_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 13,
+            "tool_calls": 9,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "reopen_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 13,
+            "tool_calls": 9,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_approval_new_process",
+          "status": "completed",
+          "business_status": "waiting_return",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "executed_actions": [
+            {
+              "operation_key": "op-67057b7914dc41993b879a2cf33216d5078f5e78",
+              "payload_hash": "571e4ab8d871496393f726bb7e794c2b355aad56912fecb0cfbc074c04983881",
+              "run_id": "worker-run",
+              "ticket_id": "T-RETURN-001",
+              "action_id": "action-9352ff5ca52e084f3af96e859c492f1a",
+              "input_revision": 1,
+              "type": "create_return_request",
+              "order_id": "ORD-005",
+              "amount_cents": null,
+              "business_record_id": "act-90444440eb15af65ad65b4c0087ff20b",
+              "business_status": "waiting_return",
+              "committed_at": "2026-10-02T04:00:00Z"
+            }
+          ],
+          "pending_kind": null,
+          "statistics": {
+            "model_calls": 13,
+            "tool_calls": 10,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": [
+            "approve"
+          ]
+        }
+      ]
+    },
+    {
+      "ticket_id": "T-MISSING-001",
+      "run_id": "worker-run",
+      "snapshots": [
+        {
+          "step": "start_process",
+          "status": "paused",
+          "business_status": "waiting_customer",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer"
+          ],
+          "executed_actions": [],
+          "pending_kind": "customer_info",
+          "statistics": {
+            "model_calls": 3,
+            "tool_calls": 0,
+            "validation_tool_calls": 0,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "reopen_process",
+          "status": "paused",
+          "business_status": "waiting_customer",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer"
+          ],
+          "executed_actions": [],
+          "pending_kind": "customer_info",
+          "statistics": {
+            "model_calls": 3,
+            "tool_calls": 0,
+            "validation_tool_calls": 0,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "customer_order_answer_new_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 2,
+          "proposal_revision": 2,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer",
+            "wait_customer",
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 16,
+            "tool_calls": 9,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_approval_new_process",
+          "status": "completed",
+          "business_status": "waiting_return",
+          "input_revision": 2,
+          "proposal_revision": 2,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "draft",
+            "validate",
+            "review",
+            "prepare_customer",
+            "wait_customer",
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "executed_actions": [
+            {
+              "operation_key": "op-9ca7c937b562eadd42676469cbb6658c7f2939d3",
+              "payload_hash": "ea3defc5bc406371f9b1a2bc793a2a2310e4757ff029b0a034ee13fc5206fd84",
+              "run_id": "worker-run",
+              "ticket_id": "T-MISSING-001",
+              "action_id": "action-2e9fb40891a4efda70ea526e39f5f9f6",
+              "input_revision": 2,
+              "type": "create_return_request",
+              "order_id": "ORD-019",
+              "amount_cents": null,
+              "business_record_id": "act-48f1e669963b8947968130272c070122",
+              "business_status": "waiting_return",
+              "committed_at": "2026-10-02T04:00:00Z"
+            }
+          ],
+          "pending_kind": null,
+          "statistics": {
+            "model_calls": 16,
+            "tool_calls": 10,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": [
+            "approve"
+          ]
+        }
+      ]
+    },
+    {
+      "ticket_id": "T-NOTRECEIVED-002",
+      "run_id": "worker-run",
+      "snapshots": [
+        {
+          "step": "start_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 10,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "reopen_process",
+          "status": "paused",
+          "business_status": "waiting_review",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator"
+          ],
+          "executed_actions": [],
+          "pending_kind": "operator_decision",
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 10,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": []
+        },
+        {
+          "step": "operator_approval_new_process",
+          "status": "completed",
+          "business_status": "resolved",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "repair_count": 0,
+          "node_trace": [
+            "intake",
+            "order",
+            "policy",
+            "draft",
+            "validate",
+            "review",
+            "prepare_operator",
+            "wait_operator",
+            "approve"
+          ],
+          "executed_actions": [
+            {
+              "operation_key": "op-5a5be83bee6234302fcaeef2d6e78ed511efab63",
+              "payload_hash": "5831d8aace0b779d54b980d5f044f0b88e1b07072b88e50466d99da1039930a9",
+              "run_id": "worker-run",
+              "ticket_id": "T-NOTRECEIVED-002",
+              "action_id": "action-1207dc265c17081270d0c0dfd358b999",
+              "input_revision": 1,
+              "type": "issue_mock_refund",
+              "order_id": "ORD-004",
+              "amount_cents": 10000,
+              "business_record_id": "act-66fd97e57994fcdfc294edc8d0543da3",
+              "business_status": "resolved",
+              "committed_at": "2026-10-02T04:00:00Z"
+            }
+          ],
+          "pending_kind": null,
+          "statistics": {
+            "model_calls": 14,
+            "tool_calls": 11,
+            "validation_tool_calls": 1,
+            "schema_repairs": 0,
+            "token_usage": null
+          },
+          "confirmation_decisions": [
+            "approve"
+          ]
+        }
+      ]
+    }
+  ],
+  "crash_recovery": {
+    "stage": "after_commit",
+    "process_exit_code": 86,
+    "before_recovery": {
+      "ledger_count": 1,
+      "refunded_cents": 10000
+    },
+    "after_recovery": {
+      "step": "resume_from_ledger",
+      "status": "completed",
+      "business_status": "resolved",
+      "input_revision": 1,
+      "proposal_revision": 1,
+      "repair_count": 0,
+      "node_trace": [
+        "intake",
+        "order",
+        "policy",
+        "draft",
+        "validate",
+        "review",
+        "prepare_operator",
+        "wait_operator",
+        "approve"
+      ],
+      "executed_actions": [
+        {
+          "operation_key": "op-5a5be83bee6234302fcaeef2d6e78ed511efab63",
+          "payload_hash": "5831d8aace0b779d54b980d5f044f0b88e1b07072b88e50466d99da1039930a9",
+          "run_id": "worker-run",
+          "ticket_id": "T-NOTRECEIVED-002",
+          "action_id": "action-1207dc265c17081270d0c0dfd358b999",
+          "input_revision": 1,
+          "type": "issue_mock_refund",
+          "order_id": "ORD-004",
+          "amount_cents": 10000,
+          "business_record_id": "act-66fd97e57994fcdfc294edc8d0543da3",
+          "business_status": "resolved",
+          "committed_at": "2026-10-02T04:00:00Z"
+        }
+      ],
+      "pending_kind": null,
+      "statistics": {
+        "model_calls": 14,
+        "tool_calls": 11,
+        "validation_tool_calls": 1,
+        "schema_repairs": 0,
+        "token_usage": null
+      },
+      "confirmation_decisions": [
+        "approve"
+      ]
+    },
+    "ledger_replay_observed": true
+  }
+}

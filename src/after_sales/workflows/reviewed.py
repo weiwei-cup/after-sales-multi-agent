@@ -351,7 +351,7 @@ class ReviewRuntime(MultiRuntime):
         raw = interrupt(copy.deepcopy(state["pending_input"]))
         request = self.owner.validate_resume(raw, state)
         self.owner.consume(request)
-        self.owner.confirmations.append(
+        self.owner.record_confirmation(
             Confirmation(
                 pending_id=request.pending_id,
                 actor_id=request.actor_id,
@@ -402,8 +402,8 @@ class ReviewRuntime(MultiRuntime):
         }
 
 
-def build_review_graph(runtime, checkpointer):
-    graph = StateGraph(ReviewState)
+def build_review_graph(runtime, checkpointer, *, state_schema=ReviewState, persistent=False):
+    graph = StateGraph(state_schema)
     names = (
         "intake",
         "order",
@@ -421,7 +421,7 @@ def build_review_graph(runtime, checkpointer):
         "approve",
         "finish",
         "handoff",
-    )
+    ) + (("refresh",) if persistent else ())
     for name in names:
         operation = getattr(runtime, name)
 
@@ -431,6 +431,8 @@ def build_review_graph(runtime, checkpointer):
                 update = await operation(state, config)
                 update = json.loads(json.dumps(update, ensure_ascii=False))
                 update["node_trace"] = [*state["node_trace"], name]
+                if persistent:
+                    runtime.owner.after_node({**state, **update}, name)
                 runtime.trace.event("node_finished", role="application", node=name)
                 return update
             except GraphInterrupt:
@@ -456,7 +458,7 @@ def build_review_graph(runtime, checkpointer):
     for name, routes in {
         "review": ("repair", "prepare_customer", "prepare_operator", "handoff", "finish"),
         "repair": ("research", "draft", "handoff"),
-        "approve": ("handoff", "end"),
+        "approve": ("handoff", "end", "refresh") if persistent else ("handoff", "end"),
     }.items():
         graph.add_conditional_edges(
             name,
@@ -464,6 +466,8 @@ def build_review_graph(runtime, checkpointer):
             {route: END if route == "end" else route for route in routes},
         )
     graph.add_edge("research", "draft")
+    if persistent:
+        graph.add_edge("refresh", "draft")
     graph.add_edge("prepare_customer", "wait_customer")
     graph.add_edge("prepare_operator", "wait_operator")
     graph.add_conditional_edges(
@@ -669,6 +673,9 @@ class InMemoryReviewRun:
             proposal_revision=request.proposal_revision,
         )
 
+    def record_confirmation(self, confirmation):
+        self.confirmations.append(confirmation)
+
     def apply_customer(self, request):
         revision = self.ticket.input_revision + 1
         messages = tuple(
@@ -726,7 +733,7 @@ class InMemoryReviewRun:
                 "run_started",
                 role="application",
                 architecture="multi",
-                workflow="review-v1",
+                workflow=getattr(self, "workflow_version", "review-v1"),
                 ticket_id=self.ticket.id,
             )
             if self.mode == "live":
@@ -745,7 +752,7 @@ class InMemoryReviewRun:
             request = self.validate_resume(raw)
             return await self.advance(Command(resume=request.model_dump(mode="json")))
 
-    def report(self):
+    def report(self, *, raw=False):
         state, session = self.state, self.runtime.session
         stats = self.trace.statistics()
         stats["roles"] = {
@@ -799,6 +806,8 @@ class InMemoryReviewRun:
             "evidence": session.evidence.export(session.context),
         }
         # A returned report is a static value, never a handle for restoring trusted state.
+        if raw:
+            return json.loads(json.dumps(report, ensure_ascii=False))
         return REPORT_ADAPTER.validate_python(
             json.loads(json.dumps(report, ensure_ascii=False))
         ).model_dump(mode="json")

@@ -150,7 +150,17 @@ prepare_customer / prepare_operator 创建绑定版本和内容的 PendingInput�
 
 review-run-v1 保留审核/版本/待办历史/确认，核对图状态、方案与批准内容一致。返回快照与运行对象隔离，保存文件不能恢复或授权动作。身份仅为本地演示，认证在 P08；checkpointer 文件路径在 P06 才使用。实现、测试与边界见 [ADR 005](decisions/005-bounded-review-and-human-input.md) 和 [第 005 轮记录](rounds/005.md)。
 
-所有角色共用 P03 的调用预算和默认 1 次 schema 修复预算，包含提前结束后的修复和验证器复算。单模型超时及工具查询限制继续生效；暂停后的预算恢复和全局并发仍是后续工作。实际图和三类轨迹见 [Mermaid](graphs/p04-serial.mmd)、[轨迹 JSON](graphs/p04-demo-traces.json)，设计依据见 [ADR 004](decisions/004-serial-role-handoffs.md)。
+所有角色共用 P03 的调用预算和默认 1 次 schema 修复预算，包含提前结束后的修复和验证器复算。单模型超时及工具查询限制继续生效；reviewed 同进程累计预算；durable 在 P06 持久恢复预算，全局并发在 P07 实现。实际图和三类轨迹见 [Mermaid](graphs/p04-serial.mmd)、[轨迹 JSON](graphs/p04-demo-traces.json)，设计依据见 [ADR 004](decisions/004-serial-role-handoffs.md)。
+
+### 3.6 P06 已实现的持久审核与动作图
+
+显式 `--workflow durable` 复用审核图，使用 AsyncSqliteSaver 和 persistent-state-v1；run ID 同时为 thread ID。业务 schema v2 保存运行资料、证据、固定调用限制、方案、待办、人工输入、动作账本和事件。加载时校验 workflow/state/model 版本、路径和检查点 manifest，旧版本拒绝且保留数据。
+
+客户回答和操作员决定先经过业务事务接受，再发送 Command。图位置与已保存回答不一致时，恢复投影为 interrupted 并自动重放保存的输入。执行节点通过 ActionService 核对批准与最新事实/政策，按执行时 UTC 时钟重新计算；变化使旧批准失效，确定性只读刷新后重新起草、校验和审核。
+
+operation key 绑定工单、输入版本、动作类型与订单，payload hash 另含金额。同 key 同 payload 直接返回账本结果，同 key 换金额冲突；模型无法生成新 key 绕过。账本、after_sales_history 模拟记录、退款金额/版本、业务状态与动作事件同事务提交。自身已提交结果优先于资料复核，以覆盖业务提交后图检查点前退出。
+
+同 run 和工单使用 POSIX 文件锁，SQL 拒绝同一工单有活跃运行时另开 run；不同工单争用订单余额由 BEGIN IMMEDIATE 和条件金额更新保护。persistent-run-v1 报告同时保存 projected graph_state 和原始 checkpoint_state，表明恢复位置与已提交效果的区别。实际图与独立进程轨迹见 [P06 图](graphs/p06-durable.mmd)、[实跑 JSON](graphs/p06-demo-traces.json)；实现与范围见 [ADR 006](decisions/006-durable-review-and-action-ledger.md)。
 
 ## 4. Agent 设计
 
@@ -304,7 +314,7 @@ P02 已实现统一 `ToolResult`：`schema_version`、`ok`、`data`、`evidence_
 
 `ToolSession` 由应用读取工单后创建；可信上下文包括 customer_id、ticket_id、ticket_version、session_id、订单原始引用、工单类型、业务时间和资料版本。10 个 `StructuredTool` 绑定这份上下文，模型输入 schema 不暴露客户身份、业务时间或依赖对象。工具只接受当前工单订单号，repository 再检查客户归属。P03 已在 Agent 调用入口创建并传递这份会话，session_id 与 run_id 对应。具体契约与测试见 [ADR 002](decisions/002-trusted-tools-and-evidence.md)。工具 schema 使用 LangChain 官方支持的 Pydantic 输入模型，异步结果通过 `ToolMessage` 与 call ID 关联。[LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
 
-证据是包含来源类型、来源 ID、来源版本、业务与观察时间、工单/会话范围及事实 JSON 的不可变快照。ID 由上述内容生成，重复读同一快照去重；内容变化生成新 ID。集合使用资料集版本，条目自身版本仍保留在事实里；当前 assessment 使用 `rules-v2` 并保存输入引用，历史阶段快照保留 `rules-v1`。P02 演示的观察时钟与固定业务时钟一致，证据只保存在会话内存；`inspect --json` 可导出，但没有重新导入接口。P06 将随 run 持久化，写操作前须重新核验资料版本。
+证据是包含来源类型、来源 ID、来源版本、业务与观察时间、工单/会话范围及事实 JSON 的不可变快照。ID 由上述内容生成，重复读同一快照去重；内容变化生成新 ID。集合使用资料集版本，条目自身版本仍保留在事实里；当前 assessment 使用 `rules-v2` 并保存输入引用，历史阶段快照保留 `rules-v1`。P02 演示的观察时钟与固定业务时钟一致，证据只保存在会话内存；`inspect --json` 可导出，但没有重新导入接口。P06 durable 随 run 持久化，写操作前读取最新资料及政策并重算规则。
 
 `get_policy` 可读取指定历史 / 未来版本；`evaluate_policy` 的引用必须适用于当前工单意图、商品、动作和业务时间，混入不适用政策返回 INVALID_ARGUMENT，不转化为客户不符合条件。非退款评估不允许金额参数。工具输入错误与业务 ineligible 分开处理。
 
@@ -346,11 +356,11 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 ### 8.2 数据库职责
 
-`business.sqlite`：customers、orders、order_items、tracking_events、delivery_proofs、policies、tickets、ticket_messages、runs、pending_inputs、action_ledger、refunds、return_requests、logistics_cases、run_events、request_idempotency、schema_migrations。
+`business.sqlite` 当前实现：原业务表，加 workflow_runtime、proposal_plans、pending_inputs、human_inputs、action_ledger、action_events。三类模拟业务记录共用 after_sales_history，其 operation_key 唯一且引用账本；HTTP request_idempotency 和独立履约表待后续接口扩展。
 
 `checkpoints.sqlite`：由框架管理图检查点，不手工修改内部表。两库分别持久化，不能假设业务提交和图检查点能原子提交。
 
-业务库启用外键、合适的 busy timeout 和明确事务。演示服务只运行一个进程；同工单同一时刻允许一个活跃执行器。用数据库条件更新占用 run，避免两个 HTTP 请求同时启动；内存锁只作辅助。
+业务库启用外键、合适的 busy timeout 和明确事务。P06 CLI 的 run/工单执行器由 POSIX 文件锁与活跃 run 注册保护，支持独立进程恢复；同订单金额由业务事务保护。HTTP 请求租约与分布式执行器尚未实现。
 
 ### 8.3 动作幂等
 
@@ -368,7 +378,7 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 - paused run 显示对应待办，可补充信息或确认继续。
 - 已经完成的动作以账本为准，不因旧图状态再次执行。
 - schema / workflow 版本不兼容时保留数据并报告版本冲突，先做明确迁移。
-- 取消在节点边界生效；已经提交的模拟动作保留真实状态，取消不表示撤销。
+- 取消为后续目标，P06 尚未提供取消入口；已经提交的模拟动作不能通过图状态撤销。
 
 ## 9. 错误、预算和可观察性
 

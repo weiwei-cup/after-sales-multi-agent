@@ -1,0 +1,59 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	intake(intake)
+	order(order)
+	policy(policy)
+	draft(draft)
+	validate(validate)
+	review(review)
+	repair(repair)
+	research(research)
+	prepare_customer(prepare_customer)
+	wait_customer(wait_customer)
+	refresh_input(refresh_input)
+	prepare_operator(prepare_operator)
+	wait_operator(wait_operator)
+	approve(approve)
+	finish(finish)
+	handoff(handoff)
+	refresh(refresh)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> intake;
+	approve -. &nbsp;end&nbsp; .-> __end__;
+	approve -.-> handoff;
+	approve -.-> refresh;
+	draft --> validate;
+	intake -.-> draft;
+	intake -.-> order;
+	order -.-> draft;
+	order -.-> policy;
+	policy --> draft;
+	prepare_customer --> wait_customer;
+	prepare_operator --> wait_operator;
+	refresh --> draft;
+	refresh_input --> draft;
+	repair -.-> draft;
+	repair -.-> handoff;
+	repair -.-> research;
+	research --> draft;
+	review -.-> finish;
+	review -.-> handoff;
+	review -.-> prepare_customer;
+	review -.-> prepare_operator;
+	review -.-> repair;
+	validate --> review;
+	wait_customer -.-> intake;
+	wait_customer -.-> refresh_input;
+	wait_operator -.-> approve;
+	wait_operator -.-> handoff;
+	wait_operator -.-> repair;
+	finish --> __end__;
+	handoff --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

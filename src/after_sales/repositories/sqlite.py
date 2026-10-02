@@ -70,7 +70,12 @@ def read_database(path: Path) -> Iterator[sqlite3.Connection]:
         if "schema_migrations" not in tables:
             raise DatabaseNotInitialized("schema is absent; run after-sales seed")
         versions = {row[0] for row in connection.execute("SELECT version FROM schema_migrations")}
-        if versions != set(MIGRATIONS):
+        if (
+            not versions
+            or min(versions) != 1
+            or versions != set(range(1, max(versions) + 1))
+            or not versions.issubset(MIGRATIONS)
+        ):
             raise UnsafeDatabase("unsupported business database schema")
         connection.execute("BEGIN")
         yield connection
@@ -204,7 +209,8 @@ class BusinessRepository:
             return [
                 AfterSalesRecord.model_validate(dict(row))
                 for row in connection.execute(
-                    "SELECT * FROM after_sales_history WHERE order_id=? ORDER BY created_at,id",
+                    "SELECT id,order_id,type,status,amount_cents,created_at,version "
+                    "FROM after_sales_history WHERE order_id=? ORDER BY created_at,id",
                     (order_id,),
                 )
             ]
@@ -272,7 +278,8 @@ class BusinessRepository:
             history = [
                 AfterSalesRecord.model_validate(dict(row))
                 for row in connection.execute(
-                    "SELECT * FROM after_sales_history WHERE order_id=? ORDER BY created_at,id",
+                    "SELECT id,order_id,type,status,amount_cents,created_at,version "
+                    "FROM after_sales_history WHERE order_id=? ORDER BY created_at,id",
                     (order_id,),
                 )
             ]

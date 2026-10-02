@@ -32,11 +32,11 @@ def snapshot(path):
 
 def test_migrations_are_repeatable_and_foreign_keys_are_enabled(tmp_path):
     path = tmp_path / "business.sqlite"
-    assert migrate(path) == 1
-    assert migrate(path) == 1
+    assert migrate(path) == 2
+    assert migrate(path) == 2
     with connect(path) as connection:
         assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
-        assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0] == 1
+        assert connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0] == 2
         with pytest.raises(sqlite3.IntegrityError):
             connection.execute(
                 "INSERT INTO order_items VALUES (?,?,?,?,?)", ("absent", "absent", 1, 1, 1)
@@ -234,3 +234,23 @@ def test_changed_fixture_and_migration_checksum_cannot_be_silently_applied(busin
         connection.execute("UPDATE schema_migrations SET checksum='changed'")
     with pytest.raises(UnsafeDatabase, match="checksum"):
         migrate(business_db)
+
+
+def test_v1_migration_preserves_existing_business_data(tmp_path, monkeypatch):
+    from after_sales.repositories.migrations import MIGRATIONS
+
+    path = tmp_path / "legacy.sqlite"
+    with monkeypatch.context() as patch:
+        patch.delitem(MIGRATIONS, 2)
+        seed_demo(path)
+    repository = BusinessRepository(path)
+    original = repository.get_ticket("T-RETURN-001")
+    assert repository.get_order("ORD-005", customer_id="CUST-B").id == "ORD-005"
+    assert migrate(path) == 2
+    assert repository.get_ticket("T-RETURN-001") == original
+    assert seed_demo(path)["changed"] is False
+    with connect(path) as db:
+        assert db.execute("SELECT count(*) FROM workflow_runtime").fetchone()[0] == 0
+        assert "operation_key" in {
+            r[1] for r in db.execute("PRAGMA table_info(after_sales_history)")
+        }

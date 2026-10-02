@@ -6,7 +6,15 @@ from typing import Annotated, Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
-from after_sales.domain.models import ActionType, Cents, DomainModel, Identifier, PositiveInt
+from after_sales.domain.models import (
+    ActionType,
+    Cents,
+    DomainModel,
+    Identifier,
+    PositiveInt,
+    TicketStatus,
+    UtcTime,
+)
 from after_sales.tools.contracts import EvidenceRef
 from after_sales.tools.evidence import canonical
 
@@ -470,8 +478,105 @@ class StoredReviewRunReport(StoredRunReport):
         return self
 
 
+class ActionReceipt(DomainModel):
+    operation_key: Identifier
+    payload_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    run_id: Identifier
+    ticket_id: Identifier
+    action_id: Identifier
+    input_revision: PositiveInt
+    type: ActionType
+    order_id: Identifier
+    amount_cents: Cents | None
+    business_record_id: Identifier
+    business_status: TicketStatus
+    committed_at: UtcTime
+
+    @model_validator(mode="after")
+    def effect(self) -> Self:
+        expected = {
+            ActionType.LOGISTICS_CASE: TicketStatus.PROCESSING,
+            ActionType.RETURN_REQUEST: TicketStatus.WAITING_RETURN,
+            ActionType.MOCK_REFUND: TicketStatus.RESOLVED,
+        }[self.type]
+        if self.business_status != expected:
+            raise ValueError("receipt must reflect the action's business state")
+        if self.type == ActionType.MOCK_REFUND:
+            if not self.amount_cents:
+                raise ValueError("refund receipt requires a positive amount")
+        elif self.amount_cents is not None:
+            raise ValueError("non-refund receipt cannot carry an amount")
+        return self
+
+
+class StoredPersistentRunReport(StoredReviewRunReport):
+    schema_version: Literal["persistent-run-v1"]
+    phase: Literal["P06"]
+    status: Literal["paused", "completed", "handed_off", "interrupted", "failed", "skipped"]
+    resume_scope: Literal["cross_process"]
+    checkpointer: Literal["AsyncSqliteSaver"]
+    candidate_only: bool
+    executed_actions: tuple[ActionReceipt, ...] = Field(max_length=3)
+    business_status: TicketStatus
+    checkpoint_schema: Literal["persistent-state-v1"]
+    checkpoint_state: dict[str, JsonValue]
+
+    @model_validator(mode="after")
+    def validate_acceptance(self) -> Self:
+        if self.status == "interrupted":
+            if self.accepted_proposal is not None or self.pending_input is not None:
+                raise ValueError("interrupted execution is recoverable, without a new human prompt")
+            if self.graph_state.get("status") != self.status:
+                raise ValueError("interrupted report must agree with its projected state")
+            projection = self.model_copy(
+                update={
+                    "status": "handed_off",
+                    "graph_state": {**self.graph_state, "status": "handed_off"},
+                }
+            )
+            StoredReviewRunReport.validate_acceptance(projection)
+        else:
+            super().validate_acceptance()
+        if self.candidate_only != (not self.executed_actions):
+            raise ValueError("report candidate flag must agree with committed receipts")
+        keys = [receipt.operation_key for receipt in self.executed_actions]
+        if len(keys) != len(set(keys)) or any(
+            receipt.ticket_id != self.ticket_id for receipt in self.executed_actions
+        ):
+            raise ValueError("receipts must be unique and belong to this ticket")
+        for receipt in self.executed_actions:
+            payload = {
+                "ticket_id": receipt.ticket_id,
+                "input_revision": receipt.input_revision,
+                "type": receipt.type.value,
+                "order_id": receipt.order_id,
+                "amount_cents": receipt.amount_cents,
+            }
+            expected_key = (
+                "op-" + _digest({k: v for k, v in payload.items() if k != "amount_cents"})[:40]
+            )
+            if receipt.operation_key != expected_key or receipt.payload_hash != _digest(payload):
+                raise ValueError("receipt operation key and payload hash must match its effect")
+        if self.status == "completed" and self.graph_state.get("executed_actions") != [
+            r.model_dump(mode="json") for r in self.executed_actions
+        ]:
+            raise ValueError("completed graph and committed receipts must agree")
+        if self.status == "completed" and self.proposal and self.proposal.actions:
+            if len(self.executed_actions) != len(self.proposal.actions) or any(
+                not any(
+                    (a.type, a.order_id, a.amount_cents) == (r.type, r.order_id, r.amount_cents)
+                    for r in self.executed_actions
+                )
+                for a in self.proposal.actions
+            ):
+                raise ValueError(
+                    "completed action workflow requires each committed business effect"
+                )
+        return self
+
+
 RunReport = Annotated[
-    StoredRunReport | StoredMultiRunReport | StoredReviewRunReport,
+    StoredRunReport | StoredMultiRunReport | StoredReviewRunReport | StoredPersistentRunReport,
     Field(discriminator="schema_version"),
 ]
 REPORT_ADAPTER = TypeAdapter(RunReport)
