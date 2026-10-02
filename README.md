@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前第 **003 轮 / P03：单 Agent 离线基线**已通过本地验收，GitHub 交付待验证。一个 Agent 使用 `create_agent` 调用 P02 的只读工具，输出结构化建议，经代码校验后保存结果和事件；本地 201 个离线测试通过。下一轮为 P04：多 Agent 串行主图。
+当前已完成 **第 003 轮 / P03：单 Agent 离线基线**，代码与学习记录已上传 GitHub。一个 Agent 使用 `create_agent` 调用 P02 的只读工具，输出结构化建议，经代码校验后保存结果和事件；本地 201 个离线测试与 [GitHub CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37018494445) 均通过，学习快照为 [phase-p03](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p03)。下一轮为 P04：多 Agent 串行主图。
 
 - [技术方案](docs/technical-design.md)：业务范围、系统架构、Agent 职责、状态与数据、工具规则、恢复与幂等、API 和评估。
 - [实施计划](plan.md)：P00～P10 的任务、测试、演示和验收条件，后续逐阶段更新。

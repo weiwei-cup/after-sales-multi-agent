@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00～P02 已完成并上传；第 003 轮 / P03 离线基线本地验收通过，GitHub CI 与阶段标签待验证。下一轮为 P04。用户选择暂缓真实模型接入。
+当前状态：P00～P03 已完成并上传；第 003 轮 / P03 离线基线本地与 GitHub CI 通过，阶段快照为 phase-p03，达到 M1 的离线范围。下一轮为 P04。用户选择暂缓真实模型接入。
 
 ## 1. 使用方式
 
@@ -205,7 +205,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P03.6 单 Agent 同样经过代码事实与规则校验；只输出建议和草稿，不执行动作。
 - [x] P03.7 实现 baseline CLI，保存输入、结果、版本、证据与统计，并提供 report show。
 - [x] P03.8 实现 live smoke 状态入口，离线选择明确显示 skipped；网络验证未执行。
-- [ ] P03.9 上传第 003 轮代码与学习记录，通过 GitHub CI，并建立 `phase-p03` 标签。
+- [x] P03.9 上传第 003 轮代码与学习记录，通过 GitHub CI，并建立 `phase-p03` 标签。
 
 延期项：
 
@@ -473,7 +473,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P00：工程基础。
 - [x] P01：模型和模拟数据。
 - [x] P02：工具和规则。
-- [ ] P03：单 Agent 基线。
+- [x] P03：单 Agent 离线基线。
 - [ ] P04：多 Agent 串行主图。
 - [ ] P05：审核与人工介入。
 - [ ] P06：恢复与模拟动作。
@@ -482,7 +482,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 003 轮 / P03 已本地通过，远程交付待完成。下一步只推进第 004 轮 / P04：多 Agent 串行主图。真实模型接入延期，后续仍可离线学习职责拆分与图编排。
+第 003 轮 / P03 已完成并上传。下一步只推进第 004 轮 / P04：多 Agent 串行主图。真实模型接入延期，后续仍可离线学习职责拆分与图编排。
 
 ### 已完成工作记录
 
@@ -538,4 +538,4 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 打包：构建并在独立锁文件环境重新安装 wheel；另一个工作目录运行退货基线通过。安装包包含 8 个 agents Python 模块与业务资料，不含 gold、运行库、测试或工具缓存。
 - 文档：[docs/rounds/003.md](docs/rounds/003.md)、[ADR 003](docs/decisions/003-offline-agent-baseline.md)，技术方案同步实际契约和当前预算行为。
 - 限制：脚本不评价真实模型质量；live provider 与网络 smoke 延期且显示 skipped。JSON 是静态报告，不是恢复检查点；复算依据本轮事实快照，动作前刷新留给 P06。自然语言草稿的完整语义审核在 P05，通用案例故障执行器及全局预算在 P07。
-- GitHub：本地验收通过，实现提交、远程 CI 与 `phase-p03` 标签待完成。
+- GitHub：实现提交 `573e1548c994d71696137ccd2d87f39468229756` 已推送，[P03 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37018494445) 为 success，完成 Linux 锁定安装、201 个离线测试、三类单 Agent 演示、live 延期状态与 wheel 构建。阶段快照为 [phase-p03](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p03)，包含本轮记录与完成状态。达到 M1 的离线范围，真实模型项仍为延期。
