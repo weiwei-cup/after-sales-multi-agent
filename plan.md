@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00～P04 已完成并上传；P05 实现完成，本地 370 个离线测试通过，GitHub CI 和 phase-p05 交付验证进行中。下一轮为 P06。继续仅用离线脚本模型。
+当前状态：P00～P05 已完成并上传；P05 本地 370 个离线测试与 [GitHub CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37031169435) 通过，学习快照为 phase-p05。下一轮为 P06。继续仅用离线脚本模型。
 
 前次 000～004 复核已完成。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
 
@@ -273,7 +273,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P05.5 为 pending input、input_revision、proposal_revision 和 action_id 建立稳定对应关系。
 - [x] P05.6 操作员可批准或拒绝；修改当前退款金额产生新版本并重新展示。
 - [x] P05.7 等待节点不执行业务写动作；本阶段只记录确认结果。
-- [ ] P05.8 上传第 005 轮实现与记录，验证 GitHub CI，保存 `phase-p05` 标签。
+- [x] P05.8 上传第 005 轮实现与记录，验证 GitHub CI，保存 `phase-p05` 标签。
 
 关键验证：
 
