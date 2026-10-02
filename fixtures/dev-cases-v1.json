@@ -1,0 +1,167 @@
+{
+  "version": "cases-v1",
+  "dataset_version": "demo-v1",
+  "as_of_time": "2026-10-02T04:00:00Z",
+  "cases": [
+    {
+      "id": "C01",
+      "title": "物流未超期",
+      "ticket_id": "T-DELAY-001",
+      "first_stage": "P03",
+      "fault_injections": []
+    },
+    {
+      "id": "C02",
+      "title": "物流超期",
+      "ticket_id": "T-DELAY-002",
+      "first_stage": "P03",
+      "fault_injections": []
+    },
+    {
+      "id": "C03",
+      "title": "签收未收到且缺凭证",
+      "ticket_id": "T-NOTRECEIVED-001",
+      "first_stage": "P03",
+      "fault_injections": []
+    },
+    {
+      "id": "C04",
+      "title": "调查确认丢件",
+      "ticket_id": "T-NOTRECEIVED-002",
+      "first_stage": "P06",
+      "fault_injections": []
+    },
+    {
+      "id": "C05",
+      "title": "窗口内未拆封退货",
+      "ticket_id": "T-RETURN-001",
+      "first_stage": "P06",
+      "fault_injections": []
+    },
+    {
+      "id": "C06",
+      "title": "超过窗口一秒",
+      "ticket_id": "T-RETURN-002",
+      "first_stage": "P02",
+      "fault_injections": []
+    },
+    {
+      "id": "C07",
+      "title": "缺少订单号",
+      "ticket_id": "T-MISSING-001",
+      "first_stage": "P05",
+      "fault_injections": []
+    },
+    {
+      "id": "C08",
+      "title": "跨客户订单",
+      "ticket_id": "T-CROSS-001",
+      "first_stage": "P02",
+      "fault_injections": []
+    },
+    {
+      "id": "C09",
+      "title": "有效政策冲突",
+      "ticket_id": "T-CONFLICT-001",
+      "first_stage": "P04",
+      "fault_injections": []
+    },
+    {
+      "id": "C10",
+      "title": "引用不存在",
+      "ticket_id": "T-INVALID-EVIDENCE-001",
+      "first_stage": "P05",
+      "fault_injections": [
+        "invalid_evidence_reference"
+      ]
+    },
+    {
+      "id": "C11",
+      "title": "审核持续返工",
+      "ticket_id": "T-REVIEW-LOOP-001",
+      "first_stage": "P05",
+      "fault_injections": [
+        "review_always_rejects"
+      ]
+    },
+    {
+      "id": "C12",
+      "title": "动作重复请求",
+      "ticket_id": "T-DUPLICATE-001",
+      "first_stage": "P06",
+      "fault_injections": [
+        "repeat_same_action"
+      ]
+    },
+    {
+      "id": "C13",
+      "title": "工具暂时超时",
+      "ticket_id": "T-TOOL-TIMEOUT-001",
+      "first_stage": "P07",
+      "fault_injections": [
+        "get_tracking_timeout_once"
+      ]
+    },
+    {
+      "id": "C14",
+      "title": "凭证查询失败",
+      "ticket_id": "T-PROOF-ERROR-001",
+      "first_stage": "P02",
+      "fault_injections": [
+        "get_delivery_proof_always_times_out"
+      ]
+    },
+    {
+      "id": "C15",
+      "title": "确认后事实变化",
+      "ticket_id": "T-STALE-APPROVAL-001",
+      "first_stage": "P06",
+      "fault_injections": [
+        "order_changes_after_approval"
+      ]
+    },
+    {
+      "id": "C16",
+      "title": "业务提交后检查点前崩溃",
+      "ticket_id": "T-CRASH-001",
+      "first_stage": "P06",
+      "fault_injections": [
+        "crash_after_action_commit"
+      ]
+    },
+    {
+      "id": "C17",
+      "title": "并发抢最后预算",
+      "ticket_id": "T-BUDGET-001",
+      "first_stage": "P07",
+      "fault_injections": [
+        "one_model_call_remaining_two_workers"
+      ]
+    },
+    {
+      "id": "C18",
+      "title": "资料包含指令注入",
+      "ticket_id": "T-PROMPT-INJECTION-001",
+      "first_stage": "P04",
+      "fault_injections": []
+    },
+    {
+      "id": "C19",
+      "title": "API 重复启动和确认",
+      "ticket_id": "T-API-DUPLICATE-001",
+      "first_stage": "P08",
+      "fault_injections": [
+        "repeat_start_and_confirm"
+      ]
+    },
+    {
+      "id": "C20",
+      "title": "页面刷新和已有退货",
+      "ticket_id": "T-UI-RESUME-001",
+      "first_stage": "P09",
+      "fault_injections": [
+        "refresh_and_reconnect"
+      ]
+    }
+  ]
+}

@@ -23,3 +23,6 @@ jobs:
       - run: uv run --locked ruff format --check .
       - run: uv run --locked pytest
       - run: uv run --locked after-sales doctor --json
+      - run: uv run --locked after-sales seed --dataset demo --json
+      - run: uv run --locked after-sales ticket show T-RETURN-001
+      - run: uv build --wheel

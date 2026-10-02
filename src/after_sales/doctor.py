@@ -27,7 +27,7 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P00",
+        "phase": "P01",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
@@ -36,7 +36,7 @@ def build_report(settings: Settings) -> dict[str, object]:
         "databases": {
             "business": str(settings.business_db_path),
             "checkpoints": str(settings.checkpoint_db_path),
-            "initialization": "available_from_P01_and_P06",
+            "initialization": {"business": "after-sales seed", "checkpoints": "available_from_P06"},
         },
         "budgets": {
             "model_calls": settings.max_model_calls,

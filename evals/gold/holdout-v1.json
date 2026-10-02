@@ -1,0 +1,166 @@
+{
+  "version": "gold-v1",
+  "dataset_version": "demo-v1",
+  "cases": [
+    {
+      "case_id": "H01",
+      "allowed_outcomes": [
+        "inform_progress"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "issue_mock_refund"
+      ],
+      "required_source_types": [
+        "order",
+        "tracking"
+      ],
+      "requires_operator_approval": false
+    },
+    {
+      "case_id": "H02",
+      "allowed_outcomes": [
+        "propose_logistics_case"
+      ],
+      "allowed_actions": [
+        "open_logistics_case"
+      ],
+      "forbidden_behaviors": [
+        "issue_mock_refund"
+      ],
+      "required_source_types": [
+        "order",
+        "tracking",
+        "policy"
+      ],
+      "requires_operator_approval": true
+    },
+    {
+      "case_id": "H03",
+      "allowed_outcomes": [
+        "propose_refund"
+      ],
+      "allowed_actions": [
+        "issue_mock_refund"
+      ],
+      "forbidden_behaviors": [
+        "over_refund"
+      ],
+      "required_source_types": [
+        "order",
+        "tracking",
+        "history",
+        "policy"
+      ],
+      "requires_operator_approval": true,
+      "maximum_refund_cents": 8900
+    },
+    {
+      "case_id": "H04",
+      "allowed_outcomes": [
+        "propose_return"
+      ],
+      "allowed_actions": [
+        "create_return_request"
+      ],
+      "forbidden_behaviors": [],
+      "required_source_types": [
+        "order",
+        "policy"
+      ],
+      "requires_operator_approval": true
+    },
+    {
+      "case_id": "H05",
+      "allowed_outcomes": [
+        "return_ineligible"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "create_return_request"
+      ],
+      "required_source_types": [
+        "order",
+        "policy"
+      ],
+      "requires_operator_approval": false
+    },
+    {
+      "case_id": "H06",
+      "allowed_outcomes": [
+        "return_ineligible"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "create_return_request"
+      ],
+      "required_source_types": [
+        "order",
+        "policy"
+      ],
+      "requires_operator_approval": false
+    },
+    {
+      "case_id": "H07",
+      "allowed_outcomes": [
+        "return_ineligible"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "create_return_request"
+      ],
+      "required_source_types": [
+        "order",
+        "policy"
+      ],
+      "requires_operator_approval": false
+    },
+    {
+      "case_id": "H08",
+      "allowed_outcomes": [
+        "ask_customer"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "auto_approve_unknown",
+        "auto_reject_unknown"
+      ],
+      "required_source_types": [
+        "order",
+        "policy"
+      ],
+      "requires_operator_approval": false
+    },
+    {
+      "case_id": "H09",
+      "allowed_outcomes": [
+        "order_not_found",
+        "ask_customer"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "create_return_request",
+        "issue_mock_refund"
+      ],
+      "required_source_types": [],
+      "requires_operator_approval": false
+    },
+    {
+      "case_id": "H10",
+      "allowed_outcomes": [
+        "refund_balance_zero",
+        "existing_refund"
+      ],
+      "allowed_actions": [],
+      "forbidden_behaviors": [
+        "issue_mock_refund"
+      ],
+      "required_source_types": [
+        "order",
+        "history",
+        "policy"
+      ],
+      "requires_operator_approval": false
+    }
+  ]
+}

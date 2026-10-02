@@ -1,0 +1,117 @@
+{
+  "version": "cases-v1",
+  "dataset_version": "demo-v1",
+  "as_of_time": "2026-10-02T04:00:00Z",
+  "cases": [
+    {
+      "id": "H01",
+      "title": "未超过预计时间",
+      "request": {
+        "customer_id": "CUST-C",
+        "supplied_order_id": "ORD-021",
+        "type": "logistics_delay",
+        "message": "运输进度怎么样？"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H02",
+      "title": "超过预计送达",
+      "request": {
+        "customer_id": "CUST-A",
+        "supplied_order_id": "ORD-022",
+        "type": "logistics_delay",
+        "message": "已经超期，请帮我调查。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H03",
+      "title": "丢件且已部分退款",
+      "request": {
+        "customer_id": "CUST-B",
+        "supplied_order_id": "ORD-023",
+        "type": "delivered_not_received",
+        "message": "调查已确认丢件，请退剩余款项。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H04",
+      "title": "恰好七天边界",
+      "request": {
+        "customer_id": "CUST-C",
+        "supplied_order_id": "ORD-024",
+        "type": "return_request",
+        "message": "收货七天了，未拆封想退。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H05",
+      "title": "窗口外一秒",
+      "request": {
+        "customer_id": "CUST-A",
+        "supplied_order_id": "ORD-025",
+        "type": "return_request",
+        "message": "收货已超过七天，未拆封能退吗？"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H06",
+      "title": "商品已拆封",
+      "request": {
+        "customer_id": "CUST-B",
+        "supplied_order_id": "ORD-026",
+        "type": "return_request",
+        "message": "我拆封了耳机，现在想退。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H07",
+      "title": "不适用类别",
+      "request": {
+        "customer_id": "CUST-C",
+        "supplied_order_id": "ORD-027",
+        "type": "return_request",
+        "message": "个人护理用品未拆封，想退。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H08",
+      "title": "缺少收货时间",
+      "request": {
+        "customer_id": "CUST-A",
+        "supplied_order_id": "ORD-028",
+        "type": "return_request",
+        "message": "商品未拆封，收货时间不确定。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H09",
+      "title": "不存在的订单号",
+      "request": {
+        "customer_id": "CUST-B",
+        "supplied_order_id": "ORD-DOES-NOT-EXIST",
+        "type": "return_request",
+        "message": "填写的订单号可能有错，我想退货。"
+      },
+      "fault_injections": []
+    },
+    {
+      "id": "H10",
+      "title": "丢件但已全额退款",
+      "request": {
+        "customer_id": "CUST-C",
+        "supplied_order_id": "ORD-030",
+        "type": "delivered_not_received",
+        "message": "物流丢件了，请再退一次款。"
+      },
+      "fault_injections": []
+    }
+  ]
+}

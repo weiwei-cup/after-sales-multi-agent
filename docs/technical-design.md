@@ -1,6 +1,6 @@
 # 售后工单多 Agent 工作台：技术方案
 
-版本：0.2（P00 工程基础完成）
+版本：0.3（P01 本地实现完成）
 
 日期：2026-10-02
 
@@ -177,7 +177,7 @@ flowchart TD
 
 | 模型 | 关键字段 |
 | --- | --- |
-| `Ticket` | id、customer_id、order_id、type、messages、status、input_revision、version |
+| `Ticket` | id、customer_id、supplied_order_id、order_id、type、messages、status、input_revision、version |
 | `Order` | id、customer_id、items、paid_cents、refunded_cents、status、received_at、version |
 | `TrackingEvent` | order_id、event_type、occurred_at、source、version |
 | `DeliveryProof` | order_id、proof_status、source、version；缺失凭证是独立状态 |
@@ -187,6 +187,8 @@ flowchart TD
 | `PendingInput` | id、run_id、kind、requested_fields/action_id、revision、resolved_at |
 
 金额统一为整数分；时间存储为带时区 UTC，页面按 Asia/Shanghai 显示。业务规则接收注入的 `as_of_time`，测试不依赖机器当前时间。
+
+P01 区分 `Ticket.supplied_order_id`（用户填写，可能缺失、错误或跨客户）与 `Ticket.order_id`（核验后属于该客户的订单）。后者与 customer_id 采用复合外键；错误引用只作为原始输入保留，不加载对方订单资料。具体原因和验证见 [ADR 001](decisions/001-fixture-and-order-references.md)。
 
 用户陈述、物流系统事件、政策条款分别标注来源，不能把“用户说未收到”转换成“物流已确认丢失”。证据 ID、版本和来源由程序生成。
 
@@ -387,6 +389,8 @@ errors, final_result
 
 准备 30 个版本化案例，20 个开发案例、10 个留出案例。三类正常工单，加上缺信息、政策矛盾、不可访问订单、工具异常、无效引用、过期确认、重复提交和恢复案例。评估 gold 记录合法结果集合、必要证据、禁止动作和允许待办，不强制唯一自然语言答案。
 
+P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预期。业务 JSON 放在 `src/after_sales/data/` 随包分发；开发输入在 `fixtures/`，留出请求与 gold 在 `evals/`。留出请求使用开发工单以外的订单，P10 在临时库创建评估工单。当前只验证资料完整性，业务行为与故障注入按后续阶段实现。
+
 真实模型评估先输出结果，暂不因小样本波动阻塞早期阶段；P10 再按目标验收：
 
 - 越权读取、未确认写动作、重复写动作、超额退款：0 次，属于必须通过项。
@@ -409,6 +413,7 @@ errors, final_result
 │   └── decisions/                 # 重要设计变更记录
 ├── src/after_sales/
 │   ├── domain/                    # models / policy_rules / enums
+│   ├── data/                      # 随安装包分发的虚构业务 JSON
 │   ├── repositories/              # sqlite / migrations / seed
 │   ├── tools/                     # orders / logistics / policies / evidence
 │   ├── models/                    # factory / scripted / capabilities
