@@ -303,8 +303,44 @@ def test_explicit_future_policy_version_is_readable_but_not_applicable(sessions)
         assert future.data["conditions"]["window_hours"] == 120
         arguments["policy_refs"] = future.evidence_refs
         result = await session.call("evaluate_policy", arguments)
-        assert result.data["disposition"] == "needs_information"
-        assert result.data["evaluations"][0]["eligibility"] == "false"
+        assert result.error.code == ErrorCode.INVALID_ARGUMENT
+        assert result.data is None and result.evidence_refs == ()
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("amount", [-1, 0, 1])
+def test_non_refund_assessment_cannot_create_a_rejection_using_an_amount(sessions, amount):
+    session = sessions()
+
+    async def scenario():
+        arguments, _ = await facts(session)
+        result = await session.call(
+            "evaluate_policy", {**arguments, "requested_amount_cents": amount}
+        )
+        assert result.error.code == ErrorCode.INVALID_ARGUMENT
+        assert result.data is None and not result.evidence_refs
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("policy_id,version", [("RETURN-STANDARD", 2), ("LOST-REFUND", 1)])
+def test_extra_inapplicable_policy_cannot_turn_an_eligible_return_into_a_rejection(
+    sessions, policy_id, version
+):
+    session = sessions()
+
+    async def scenario():
+        arguments, _ = await facts(session)
+        valid = await session.call("evaluate_policy", arguments)
+        assert valid.data["eligible"] is True
+        unrelated = await session.call("get_policy", {"policy_id": policy_id, "version": version})
+        arguments["policy_refs"] = (*arguments["policy_refs"], *unrelated.evidence_refs)
+        before = session.evidence.export(session.context)
+        result = await session.call("evaluate_policy", arguments)
+        assert not result.ok and result.error.code == ErrorCode.INVALID_ARGUMENT
+        assert result.data is None and not result.evidence_refs
+        assert session.evidence.export(session.context) == before
 
     asyncio.run(scenario())
 

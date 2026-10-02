@@ -284,6 +284,11 @@ class ToolSession:
             )
             if current is not None and current != policy:
                 raise ToolFailure(ErrorCode.EVIDENCE_VERSION_MISMATCH, "政策相同版本的内容已变更")
+            if current is None or query.action not in current.allowed_actions:
+                raise ToolFailure(
+                    ErrorCode.INVALID_ARGUMENT,
+                    "政策引用不适用于当前工单、动作或业务时间；不能作为批准或拒绝依据",
+                )
         known_refs = {ref.evidence_id for ref in refs}
         refs.extend(item.ref for item in discovered if item.id not in known_refs)
         required = {

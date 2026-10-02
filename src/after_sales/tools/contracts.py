@@ -124,6 +124,12 @@ class AssessmentQuery(DomainModel):
         None
     )
 
+    @model_validator(mode="after")
+    def validate_amount_scope(self) -> Self:
+        if self.action != ActionType.MOCK_REFUND and self.requested_amount_cents is not None:
+            raise ValueError("only refund assessments accept a requested amount")
+        return self
+
 
 class ReferenceQuery(DomainModel):
     refs: tuple[EvidenceRef, ...] = Field(min_length=1, max_length=50)

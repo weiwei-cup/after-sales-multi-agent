@@ -15,7 +15,7 @@ from after_sales.domain.models import (
     TrackingEvent,
 )
 
-RULES_VERSION = "rules-v1"
+RULES_VERSION = "rules-v2"
 
 
 class Truth(StrEnum):

@@ -144,6 +144,35 @@ def test_unknown_intent_cannot_start_order_or_policy_investigation(business):
     assert report["statistics"]["tool_calls"] == 0
 
 
+def test_ineligible_refund_cannot_justify_declining_a_not_received_investigation(business):
+    def decline(payload):
+        payload["decision"] = "decline_request"
+        payload["actions"] = []
+
+    report = run(
+        business,
+        "T-NOTRECEIVED-001",
+        model_factory=factory_with_change("draft", decline),
+    )
+    assert report["status"] == "validation_failed"
+    assert report["accepted_proposal"] is None
+    assert "DECLINE_UNPROVEN" in {issue["code"] for issue in report["validation"]["issues"]}
+    assert report["executed_actions"] == []
+
+
+def test_rejected_wrong_ticket_proposal_can_still_be_saved_for_diagnosis(business, tmp_path):
+    report = run(
+        business,
+        model_factory=factory_with_change("draft", lambda p: p.update(ticket_id="T-OTHER")),
+    )
+    assert report["status"] == "validation_failed"
+    assert report["accepted_proposal"] is None
+    assert "TICKET_MISMATCH" in {issue["code"] for issue in report["validation"]["issues"]}
+    target = tmp_path / "rejected.json"
+    save_run(report, target)
+    assert json.loads(target.read_text())["proposal"]["ticket_id"] == "T-OTHER"
+
+
 def test_specialists_receive_projected_context_and_independent_messages(business):
     captured = []
     factory = factory_with_change("unused", lambda _: None, capture=captured)

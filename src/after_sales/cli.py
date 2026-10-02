@@ -302,5 +302,5 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Python: {report['python']}；运行模式: {report['model_mode']}")
         for name, installed_version in report["packages"].items():
             print(f"  {name}: {installed_version}")
-        print("未发送模型请求。工单数据和 Agent 功能将按计划逐阶段实现。")
+        print("未发送模型请求。可用 seed 初始化资料，再用 run 执行离线单 / 多 Agent。")
     return 0 if report["ok"] else 1

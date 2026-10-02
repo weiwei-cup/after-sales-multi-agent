@@ -1,10 +1,12 @@
 # 售后工单多 Agent 工作台：技术方案
 
-版本：0.6（P04 串行多 Agent 完成并上传）
+版本：0.7（P00～P04 复核修正；P05 未开始）
 
 日期：2026-10-02
 
 实施路线：[plan.md](../plan.md)
+
+阶段复核：[000～004 复核记录](reviews/000-004.md)。当前规则记录为 rules-v2；不适用政策和非退款金额归为工具参数错误，拒绝 / 已有申请也须绑定完整依据并复算。
 
 ## 1. 项目目标与范围
 
@@ -247,6 +249,8 @@ P04 已实现的交接契约为 IntakeSlots（原始订单引用、客户陈述�
 
 P03 的 decision 为 inform_progress、propose_logistics_investigation、propose_return、propose_refund、request_information、existing_application、human_review、decline_request。FactClaim 只接受定义的事实字段及其引用；ActionCandidate 关联动作、订单、整数分金额、assessment_ref、policy_refs 和 evidence_refs，并要求操作员确认。schema 验证 decision/action 的一致性；真实事实是否支持、金额是否在余额内由随后代码判断。字符串草稿的完整语义审核留给 P05。
 
+000～004 复核后，decline_request 只接纳当前退货请求的完整不符合条件依据，不能用退款候选失败拒绝物流调查诉求。decline_request 与 existing_application 都绑定订单、适合当前意图的 assessment 和完整规则输入，并在同一工具预算内复算。ProposalValidation 分别记录 rechecked_actions、rechecked_decisions，旧报告缺少后者时默认 0。运行报告校验已通过建议与原始建议一致、工单一致及状态 / 校验结果一致；失败的原始建议仍保留用于诊断。静态文件一致性不代表来源认证。
+
 ### 6.3 图状态
 
 外层 `TicketState` 使用 `TypedDict`；节点输入/输出在边界通过 Pydantic 校验后转为可序列化字典。`create_agent` 的专员状态保留其要求的消息 schema，不直接复用业务 Pydantic 模型作为 Agent state。[S4]
@@ -288,7 +292,9 @@ P02 已实现统一 `ToolResult`：`schema_version`、`ok`、`data`、`evidence_
 
 `ToolSession` 由应用读取工单后创建；可信上下文包括 customer_id、ticket_id、ticket_version、session_id、订单原始引用、工单类型、业务时间和资料版本。10 个 `StructuredTool` 绑定这份上下文，模型输入 schema 不暴露客户身份、业务时间或依赖对象。工具只接受当前工单订单号，repository 再检查客户归属。P03 已在 Agent 调用入口创建并传递这份会话，session_id 与 run_id 对应。具体契约与测试见 [ADR 002](decisions/002-trusted-tools-and-evidence.md)。工具 schema 使用 LangChain 官方支持的 Pydantic 输入模型，异步结果通过 `ToolMessage` 与 call ID 关联。[LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
 
-证据是包含来源类型、来源 ID、来源版本、业务与观察时间、工单/会话范围及事实 JSON 的不可变快照。ID 由上述内容生成，重复读同一快照去重；内容变化生成新 ID。集合使用资料集版本，条目自身版本仍保留在事实里；assessment 使用 `rules-v1` 并保存输入引用。P02 演示的观察时钟与固定业务时钟一致，证据只保存在会话内存；`inspect --json` 可导出，但没有重新导入接口。P06 将随 run 持久化，写操作前须重新核验资料版本。
+证据是包含来源类型、来源 ID、来源版本、业务与观察时间、工单/会话范围及事实 JSON 的不可变快照。ID 由上述内容生成，重复读同一快照去重；内容变化生成新 ID。集合使用资料集版本，条目自身版本仍保留在事实里；当前 assessment 使用 `rules-v2` 并保存输入引用，历史阶段快照保留 `rules-v1`。P02 演示的观察时钟与固定业务时钟一致，证据只保存在会话内存；`inspect --json` 可导出，但没有重新导入接口。P06 将随 run 持久化，写操作前须重新核验资料版本。
+
+`get_policy` 可读取指定历史 / 未来版本；`evaluate_policy` 的引用必须适用于当前工单意图、商品、动作和业务时间，混入不适用政策返回 INVALID_ARGUMENT，不转化为客户不符合条件。非退款评估不允许金额参数。工具输入错误与业务 ineligible 分开处理。
 
 P03 将证据快照随静态运行报告保存；读取报告不重新注册为可信工具输入。当前候选复算使用本轮已取得的事实，不能替代执行前读取最新订单/政策、重新计算时间窗口与校验批准版本。
 

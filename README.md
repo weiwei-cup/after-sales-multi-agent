@@ -4,6 +4,8 @@
 
 当前已完成 **第 004 轮 / P04：多 Agent 串行主图**，代码与学习记录已上传 GitHub。客服协调、订单物流、售后政策三个角色通过 LangGraph 串行交接，共用代码校验和调用预算；本地 250 个离线测试与 [GitHub CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37021920152) 均通过，学习快照为 [phase-p04](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p04)。单 Agent 基线继续保留，下一轮为 P05：审核、返工和人工介入。
 
+用户要求先复核 000～004，暂不进入 005。[本轮复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，本地 **285 个离线测试通过**；本次补修的 GitHub 验证结果将在复核记录中补录。原有阶段标签保留历史实现。
+
 - [技术方案](docs/technical-design.md)：业务范围、系统架构、Agent 职责、状态与数据、工具规则、恢复与幂等、API 和评估。
 - [实施计划](plan.md)：P00～P10 的任务、测试、演示和验收条件，后续逐阶段更新。
 - [第 001 轮学习记录](docs/rounds/001.md)：实现步骤、验证方法和本轮要理解的概念。

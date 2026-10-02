@@ -112,7 +112,14 @@ class ProposalValidation(DomainModel):
     ok: bool
     issues: tuple[ValidationIssue, ...] = ()
     rechecked_actions: int = Field(default=0, ge=0)
+    rechecked_decisions: int = Field(default=0, ge=0)
     executable: Literal[False] = False
+
+    @model_validator(mode="after")
+    def validate_outcome(self) -> Self:
+        if self.ok != (not self.issues):
+            raise ValueError("validation outcome must agree with its issues")
+        return self
 
 
 class StoredRunReport(DomainModel):
@@ -146,11 +153,24 @@ class StoredRunReport(DomainModel):
 
     @model_validator(mode="after")
     def validate_acceptance(self) -> Self:
+        if (
+            self.accepted_proposal is not None
+            and self.accepted_proposal.ticket_id != self.ticket_id
+        ):
+            raise ValueError("run and accepted proposal must refer to the same ticket")
         if self.status == "completed":
             if self.accepted_proposal is None or self.validation is None or not self.validation.ok:
                 raise ValueError("completed run requires a code-validated proposal")
+            if self.proposal != self.accepted_proposal:
+                raise ValueError("accepted proposal must equal the proposal that was validated")
+            if self.error is not None:
+                raise ValueError("completed run cannot carry an execution error")
         elif self.accepted_proposal is not None:
             raise ValueError("failed or skipped run cannot contain an accepted proposal")
+        if self.status == "validation_failed" and (
+            self.proposal is None or self.validation is None or self.validation.ok
+        ):
+            raise ValueError("validation_failed requires a rejected proposal and failed validation")
         return self
 
 

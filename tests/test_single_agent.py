@@ -212,6 +212,37 @@ def test_over_balance_refund_is_blocked_by_code_after_valid_schema(business):
     assert report["executed_actions"] == []
 
 
+def test_ineligible_refund_cannot_justify_declining_a_not_received_investigation(business):
+    def decline(payload):
+        payload["decision"] = "decline_request"
+        payload["actions"] = []
+
+    report = run(
+        business,
+        "T-NOTRECEIVED-001",
+        model=model_for(business, "T-NOTRECEIVED-001", transform=decline),
+    )
+    assert report["status"] == "validation_failed"
+    assert report["accepted_proposal"] is None
+    assert "DECLINE_UNPROVEN" in {issue["code"] for issue in report["validation"]["issues"]}
+    assert report["executed_actions"] == []
+
+
+def test_rejected_wrong_ticket_proposal_can_still_be_saved_for_diagnosis(business, tmp_path):
+    report = run(
+        business,
+        model=model_for(
+            business, "T-RETURN-001", transform=lambda p: p.update(ticket_id="T-OTHER")
+        ),
+    )
+    assert report["status"] == "validation_failed"
+    assert report["accepted_proposal"] is None
+    assert "TICKET_MISMATCH" in {issue["code"] for issue in report["validation"]["issues"]}
+    target = tmp_path / "rejected.json"
+    save_run(report, target)
+    assert json.loads(target.read_text())["proposal"]["ticket_id"] == "T-OTHER"
+
+
 @pytest.mark.parametrize("forgery", ["claim", "reference", "policy", "order"])
 def test_forged_proposal_is_not_accepted(business, forgery):
     def forge(payload):

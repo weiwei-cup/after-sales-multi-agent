@@ -1,4 +1,4 @@
-"""Validate factual claims and recheck action candidates before accepting a proposal."""
+"""Validate facts, actions and decisive business conclusions before accepting a proposal."""
 
 import json
 from collections.abc import Awaitable, Callable
@@ -10,9 +10,36 @@ from after_sales.agents.contracts import (
     ResolutionProposal,
     ValidationIssue,
 )
+from after_sales.domain.models import ActionType, TicketType
 from after_sales.tools.contracts import EvidenceRef, ToolFailure, ToolResult
 from after_sales.tools.evidence import canonical
 from after_sales.tools.service import ToolSession
+
+
+def assessment_arguments(assessment: dict, session: ToolSession, amount: int | None) -> dict:
+    """Rebuild a rule query from trusted assessment inputs, never proposal text."""
+    inputs = {}
+    policy_refs = []
+    for raw_ref in assessment["input_evidence_refs"]:
+        ref = EvidenceRef.model_validate(raw_ref)
+        evidence = session.evidence.resolve(ref, session.context)
+        if evidence.source_type == "policy":
+            policy_refs.append(raw_ref)
+        else:
+            field = {
+                "order": "order_ref",
+                "products": "products_ref",
+                "tracking": "tracking_ref",
+                "history": "history_ref",
+            }.get(evidence.source_type)
+            if field:
+                inputs[field] = raw_ref
+    return {
+        **inputs,
+        "policy_refs": policy_refs,
+        "action": assessment["action"],
+        "requested_amount_cents": amount,
+    }
 
 
 async def validate_proposal(
@@ -23,6 +50,7 @@ async def validate_proposal(
 ) -> ProposalValidation:
     issues = []
     checked = 0
+    checked_decisions = 0
 
     def issue(code, message):
         issues.append(ValidationIssue(code=code, message=message))
@@ -121,24 +149,12 @@ async def validate_proposal(
                 continue
             if not assessment["eligible"]:
                 issue("ACTION_INELIGIBLE", "已有代码规则不支持该动作候选")
-            inputs = {}
-            policy_refs = []
+            arguments = assessment_arguments(assessment, session, action.amount_cents)
             expected_policies = set()
-            for raw_ref in assessment["input_evidence_refs"]:
+            for raw_ref in arguments["policy_refs"]:
                 ref = EvidenceRef.model_validate(raw_ref)
                 evidence = session.evidence.resolve(ref, session.context)
-                if evidence.source_type == "policy":
-                    policy_refs.append(raw_ref)
-                    expected_policies.add((evidence.source_id, int(evidence.source_version)))
-                else:
-                    field = {
-                        "order": "order_ref",
-                        "products": "products_ref",
-                        "tracking": "tracking_ref",
-                        "history": "history_ref",
-                    }.get(evidence.source_type)
-                    if field:
-                        inputs[field] = raw_ref
+                expected_policies.add((evidence.source_id, int(evidence.source_version)))
             supplied = {(ref.policy_id, ref.version) for ref in action.policy_refs}
             if supplied != expected_policies:
                 issue("POLICY_REFERENCE_MISMATCH", "动作政策引用必须完整且版本一致")
@@ -147,12 +163,6 @@ async def validate_proposal(
                 for ref in assessment["input_evidence_refs"]
             ):
                 issue("UNCITED_RULE_INPUT", "动作所依据的规则输入未完整列入建议证据")
-            arguments = {
-                **inputs,
-                "policy_refs": policy_refs,
-                "action": action.type.value,
-                "requested_amount_cents": action.amount_cents,
-            }
             result = (
                 await recheck(arguments)
                 if recheck is not None
@@ -164,15 +174,58 @@ async def validate_proposal(
         except ToolFailure as error:
             issue(error.code.value, error.message)
 
-    assessments = [
-        json.loads(item.facts_json) for item in cited.values() if item.source_type == "assessment"
-    ]
-    if proposal.decision == Decision.EXISTING and not any(
-        data["disposition"] == "existing_application" for data in assessments
-    ):
-        issue("EXISTING_APPLICATION_UNPROVEN", "没有规则证据支持已有申请")
-    if proposal.decision == Decision.DECLINE and not any(
-        data["disposition"] == "ineligible" for data in assessments
-    ):
-        issue("DECLINE_UNPROVEN", "未知资料或缺少规则证据不能自动拒绝")
-    return ProposalValidation(ok=not issues, issues=tuple(issues), rechecked_actions=checked)
+    if proposal.decision in {Decision.DECLINE, Decision.EXISTING}:
+        # Decline applies to the return request itself. A failed refund candidate does not
+        # justify declining a not-received investigation; other intents need human review.
+        decline = proposal.decision == Decision.DECLINE
+        disposition = "ineligible" if decline else "existing_application"
+        allowed = (
+            {ActionType.RETURN_REQUEST.value}
+            if session.context.intent == TicketType.RETURN
+            else {ActionType.LOGISTICS_CASE.value, ActionType.MOCK_REFUND.value}
+            if not decline and session.context.intent in {TicketType.DELAY, TicketType.NOT_RECEIVED}
+            else set()
+        )
+        unproven = "DECLINE_UNPROVEN" if decline else "EXISTING_APPLICATION_UNPROVEN"
+        supporting = []
+        for item in cited.values():
+            if item.source_type != "assessment" or item.source_id != proposal.order_id:
+                continue
+            data = json.loads(item.facts_json)
+            if (
+                data["action"] in allowed
+                and data["disposition"] == disposition
+                and all(
+                    (ref["evidence_id"], ref["source_version"]) in top_refs
+                    for ref in data["input_evidence_refs"]
+                )
+            ):
+                supporting.append(data)
+        if (
+            proposal.order_id is None
+            or proposal.order_id != session.context.supplied_order_id
+            or not supporting
+        ):
+            issue(unproven, "处理结论须绑定当前请求、订单及完整规则依据；未知资料不能自动拒绝")
+        else:
+            try:
+                arguments = assessment_arguments(supporting[0], session, None)
+                result = (
+                    await recheck(arguments)
+                    if recheck is not None
+                    else await session.call("evaluate_policy", arguments)
+                )
+                checked_decisions += 1
+                if not result.ok or result.data["disposition"] != disposition:
+                    code = (
+                        "DECLINE_RULE_RECHECK_FAILED" if decline else "EXISTING_RULE_RECHECK_FAILED"
+                    )
+                    issue(code, "处理结论未通过当前请求的代码规则复算")
+            except ToolFailure as error:
+                issue(error.code.value, error.message)
+    return ProposalValidation(
+        ok=not issues,
+        issues=tuple(issues),
+        rechecked_actions=checked,
+        rechecked_decisions=checked_decisions,
+    )
