@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00、P01 已完成；第 002 轮 / P02 本地验收通过，GitHub 交付待验证；下一轮为 P03。
+当前状态：P00、P01 与第 002 轮 / P02 均已完成，本地检查和 GitHub CI 通过；下一轮为 P03。
 
 ## 1. 使用方式
 
@@ -171,7 +171,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P02.5 建立证据 ID、来源、版本、时间和引用验证。
 - [x] P02.6 统一工具结果和错误码；区分缺资料、查询失败、归属不符。
 - [x] P02.7 工具提供清楚说明与返回 schema；加入结果长度限制和超时入口。
-- [ ] P02.8 上传第 002 轮实现与记录，验证 GitHub CI，保存 `phase-p02` 标签。
+- [x] P02.8 上传第 002 轮实现与记录，验证 GitHub CI，保存 `phase-p02` 标签。
 
 关键验证：
 
@@ -463,7 +463,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] 保存完整技术方案和分阶段计划。
 - [x] P00：工程基础。
 - [x] P01：模型和模拟数据。
-- [ ] P02：工具和规则。
+- [x] P02：工具和规则。
 - [ ] P03：单 Agent 基线。
 - [ ] P04：多 Agent 串行主图。
 - [ ] P05：审核与人工介入。
@@ -473,7 +473,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 002 轮 / P02 已通过本地验收，正在完成 GitHub 交付。下一步只推进第 003 轮 / P03：单 Agent 基线。真实模型配置在 P03 接入前确定。
+第 002 轮 / P02 已完成并上传。下一步只推进第 003 轮 / P03：单 Agent 基线。真实模型配置在 P03 接入前确定。
 
 ### 已完成工作记录
 
@@ -519,4 +519,4 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 测试环境：按 pytest-socket 的 Unix socket 例外支持 asyncio；IPv4/IPv6 禁网回归通过。保持默认离线与临时数据库隔离。
 - 文档：[docs/rounds/002.md](docs/rounds/002.md)、[ADR 002](docs/decisions/002-trusted-tools-and-evidence.md)；技术方案同步实际接口。
 - 限制：证据在会话内存中，未实现跨进程恢复或动作；仅验证代码规则和工具，不代表真实 Agent 的提示注入抵抗能力。全局并发/预算与运行事件按后续阶段实现。
-- GitHub：本地已验收，推送、远程 CI 与 `phase-p02` 标签待完成。
+- GitHub：实现提交 `86fa6a49e0094b19f313fd0cecfeff3030f3cefd` 已推送，[P02 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37014887512) 为 success，完成 Linux 新环境安装、132 个离线测试、普通与冲突工单 inspect 演示、wheel 构建；阶段快照为 [phase-p02](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p02)，包含完成状态与学习记录。
