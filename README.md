@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 007 轮 / P07：有界并行与预算**已实现；本地 **488 个离线测试**通过，GitHub 交付验收进行中。订单调查与独立政策候选检索并行，适用性等待事实齐备后计算；调用/usage/活动时间与返工额度从持久账本恢复，取消保留已提交动作。保留 single、serial、reviewed、durable 入口；下一轮为 P08 HTTP 服务。
+当前 **第 007 轮 / P07：有界并行与预算**已完成并上传 GitHub；本地 **488 个离线测试**与 [实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) 通过，阶段标签为 [phase-p07](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p07)。订单调查与独立政策候选检索并行，适用性等待事实齐备后计算；调用/usage/活动时间与返工额度从持久账本恢复，取消保留已提交动作。保留 single、serial、reviewed、durable 入口；下一轮为 P08 HTTP 服务。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 
@@ -13,8 +13,8 @@
 - [第 003 轮学习记录](docs/rounds/003.md)：实际工具循环、结构化建议、有限修复、代码复算和运行记录。
 - [第 004 轮学习记录](docs/rounds/004.md)：主图状态、有限路由、专员工具与上下文隔离、结构化交接。
 - [第 005 轮学习记录](docs/rounds/005.md)：审核反馈、定向返工、interrupt、版本绑定和人工输入。
-- [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
 - [第 006 轮学习记录](docs/rounds/006.md)：跨进程恢复、事务边界、动作幂等、执行前复核与业务状态。
+- [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
 - [模拟资料与案例](fixtures/README.md)：数据来源、20 个开发案例与 10 个留出案例。
 
 第一版使用本地模拟订单、物流与虚构售后政策，输出建议与回复草稿；durable 入口会在人工确认后执行模拟业务动作。用户选择当前仅使用离线脚本模型；真实模型适配器和网络 smoke test 暂缓。

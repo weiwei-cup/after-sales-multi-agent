@@ -355,7 +355,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：并发状态、预算竞争和错误处理验证通过；真实耗时变化单独记录。需要理解：fan-out / join、reducers、共享预算和调用成本。
 
-实现与验证：[第 007 轮](docs/rounds/007.md)、[ADR 007](docs/decisions/007-parallel-joins-and-durable-budgets.md)、[实际图](docs/graphs/p07-parallel.mmd)、[教学观测](docs/graphs/p07-demo-traces.json)。完整本地回归 488 passed（新增 59 项）；真实 barrier、SQLite 额度竞争、os._exit 恢复、暂停时间与取消提交边界通过。GitHub CI 验证与阶段标签在交付时补记。
+实现与验证：[第 007 轮](docs/rounds/007.md)、[ADR 007](docs/decisions/007-parallel-joins-and-durable-budgets.md)、[实际图](docs/graphs/p07-parallel.mmd)、[教学观测](docs/graphs/p07-demo-traces.json)。完整本地回归 488 passed（新增 59 项）；真实 barrier、SQLite 额度竞争、os._exit 恢复、暂停时间与取消提交边界通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) completed/success；阶段交付标签为 phase-p07。
 
 ## 12. P08：HTTP 应用服务
 
@@ -494,7 +494,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 007 轮 / P07 已实现并通过本地验收；本轮完成 GitHub 交付后，下一轮为 P08 HTTP 服务。真实模型接入仍按用户选择延期。
+第 007 轮 / P07 已完成并上传，下一轮为 P08 HTTP 服务。真实模型接入仍按用户选择延期。
 
 ### 已完成工作记录
 
@@ -578,5 +578,5 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 已完成：独立订单/候选政策分支、LangGraph fan-out/join、任务/证据 reducer 与冲突、checkpoint 前分支结果保存、共享并发槽、原子调用/token 预留、usage 对账、活动时间、累计 schema/审核返工额度、有限暂时错误重试、持久事件、取消信号与事务检查。
 - 验证：488 passed（新增 59 项），Ruff 格式/lint 通过；既有 P00～P06 路径保留，v2→v3 后 P06 人工待办仍可恢复；未知 usage/费用不能写成零。日常数据库不参与验证。
 - 观测：同一 case 无延迟串行 227.100 ms / 并行 424.178 ms；各注入 500 ms 的两条独立读取串行 1273.111 ms / 并行 958.988 ms。单次教学观测不代表真实 provider 性能。
-- 文档：第 007 轮、ADR 007、实际图、可复现演示与观测 JSON 已保存；安装包含 41 个模块与 demo JSON，隔离环境旧入口及 P07 跨进程批准/回看/取消通过；GitHub CI 与 phase-p07 在远端验证后补记。
+- 文档：第 007 轮、ADR 007、实际图、可复现演示与观测 JSON 已保存；安装包含 41 个模块与 demo JSON，隔离环境旧入口及 P07 跨进程批准/回看/取消通过；实现提交 f5f299181b69d66b6ae3cc3996e562a939083be2 已推送，[CI 37051776146](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) completed/success；phase-p07 指向最终文档提交，历史标签不移动。
 - 范围：继续离线脚本模型；未开始 P08 HTTP/鉴权，也未接入真实支付。
