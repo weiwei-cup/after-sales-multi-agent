@@ -386,7 +386,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：API 集成和同工单并发验证通过。需要理解：agent runtime 与 HTTP 生命周期、业务身份和幂等请求。
 
-实现与验证：[第 008 轮](docs/rounds/008.md)、[ADR 008](docs/decisions/008-durable-http-admission.md)、[真实 HTTP 演示](docs/graphs/p08-demo-http.json)。516 项离线测试通过（新增 28 项），Ruff、独立进程退出/恢复、同工单并发、容量/取消边界和项目外 wheel 验证通过。GitHub CI 与 phase-p08 待远端验收。
+实现与验证：[第 008 轮](docs/rounds/008.md)、[ADR 008](docs/decisions/008-durable-http-admission.md)、[真实 HTTP 演示](docs/graphs/p08-demo-http.json)。516 项离线测试通过（新增 28 项），Ruff、独立进程退出/恢复、同工单并发、容量/取消边界和项目外 wheel 验证通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37620606885) completed/success；阶段快照为 phase-p08。
 
 ## 13. P09：工单工作台页面
 
@@ -496,7 +496,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 008 轮 / P08 本地验收完成，GitHub 交付正在验证；下一轮为 P09 工单工作台。真实模型接入仍按用户选择延期。
+第 008 轮 / P08 已完成并上传 GitHub；下一轮为 P09 工单工作台。真实模型接入仍按用户选择延期。
 
 ### 已完成工作记录
 
@@ -589,4 +589,5 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 验证：516 passed in 91.29s（新增28项）；Ruff 通过；同工单竞争、同 key 并发、角色/版本/金额/字段、容量回滚、队列满取消、强制退出恢复与动作重放通过。
 - 演示：真实 loopback HTTP 完成创建→启动→补充→审批→结果；独立临时库，演示时钟固定2026-10-02，日常服务真实UTC。项目外安装wheel48模块，旧CLI和HTTP退款批准/重放通过。
 - 文档：第008轮、ADR008、HTTP轨迹已保存；CI增加真实HTTP演示。日常库只读确认schema1、ORD-004退款0、T-NOTRECEIVED-002 new。
-- 范围：单机POSIX、单HTTP进程、固定公开演示身份、离线模型与模拟业务；未开始P09页面、生产鉴权、分布式队列或外部支付。GitHub CI 与 phase-p08 待远端验证。
+- GitHub：实现提交 5a019a3dc6e01acb77e5af2b89f88a35e74e8ee5 已推送，[CI 37620606885](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37620606885) completed/success；Linux日志确认516 passed in130.32s，真实HTTP演示和wheel构建通过。phase-p08在最终文档提交通过CI后建立，历史标签不移动。
+- 范围：单机POSIX、单HTTP进程、固定公开演示身份、离线模型与模拟业务；未开始P09页面、生产鉴权、分布式队列或外部支付。
