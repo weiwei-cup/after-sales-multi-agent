@@ -9,7 +9,7 @@ P10 已实现离线对照评估，使用 P01 保存的版本化案例与独立�
 
 gold 使用业务结果代码，不强制自然语言全文。动作列表示可以提出并在操作员确认后执行的动作，不表示资料一匹配就直接写入业务。
 
-完整本机报告见 [p10-offline-v1](reports/p10-offline-v1/report.md)，机器结果见 [evaluation.json](reports/p10-offline-v1/evaluation.json)。30 个案例×两种架构×三次重复，共180次；开发集单 Agent 54/60、多 Agent 51/60，留出集各27/30。关键安全错误均0，业务失败全部保留。原始记录和6张刷新截图压缩保存为 [observations.tar.gz](reports/p10-offline-v1/observations.tar.gz)，SHA256 在 [archive-hashes.json](reports/p10-offline-v1/archive-hashes.json)。
+完整本机报告见 [p10-offline-v1](reports/p10-offline-v1/report.md)，机器结果见 [evaluation.json](reports/p10-offline-v1/evaluation.json)。30 个案例×两种架构×三次重复，共180次；开发集单 Agent 54/60、多 Agent 51/60，留出集各27/30。关键安全错误均0，业务失败全部保留。原始记录和6张刷新截图压缩保存为 [observations.tar.gz](reports/p10-offline-v1/observations.tar.gz)，SHA256 在 [archive-hashes.json](reports/p10-offline-v1/archive-hashes.json)，运行源码/页面快照哈希见 [source-hashes.json](reports/p10-offline-v1/source-hashes.json)。
 
 Agent 和业务执行器不加载 gold。runner 保存并校验全部系统输出、输入哈希和执行矩阵后，评分器才打开 gold。留出失败没有用于本轮提示词或规则调优。测试和新评估输出保存于忽略目录 `evals/output/`，每次必须选择新的输出路径。
 

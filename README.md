@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 010 轮 / P10：离线对照评估**已实现：补齐持久单 Agent，30 个案例×两种架构×三次重复共180次，实际越权读取、未审批写入、重复动作、超额退款均0。开发集单 Agent 90%、多 Agent 85%；留出集各90%，未通过案例保留。详见 [对照报告](evals/reports/p10-offline-v1/report.md)、[第010轮](docs/rounds/010.md) 和 [评估说明](evals/README.md)。离线工程交付；真实模型和真人标注仍延期。554 个离线测试与12个真实浏览器测试通过，独立安装包通过。原P09工作台与CLI保留，阶段历史见标签。
+当前 **第 010 轮 / P10：离线对照评估**已完成并上传 GitHub：补齐持久单 Agent，30 个案例×两种架构×三次重复共180次，实际越权读取、未审批写入、重复动作、超额退款均0。开发集单 Agent 90%、多 Agent 85%；留出集各90%，未通过案例保留。详见 [对照报告](evals/reports/p10-offline-v1/report.md)、[第010轮](docs/rounds/010.md) 和 [评估说明](evals/README.md)。离线工程交付；真实模型和真人标注仍延期。554 个离线测试与12个真实浏览器测试通过，独立安装包通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37648721025) 两项job通过；阶段快照为 [phase-p10](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p10)。原P09工作台与CLI保留，阶段历史见标签。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 
