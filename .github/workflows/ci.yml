@@ -23,6 +23,8 @@ jobs:
       - run: uv run --locked ruff format --check .
       - name: Documentation links and release metadata
         run: uv run --locked python scripts/check_docs.py
+      - name: README figure source consistency
+        run: uv run --locked python scripts/draw_readme_figures.py --check
       - run: uv run --locked after-sales --version
       - run: uv run --locked after-sales demo --help
       - run: uv run --locked pytest

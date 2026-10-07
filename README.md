@@ -12,7 +12,9 @@
 
 [快速启动](#快速启动) · [演示指南](docs/demo.md) · [系统架构](docs/technical-design.md) · [API](docs/api.md) · [验证报告](docs/quality.md) · [文档中心](docs/README.md)
 
-![售后协作桌面工作台：证据、人工审批与协作时间线](docs/screenshots/workbench-desktop.png)
+![系统架构：请求处理、受限工具、事务执行与持久状态](docs/figures/architecture.svg)
+
+*图 1. 系统边界与持久状态。实线表示控制流，虚线表示数据访问或持久化；Agent 工具只读，批准后的业务效果由事务执行器提交。* [SVG](docs/figures/architecture.svg) · [高清 PNG](docs/figures/architecture.png) · [工作台演示](docs/demo.md)
 
 ## 业务场景
 
@@ -57,20 +59,9 @@ uv run --locked after-sales demo --data-dir var/demo --port 8000
 
 ## 系统架构
 
-```mermaid
-flowchart LR
-    UI[客户 / 操作员工作台] --> API[FastAPI · 身份与请求幂等]
-    API --> APP[应用服务 · 持久任务队列]
-    APP --> GRAPH[LangGraph · 分派 / 并行 / 审核 / 暂停恢复]
-    GRAPH --> AGENT[LangChain Agents · 独立工具与上下文]
-    AGENT --> TOOLS[只读工具 · 证据快照]
-    TOOLS --> RULES[确定性政策规则]
-    GRAPH --> HUMAN[客户补资料 / 操作员确认]
-    HUMAN --> EXEC[执行前复核 · 事务动作账本]
-    APP --> DB[(业务 SQLite)]
-    EXEC --> DB
-    GRAPH --> CP[(SQLite 检查点)]
-```
+![多 Agent 工作流：并行事实调查、政策核算、审核与人工确认](docs/figures/agent-workflow.svg)
+
+*图 2. 多 Agent 的主要动作处理路径。候选政策检索与订单调查并行，资格判断依赖汇合后的事实；人工输入经 API 持久化，再恢复图执行。虚线表示客户补资料恢复和有限方案修订，异常转人工、无动作结束及部分恢复路径省略。* [SVG](docs/figures/agent-workflow.svg) · [高清 PNG](docs/figures/agent-workflow.png)
 
 Agent 负责调查与建议；代码核验事实、权限和政策，操作员批准动作，事务执行器产生业务效果。单机服务使用一个 HTTP 进程和有界执行线程；业务库与检查点库共同支持恢复。[完整架构与取舍](docs/technical-design.md)。
 

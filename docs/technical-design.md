@@ -25,31 +25,9 @@
 
 ## 多 Agent 处理图
 
-```mermaid
-flowchart TD
-    IN[工单受理 / 协调] --> NEED{订单引用完整?}
-    NEED -->|否| CUSTOMER[客户补充 · interrupt]
-    CUSTOMER -->|版本化回答 / resume| IN
-    NEED -->|是| ORDER[订单分支 · 订单 / 商品 / 物流 / 凭证 / 历史]
-    NEED -->|是| CAND[政策分支 · 候选政策检索]
-    ORDER --> JOIN[受校验的结果与证据汇合]
-    CAND --> JOIN
-    JOIN --> POLICY[根据订单事实计算适用政策]
-    POLICY --> DRAFT[生成结构化建议与回复草稿]
-    DRAFT --> VALID[代码校验事实 / 引用 / 金额]
-    VALID --> REVIEW[审核员与最低代码审核]
-    REVIEW -->|需补查或修改 · 有限返工| REPAIR[定向补查 / 改写]
-    REPAIR --> JOIN
-    REVIEW -->|缺资料| CUSTOMER
-    REVIEW -->|涉及业务动作| HUMAN[操作员确认 · interrupt]
-    HUMAN -->|改金额| DRAFT
-    HUMAN -->|批准| EXEC[最新资料与时钟复核 / 事务动作提交]
-    EXEC -->|资料变化| REPAIR
-    EXEC --> FIN[结束 / 回执]
-    REVIEW -->|说明进度或转人工| FIN
-```
+![多 Agent 工作流：调查、政策核算、审核与人工输入](figures/agent-workflow.svg)
 
-这是业务视图，具体节点、路由与 reducer 见 [实现图](graphs/p07-parallel.mmd) 和 `workflows/parallel.py`。并行只用于互不依赖的订单调查与候选政策检索；资格判断在汇合后依赖订单事实。候选政策不等于适用政策。
+图示展示主要业务动作路径，省略异常转人工、无动作终止和部分恢复分支；人工输入由 API 持久化后恢复图执行。具体节点、路由与 reducer 见 [实现图](graphs/p07-parallel.mmd) 和 `workflows/parallel.py`。并行只用于互不依赖的订单调查与候选政策检索；资格判断在汇合后依赖订单事实。候选政策不等于适用政策。
 
 | 角色 | 输入与权限 | 交接结果 |
 | --- | --- | --- |

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1460" height="676" viewBox="0 0 1460 676" role="img" aria-labelledby="title description">
+<title id="title">Evidence-constrained multi-agent workflow</title>
+<desc id="description">Order investigation and policy candidate retrieval run independently, followed by a checked join, facts-dependent policy assessment and a structured proposal. Deterministic validation and review precede a version-bound human input node. Approved graph execution revalidates facts before atomic effects. Dashed paths show bounded revision and missing-information resume.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 8 8" refX="7.3" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse" markerUnits="strokeWidth"><path d="M 0 0 L 8 4 L 0 8 Z" fill="#262626"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="white"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#262626">
+<text x="40" y="38" font-size="24" font-weight="bold" text-anchor="start" fill="#262626">(a) Investigation and proposal</text>
+<g data-box="Coordinator"><rect x="40" y="202" width="176" height="90" fill="#edf2f7" stroke="#262626" stroke-width="1.3"/>
+<text x="128.0" y="240.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Coordinator</text>
+<text x="128.0" y="270.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Intake / routing</text>
+</g>
+<g data-box="Order investigation"><rect x="292" y="100" width="240" height="84" fill="#edf2f7" stroke="#262626" stroke-width="1.3"/>
+<text x="412.0" y="135.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Order investigation</text>
+<text x="412.0" y="165.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Order / tracking / proof</text>
+</g>
+<g data-box="Policy candidates"><rect x="292" y="310" width="240" height="84" fill="#edf2f7" stroke="#262626" stroke-width="1.3"/>
+<text x="412.0" y="345.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Policy candidates</text>
+<text x="412.0" y="375.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Retrieval only</text>
+</g>
+<text x="412" y="248" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Independent read branches</text>
+<g data-box="Checked join"><rect x="588" y="202" width="148" height="90" fill="white" stroke="#262626" stroke-width="1.3"/>
+<text x="662.0" y="240.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Checked join</text>
+<text x="662.0" y="270.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Facts + evidence</text>
+</g>
+<g data-box="Policy assessment"><rect x="790" y="202" width="230" height="90" fill="#edf2f7" stroke="#262626" stroke-width="1.3"/>
+<text x="905.0" y="240.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Policy assessment</text>
+<text x="905.0" y="270.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Facts-dependent rules</text>
+</g>
+<g data-box="Coordinator"><rect x="1078" y="202" width="220" height="90" fill="#edf2f7" stroke="#262626" stroke-width="1.3"/>
+<text x="1188.0" y="240.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Coordinator</text>
+<text x="1188.0" y="270.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Structured proposal</text>
+</g>
+<polyline points="216,247 250,247" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter" />
+<polyline points="250,247 250,142 289,142" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="250,247 250,352 289,352" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="532,142 560,142 560,231 585,231" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="532,352 560,352 560,263 585,263" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="736,247 787,247" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="1020,247 1075,247" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<text x="40" y="457" font-size="24" font-weight="bold" text-anchor="start" fill="#262626">(b) Review and approved execution</text>
+<g data-box="Code validation"><rect x="1078" y="486" width="220" height="90" fill="white" stroke="#262626" stroke-width="1.3"/>
+<text x="1188.0" y="524.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Code validation</text>
+<text x="1188.0" y="554.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Facts / references / amounts</text>
+</g>
+<g data-box="Review Agent"><rect x="790" y="486" width="230" height="90" fill="#edf2f7" stroke="#262626" stroke-width="1.3"/>
+<text x="905.0" y="524.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Review Agent</text>
+<text x="905.0" y="554.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">With minimum code review</text>
+</g>
+<g data-box="Human-input node"><rect x="480" y="486" width="246" height="90" fill="#f7f3e9" stroke="#262626" stroke-width="1.3"/>
+<text x="603.0" y="524.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Human-input node</text>
+<text x="603.0" y="554.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Interrupt + bound resume</text>
+</g>
+<g data-box="Execution node"><rect x="40" y="486" width="246" height="90" fill="white" stroke="#262626" stroke-width="1.3"/>
+<text x="163.0" y="524.5" font-size="19" font-weight="bold" text-anchor="middle" fill="#262626">Execution node</text>
+<text x="163.0" y="554.5" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Revalidation + atomic ledger</text>
+</g>
+<polyline points="1188,292 1188,483" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="1078,531 1023,531" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="790,531 729,531" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<polyline points="480,531 289,531" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<text x="383" y="519" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Approved payload</text>
+<polyline points="603,483 603,419 128,419 128,295" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<text x="347" y="410" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Customer information resume</text>
+<polyline points="905,576 905,617 1342,617 1342,247 1301,247" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<text x="1125" y="607" font-size="15" font-weight="normal" text-anchor="middle" fill="#595959">Bounded revision</text>
+<polyline points="40,647 82,647" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter"  marker-end="url(#arrow)"/>
+<text x="94" y="652" font-size="15" font-weight="normal" text-anchor="start" fill="#595959">Control flow</text>
+<polyline points="236,647 278,647" fill="none" stroke="#262626" stroke-width="1.45" stroke-linejoin="miter" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+<text x="290" y="652" font-size="15" font-weight="normal" text-anchor="start" fill="#595959">Feedback / resume</text>
+<text x="1420" y="652" font-size="15" font-weight="normal" text-anchor="end" fill="#595959">Blue: Agent nodes  |  Ochre: human-input node</text>
+</g>
+</svg>
