@@ -65,3 +65,28 @@ jobs:
       - name: P08 real local HTTP create, answer and approve
         run: uv run --locked python scripts/demo_p08.py
       - run: uv build --wheel
+
+  browser-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/playwright-browsers
+      P09_ARTIFACT_DIR: ${{ github.workspace }}/test-results/p09
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.22"
+          enable-cache: true
+      - run: uv python install 3.12
+      - run: uv sync --locked
+      - run: uv run --locked playwright install --with-deps chromium
+      - name: P09 real browser flows
+        run: uv run --locked pytest -m e2e --allow-hosts=127.0.0.1 tests/test_workbench_e2e.py
+      - name: Save browser screenshots, requests and replay traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p09-browser-observations
+          path: test-results/p09
+          retention-days: 7

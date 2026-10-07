@@ -29,7 +29,7 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P08",
+        "phase": "P09",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
@@ -43,6 +43,11 @@ def build_report(settings: Settings) -> dict[str, object]:
             "identity": "P08_fixed_demo_bearer_tokens; production_auth_deferred",
         },
         "live_smoke": "skipped_provider_deferred_by_user",
+        "workbench": {
+            "url": "/",
+            "transport": "same_origin_HTTP_polling",
+            "browser_checks": "separate_Playwright_e2e_suite",
+        },
         "readonly_tools": {
             "inspection": "after-sales inspect --ticket T-RETURN-001",
             "timeout_seconds": settings.tool_timeout_seconds,

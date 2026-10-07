@@ -80,7 +80,7 @@ def answer(pending, **payload):
 
 
 def test_health_no_model_and_openapi_contract(client, storage):
-    assert client.get("/health").json()["phase"] == "P08"
+    assert client.get("/health").json()["phase"] == "P09"
     with read_database(storage[0].path) as db:
         assert db.execute("SELECT count(*) FROM call_reservations").fetchone()[0] == 0
     schema = client.get("/openapi.json").json()
@@ -110,6 +110,7 @@ def test_create_answer_approve_result_and_exact_duplicates(client, storage):
     assert post(client, f"/runs/{run_id}/responses", body, key="answer").json() == accepted.json()
     pending = wait_run(client, run_id, "paused")["pending_input"]
     assert pending["kind"] == "operator_decision" and not pending["can_respond"]
+    assert pending["actions"][0]["policies"]
     operator_view = client.get(f"/runs/{run_id}", headers=OPERATOR).json()
     assert operator_view["pending_input"]["can_respond"]
     body = answer(pending, decision="approve")
@@ -118,6 +119,11 @@ def test_create_answer_approve_result_and_exact_duplicates(client, storage):
     assert accepted.status_code == 202, accepted.text
     result = wait_run(client, run_id, "completed", pending=False)
     assert len(result["result"]["receipts"]) == 1
+    assert result["result"]["evidence"]
+    assert result["result"]["review_outcome"] == "accept"
+    assert result["result"]["review_reworks"] == 0
+    assert result["result"]["proposal_revision"] == pending["proposal_revision"]
+    assert "facts" not in result["result"]["evidence"][0]
     assert (
         post(client, f"/runs/{run_id}/responses", body, key="approve", headers=OPERATOR).json()
         == accepted.json()

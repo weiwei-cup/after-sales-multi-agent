@@ -52,6 +52,21 @@ class PendingAction(DomainModel):
     type: str
     order_id: Identifier
     amount_cents: Cents | None
+    policies: list["PolicyView"] = Field(default_factory=list)
+
+
+class PolicyView(DomainModel):
+    policy_id: str
+    version: int
+
+
+class EvidenceView(DomainModel):
+    evidence_id: str
+    source_type: str
+    source_id: str
+    source_version: str
+    observed_at: str
+    summary: str
 
 
 class PendingView(DomainModel):
@@ -84,6 +99,15 @@ class ResultView(DomainModel):
     model_calls: int
     tool_calls: int
     error_code: str | None
+    input_revision: int | None = None
+    proposal_revision: int | None = None
+    evidence: list[EvidenceView] = Field(default_factory=list)
+    gaps: list[dict[str, str]] = Field(default_factory=list)
+    review_outcome: str | None = None
+    review_issues: list[str] = Field(default_factory=list)
+    elapsed_ms: float | None = None
+    schema_repairs: int | None = None
+    review_reworks: int | None = None
 
 
 class RunView(DomainModel):
@@ -104,6 +128,7 @@ class TicketView(DomainModel):
     input_revision: PositiveInt
     messages: list[str]
     latest_run: RunView | None
+    last_activity_at: str | None = None
 
 
 class Accepted(DomainModel):

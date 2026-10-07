@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#14675e" />
+    <title>售后协作 · 工单工作台</title>
+    <link rel="stylesheet" href="/assets/workbench.css" />
+    <script type="module" src="/assets/workbench.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#detail">跳到工单详情</a>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="售后协作首页"
+        ><span class="brand-icon">售</span
+        ><span>售后协作<small>多 Agent 工单工作台</small></span></a
+      >
+      <div class="top-right">
+        <span class="demo-label">本地演示 · 离线模型</span
+        ><label class="identity-label" for="identity">当前身份</label
+        ><select id="identity" aria-label="演示身份">
+          <option value="demo-customer-a">客户 A</option>
+          <option value="demo-customer-b">客户 B</option>
+          <option value="demo-operator">操作员</option>
+        </select>
+      </div>
+    </header>
+    <div id="notice" class="notice" role="status" hidden>
+      <span id="notice-text"></span><button id="retry" type="button" hidden>重试原请求</button
+      ><button id="dismiss" type="button" aria-label="关闭提示">×</button>
+    </div>
+    <main class="workspace">
+      <aside class="inbox" aria-label="工单列表">
+        <div class="inbox-heading">
+          <div>
+            <p class="eyebrow">服务工作台</p>
+            <h1>售后工单 <span id="ticket-count" class="count">0</span></h1>
+          </div>
+          <button id="new-ticket" class="icon-button" type="button" aria-label="新建工单">
+            ＋
+          </button>
+        </div>
+        <p class="muted list-intro">每一次处理，都有据可循。</p>
+        <label class="search-label"
+          ><span>搜索当前页</span
+          ><input
+            id="search"
+            type="search"
+            placeholder="工单号、订单号或诉求"
+            aria-label="搜索工单"
+        /></label>
+        <select id="filter" aria-label="筛选业务类型">
+          <option value="all">全部业务类型</option>
+          <option value="logistics_delay">物流延迟</option>
+          <option value="delivered_not_received">签收未收到</option>
+          <option value="return_request">退货申请</option>
+        </select>
+        <div id="ticket-list" class="ticket-list"></div>
+        <div class="pagination">
+          <button id="prev" type="button">上一页</button><span id="page-number">第 1 页</span
+          ><button id="next" type="button">下一页</button>
+        </div>
+        <div class="inbox-footer">
+          <span class="live-dot"></span><span id="connection">正在连接服务</span
+          ><small>时间以 Asia/Shanghai 显示</small>
+        </div>
+      </aside>
+      <section id="detail" class="detail" aria-label="工单详情" tabindex="-1">
+        <div id="empty" class="empty">
+          <div class="empty-symbol">◎</div>
+          <h2>选择一张工单，开始协作</h2>
+          <p>查看调查、处理建议与人工待办。<br />客户也可以新建一张售后工单。</p>
+        </div>
+        <div id="ticket-content" hidden>
+          <div class="detail-heading">
+            <div>
+              <p id="ticket-id" class="eyebrow"></p>
+              <h2 id="ticket-title"></h2>
+              <p id="ticket-meta" class="muted"></p>
+            </div>
+            <div id="controls" class="controls"></div>
+          </div>
+          <div class="status-strip">
+            <div>
+              <span class="label">业务进度</span><span id="business-status" class="badge"></span>
+            </div>
+            <div>
+              <span class="label">流程运行</span><span id="run-status" class="badge neutral"></span>
+            </div>
+            <p id="status-note"></p>
+          </div>
+          <div class="detail-grid">
+            <div class="case-main">
+              <section class="card">
+                <div class="card-heading">
+                  <h3>客户诉求</h3>
+                  <span id="input-version" class="subtle"></span>
+                </div>
+                <div id="messages" class="messages"></div>
+              </section>
+              <section
+                id="pending-card"
+                class="card pending"
+                hidden
+                aria-label="人工待办"
+              ></section>
+              <section class="card">
+                <div class="card-heading">
+                  <h3>处理建议</h3>
+                  <span id="proposal-version" class="subtle"></span>
+                </div>
+                <h4 id="decision"></h4>
+                <p id="review-summary" class="muted"></p>
+                <div id="gaps"></div>
+                <div class="draft">
+                  <span class="label">客户回复草稿 · 审批前生成，尚未发送</span>
+                  <p id="reply"></p>
+                </div>
+                <div id="receipts"></div>
+              </section>
+              <section class="card">
+                <div class="card-heading">
+                  <h3>调查依据</h3>
+                  <span id="evidence-count" class="subtle"></span>
+                </div>
+                <p class="muted evidence-intro">
+                  展示来源快照摘要；人工确认后，服务会复核最新资料。
+                </p>
+                <div id="evidence" class="evidence"></div>
+              </section>
+            </div>
+            <aside class="execution card" aria-label="执行过程">
+              <div class="card-heading">
+                <h3>协作过程</h3>
+                <span class="pill">LangGraph</span>
+              </div>
+              <div id="stats" class="stats"></div>
+              <p id="stats-meta" class="subtle"></p>
+              <div id="roles" class="roles"></div>
+              <div class="timeline-heading">
+                <span class="label">执行时间线</span
+                ><button id="all-events" type="button" hidden>查看全部</button>
+              </div>
+              <ol id="timeline" class="timeline"></ol>
+              <p id="event-empty" class="muted">启动处理后，协作事件会显示在这里。</p>
+              <p id="event-count" class="subtle"></p>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+    <dialog id="create-dialog">
+      <form id="create-form">
+        <div class="card-heading">
+          <h2>新建售后工单</h2>
+          <button id="close-dialog" type="button" class="icon-button" aria-label="关闭新建工单">
+            ×
+          </button>
+        </div>
+        <p class="muted">描述遇到的问题，工作台会调查资料并提出建议。</p>
+        <label
+          >业务类型<select name="type" required>
+            <option value="logistics_delay">物流延迟</option>
+            <option value="delivered_not_received">签收未收到</option>
+            <option value="return_request">退货申请</option>
+          </select></label
+        ><label
+          >订单号 <span class="subtle">可稍后补充</span
+          ><input
+            name="order"
+            maxlength="64"
+            pattern="[A-Za-z0-9_-]+"
+            placeholder="例如 ORD-004" /></label
+        ><label
+          >客户诉求<textarea
+            name="message"
+            required
+            maxlength="2000"
+            rows="4"
+            placeholder="请描述需要解决的问题"
+          ></textarea>
+        </label>
+        <p id="create-error" class="form-error" role="alert"></p>
+        <button class="primary" type="submit">创建工单</button>
+      </form>
+    </dialog>
+    <footer class="page-footer">学习项目 · 使用虚构订单与售后政策 · 退款为模拟记录</footer>
+  </body>
+</html>

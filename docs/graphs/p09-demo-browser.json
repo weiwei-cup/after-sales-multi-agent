@@ -1,0 +1,720 @@
+{
+  "schema_version": "p09-browser-demo-v1",
+  "recorded_at": "2026-10-07",
+  "note": "Real Chromium, HTTP, LangGraph and isolated SQLite. One teaching observation per path; times are not performance benchmarks.",
+  "paths": [
+    {
+      "case": "test_core_logistics_and_return[T-DELAY-002-\\u5904\\u7406\\u4e2d-\\u767b\\u8bb0\\u7269\\u6d41\\u8c03\\u67e5]",
+      "observation": {
+        "schema_version": "p09-browser-observation-v1",
+        "browser": "153.0.8010.12",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "model_mode": "scripted",
+        "fixture_business_clock": "2026-10-02T04:00:00Z",
+        "temporary_database": true,
+        "ticket_id": "T-DELAY-002",
+        "business_status": "处理中",
+        "run_status": "运行结束",
+        "receipts": "登记物流调查 · 已登记\n\nORD-002 · 处理中\n\n记录 act-1a44a0f9f435a175cbabc072a3eee255 · 10/02 12:00",
+        "evidence": "9 份快照",
+        "statistics": "16\n模型调用\n12\n工具查询\n0.4s\n活动耗时",
+        "events": "132 条事件 · 已同步到 #132 · 显示最近 60 条"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/",
+          "query": "",
+          "status": 200,
+          "request_id": "3d45c87f93db46e9873fc75c3ff2e10b"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.css",
+          "query": "",
+          "status": 200,
+          "request_id": "46b46299566640e1876d0c1210759899"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.js",
+          "query": "",
+          "status": 200,
+          "request_id": "7701a6e73b5a41cab89cd4f52e322cfa"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "f4b70117094a4c469c9e77abc205d709"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "d976c01845124d03817751c4a55bba9b"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "662ad9da22d641baa9a41c5b57e31824"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "9418e7e3699143a988ec181e98d74105"
+        },
+        {
+          "method": "POST",
+          "path": "/tickets/T-DELAY-002/runs",
+          "query": "",
+          "status": 202,
+          "request_id": "85b13cf616dc4e03a9e4c32be5b1bb1b"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "11bd1d53b8054108b2a13df135344e35"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "abada48402c542688ee9e8a945df4ff9"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "05745574c33944dda052d246870dbaa2"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "078b36f5254443e6b1ff9001bde519d5"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "db808699ba18435f95e17c0431a454d0"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "a91fec95daa648ab8b75f2ca985c6b03"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "b9daa872544c452b8053e383488f0037"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "d56441cf684b4cf99b04e6ffafcc33cc"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "df846221ea544b48b15cecb77167baf3"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "45552389cd9d41e9b46d7e9e1f6a5bf0"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "87ea7a73754441cbad9993331bb53b02"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "a05679528d0e4ce0bfd30115775a7fa7"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "57eb6c9439b94ea48607f69b3a0e63db"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "74d59759dfff45a79b71c7e8505192cf"
+        },
+        {
+          "method": "POST",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/responses",
+          "query": "",
+          "status": 202,
+          "request_id": "0424edc7a8914e8fba6a05131c9b995f"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "2659694a11b348168801146b3b836fa1"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "ce741cfc85934a7c9ec974f387806819"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=122&limit=100",
+          "status": 200,
+          "request_id": "9cc4a52be6414ee5afa0e194dc22bd92"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-DELAY-002",
+          "query": "",
+          "status": 200,
+          "request_id": "fb1f4dcedd604c288cee3feaa615b03e"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-a666f6ec2499494788efe131cfb2b89e/events",
+          "query": "after_seq=122&limit=100",
+          "status": 200,
+          "request_id": "6e4f6b9f4d6b456d9ac0017fd88f994c"
+        }
+      ]
+    },
+    {
+      "case": "test_core_logistics_and_return[T-RETURN-001-\\u5f85\\u5ba2\\u6237\\u5bc4\\u56de-\\u767b\\u8bb0\\u9000\\u8d27\\u7533\\u8bf7]",
+      "observation": {
+        "schema_version": "p09-browser-observation-v1",
+        "browser": "153.0.8010.12",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "model_mode": "scripted",
+        "fixture_business_clock": "2026-10-02T04:00:00Z",
+        "temporary_database": true,
+        "ticket_id": "T-RETURN-001",
+        "business_status": "待客户寄回",
+        "run_status": "运行结束",
+        "receipts": "登记退货申请 · 已登记\n\nORD-005 · 待客户寄回\n\n记录 act-90444440eb15af65ad65b4c0087ff20b · 10/02 12:00",
+        "evidence": "8 份快照",
+        "statistics": "15\n模型调用\n11\n工具查询\n0.4s\n活动耗时",
+        "events": "126 条事件 · 已同步到 #126 · 显示最近 60 条"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/",
+          "query": "",
+          "status": 200,
+          "request_id": "1b152e261d094c8bb427c92f03f3875a"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.css",
+          "query": "",
+          "status": 200,
+          "request_id": "fc042e5eae6c4cff88baef79213e359a"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.js",
+          "query": "",
+          "status": 200,
+          "request_id": "a0c54a6cff484fcaa9bc627bd477eda3"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "bee67bf683534b39b85b1ff5ba630462"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "4866a2d83ed84980922ed94fbd57c624"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "bb8a9d0a0c6f499e9a1947b621c59b52"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "ff7a0f6f9f084fbbb1bfbe5de7ac6bdd"
+        },
+        {
+          "method": "POST",
+          "path": "/tickets/T-RETURN-001/runs",
+          "query": "",
+          "status": 202,
+          "request_id": "72a055713c754e05be6b44ece0c77f0c"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "e59a2eee7d4f4ecc88b78f0b3617d645"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "37cd5758a75c42ceb70ca778d80336e2"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "aa1bed8a8781416386041d42e9c5d612"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "664d2d2601a6484883cb96505c3f4d5b"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "1142190aede14dd0baf4f7f2b3118875"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "6459604c9f874f13b4a6999fdc209e4e"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "8f0a8d685e544f52906d457788da03f6"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "e92625aa0ab54c919134121e6b05b1b7"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "991d89893b33406d9f02399faf062d2b"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "0891bbf33fd7436ba6df3829ba6d09c8"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "0c4aa17d18f84026ad5b0c063283f764"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "80564550cd464cedab8d0fbe6ab0a0ee"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "5a94301fdde3471299e048d89323bba0"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "0283c170bcce485d82ef957fc657a721"
+        },
+        {
+          "method": "POST",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/responses",
+          "query": "",
+          "status": 202,
+          "request_id": "3adc1cd7c6ec4fe297730cb58349f135"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "188a650d9822427192845eb85dee8933"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "42877f74360b4a569850d79be2249c34"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=116&limit=100",
+          "status": 200,
+          "request_id": "80f2e2cb75444fdb908c34626569e8cc"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-RETURN-001",
+          "query": "",
+          "status": 200,
+          "request_id": "c1db0cc2fd8641cf85a199d047e4d203"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-f17507f5ac5e48b9b5bf50ca3d6edf83/events",
+          "query": "after_seq=116&limit=100",
+          "status": 200,
+          "request_id": "05c5e694cca84e83ba688096ea3683e5"
+        }
+      ]
+    },
+    {
+      "case": "test_core_not_received_create_supplement_refresh_and_refund",
+      "observation": {
+        "schema_version": "p09-browser-observation-v1",
+        "browser": "153.0.8010.12",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "model_mode": "scripted",
+        "fixture_business_clock": "2026-10-02T04:00:00Z",
+        "temporary_database": true,
+        "ticket_id": "T-4cf901c948d14b57b6d77f065d4f45e4",
+        "business_status": "已办结",
+        "run_status": "运行结束",
+        "receipts": "登记模拟退款 · 已登记\n\nORD-004 · ¥100.00 · 已办结\n\n记录 act-0c5166aa81bb570b76286406a2590111 · 10/02 12:00",
+        "evidence": "9 份快照",
+        "statistics": "19\n模型调用\n12\n工具查询\n0.5s\n活动耗时",
+        "events": "166 条事件 · 已同步到 #166 · 显示最近 60 条"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/",
+          "query": "",
+          "status": 200,
+          "request_id": "4370d79615994764b909e216be10d3f3"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.css",
+          "query": "",
+          "status": 200,
+          "request_id": "741acd42ade54a0d8caf37440ab4f80f"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.js",
+          "query": "",
+          "status": 200,
+          "request_id": "03de53260bfb4faca0951fb7db681f74"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "8b44bff994a2479d87282273cad90fce"
+        },
+        {
+          "method": "POST",
+          "path": "/tickets",
+          "query": "",
+          "status": 201,
+          "request_id": "10b9ccd0d1d94eb79461d04bb2a8785b"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "9c6ebbbf6db74a53b44c789c16a05e06"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "06541c13c66c468ba6485ce34d2733d1"
+        },
+        {
+          "method": "POST",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4/runs",
+          "query": "",
+          "status": 202,
+          "request_id": "2759a7028882454ab338feffc8d270d2"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "d65ce38ddb904a35942600166c9c8342"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "d7cd4cc572b24df19e396c60ca446943"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "7ad6e16c99f34873b1d2b6c4b614bbd8"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "99458fd793db497786d86fc9e64ec1e1"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "cadb489187d5469a8c73ed35564f9e2e"
+        },
+        {
+          "method": "GET",
+          "path": "/",
+          "query": "",
+          "status": 200,
+          "request_id": "cdfa2eb73ea84d43a8c00df145bdffc5"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.css",
+          "query": "",
+          "status": 200,
+          "request_id": "a44ec4e7efb74bacbbd49ae3794d7a6d"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/workbench.js",
+          "query": "",
+          "status": 200,
+          "request_id": "0c1ef188e5e9449c89ffedbb916e7838"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "6d81820942f244e8a8633cf77843a409"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "3adef106e1ed4b96bf65052a17bbd356"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "3ccd2832f0f54ccf9904b71a369654ab"
+        },
+        {
+          "method": "POST",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/responses",
+          "query": "",
+          "status": 202,
+          "request_id": "bbab61e6a44b49f3947b4e4f2b5b57e6"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "87c70eca0ee7480ea99ddc68de7c9e1a"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "b2b266ccba3947cea1652860c5353f83"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=31&limit=100",
+          "status": 200,
+          "request_id": "2d76f2c8a7234ba88b193aee246cf8cf"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "3596489af00d47d7933c4ba7e396238a"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=31&limit=100",
+          "status": 200,
+          "request_id": "7fc97bee19314fb58da66c261d4fd5ae"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=131&limit=100",
+          "status": 200,
+          "request_id": "6fc8e3a4bd42401d8fb2ae97e7d1e7ea"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "4e2339015c7a4d2ca3171a724416b58c"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "64bb6fb328294ec2a32ef7d2491bd23b"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=0&limit=100",
+          "status": 200,
+          "request_id": "a3146af5a4fc47f680db76edc2a8e193"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=100&limit=100",
+          "status": 200,
+          "request_id": "14cad97cd18245d9a74d531bbd55d56f"
+        },
+        {
+          "method": "POST",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/responses",
+          "query": "",
+          "status": 202,
+          "request_id": "f6b8dbc1b22f495e965d4b1a1bebf3e6"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets",
+          "query": "limit=20&offset=0",
+          "status": 200,
+          "request_id": "f01af33bb1a4461b97b92f91c45dfdb9"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "df078257128a4ee4ab2d55000a73febe"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=156&limit=100",
+          "status": 200,
+          "request_id": "d4226f93eab24859896a34c386b7df5e"
+        },
+        {
+          "method": "GET",
+          "path": "/tickets/T-4cf901c948d14b57b6d77f065d4f45e4",
+          "query": "",
+          "status": 200,
+          "request_id": "d0c842b9b5f4420ba5ceae975983492e"
+        },
+        {
+          "method": "GET",
+          "path": "/runs/run-bae26fc239754b138cd2b2cd20b21b0e/events",
+          "query": "after_seq=156&limit=100",
+          "status": 200,
+          "request_id": "39060e73607844e6b3f8f8b38c75ee75"
+        }
+      ]
+    }
+  ]
+}

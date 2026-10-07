@@ -4,13 +4,15 @@ import asyncio
 import logging
 import secrets
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
 
@@ -76,11 +78,26 @@ def create_app(settings=None, *, service=None):
     errors = {code: {"model": ErrorView} for code in (401, 403, 404, 409, 422, 500, 503)}
     app = FastAPI(
         title="售后多 Agent 本地服务",
-        version="0.8.0",
+        version="0.9.0",
         lifespan=lifespan,
         responses=errors,
-        description="P08：脚本模型、固定演示身份、单进程执行器。",
+        description="P09：售后工单工作台、脚本模型、固定演示身份、单进程执行器。",
     )
+    assets = Path(__file__).resolve().parent.parent / "web"
+    app.mount("/assets", StaticFiles(directory=assets), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    def workbench():
+        return FileResponse(
+            assets / "index.html",
+            headers={
+                "Cache-Control": "no-cache",
+                "Content-Security-Policy": "default-src 'self'; script-src 'self'; "
+                "style-src 'self'; img-src 'self' data:; connect-src 'self'; "
+                "object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
 
     @app.middleware("http")
     async def request_id(request, call_next):

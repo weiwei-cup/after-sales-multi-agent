@@ -24,6 +24,7 @@ after-sales = "after_sales.cli:main"
 [dependency-groups]
 dev = [
   "httpx>=0.28,<1",
+  "playwright>=1.55,<2",
   "pytest>=8,<10",
   "pytest-socket>=0.7,<1",
   "ruff>=0.12,<1",

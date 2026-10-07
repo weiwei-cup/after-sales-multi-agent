@@ -414,6 +414,15 @@ class ApplicationService:
         latest = db.execute(
             "SELECT * FROM runs WHERE ticket_id=? ORDER BY rowid DESC LIMIT 1", (ticket.id,)
         ).fetchone()
+        activity = [ticket.created_at, *(m.created_at for m in ticket.messages)]
+        # This is the latest recorded activity, not an invented ticket update timestamp.
+        recorded = db.execute(
+            "SELECT created_at FROM execution_jobs WHERE run_id IN "
+            "(SELECT id FROM runs WHERE ticket_id=?) UNION ALL "
+            "SELECT committed_at FROM action_ledger WHERE ticket_id=?",
+            (ticket.id, ticket.id),
+        ).fetchall()
+        activity.extend(datetime.fromisoformat(r[0]) for r in recorded)
         return TicketView(
             ticket_id=ticket.id,
             type=ticket.type,
@@ -422,6 +431,7 @@ class ApplicationService:
             input_revision=ticket.input_revision,
             messages=[redact(m.content) for m in ticket.messages],
             latest_run=self._view_run(db, latest, principal) if latest else None,
+            last_activity_at=utc_text(max(activity)),
         )
 
     def ticket(self, ticket_id, principal):
@@ -465,4 +475,4 @@ class ApplicationService:
             db.execute("SELECT 1").fetchone()
         if not self.lease or self.stop.is_set() or not all(t.is_alive() for t in self.threads):
             raise ApplicationError(503, "NOT_READY", "执行器未就绪。")
-        return {"status": "ok", "phase": "P08", "model_mode": "scripted"}
+        return {"status": "ok", "phase": "P09", "model_mode": "scripted"}

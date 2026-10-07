@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 008 轮 / P08：HTTP 应用服务**已完成并上传 GitHub：**516 个离线测试**、[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37620606885)、真实 HTTP 全流程和项目外安装包验证通过；阶段快照为 [phase-p08](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p08)。支持创建/查询工单、后台处理、版本绑定的回答与审批、恢复、取消和增量事件；请求幂等、身份范围与有界队列已接入。保留原 CLI 入口，下一轮为 P09 工单工作台。
+当前 **第 009 轮 / P09：工单工作台**已通过本地验收：**519 个离线测试＋12 个真实浏览器测试**、三类业务闭环、桌面/窄窗口视觉检查和项目外安装包验证通过。页面支持创建/查询、开始/恢复/取消、客户补充、版本绑定的人工确认，以及建议、证据摘要和执行时间线。达到离线 M3，保留原 CLI；GitHub 验收待验证，下一轮为 P10 对照评估。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 
@@ -16,11 +16,21 @@
 - [第 006 轮学习记录](docs/rounds/006.md)：跨进程恢复、事务边界、动作幂等、执行前复核与业务状态。
 - [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
 - [第 008 轮学习记录](docs/rounds/008.md)：HTTP 启动步骤、演示身份、请求幂等、后台队列、审批/重启边界；[ADR 008](docs/decisions/008-durable-http-admission.md)。
+- [第 009 轮学习记录](docs/rounds/009.md)：工作台启动、三条页面演示、刷新/重试/旧审批边界、浏览器验收；[ADR 009](docs/decisions/009-browser-workbench-and-public-evidence.md)。
 - [模拟资料与案例](fixtures/README.md)：数据来源、20 个开发案例与 10 个留出案例。
 
 第一版使用本地模拟订单、物流与虚构售后政策，输出建议与回复草稿；durable 入口会在人工确认后执行模拟业务动作。用户选择当前仅使用离线脚本模型；真实模型适配器和网络 smoke test 暂缓。
 
 ## 本地运行
+
+快速体验工作台（临时演示库，停止后清理）：
+
+```bash
+uv sync --locked --python 3.12
+uv run --locked python scripts/demo_p09.py --port 8000
+```
+
+打开 [本地工作台](http://127.0.0.1:8000/)。客户 A 新建“签收未收到”工单，开始处理后补充 `ORD-004`，切换操作员核对并确认，即可看到模拟退款回执。客户 B 可体验 `T-DELAY-002` 和 `T-RETURN-001`。演示业务时间固定为 2026-10-02，正常 HTTP app 使用真实时间。详细操作与浏览器测试命令见 [第 009 轮](docs/rounds/009.md)。
 
 需要 Python 3.12 和 [uv](https://docs.astral.sh/uv/getting-started/installation/)。在项目根目录执行：
 
