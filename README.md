@@ -1,214 +1,124 @@
-# 售后工单多 Agent 工作台
+# AfterSales · 售后协作
 
-通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
+[![CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/weiwei-cup/after-sales-multi-agent/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB)
+![LangGraph + LangChain](https://img.shields.io/badge/Agents-LangGraph%20%2B%20LangChain-14675e)
 
-当前 **第 010 轮 / P10：离线对照评估**已完成并上传 GitHub：补齐持久单 Agent，30 个案例×两种架构×三次重复共180次，实际越权读取、未审批写入、重复动作、超额退款均0。开发集单 Agent 90%、多 Agent 85%；留出集各90%，未通过案例保留。详见 [对照报告](evals/reports/p10-offline-v1/report.md)、[第010轮](docs/rounds/010.md) 和 [评估说明](evals/README.md)。离线工程交付；真实模型和真人标注仍延期。554 个离线测试与12个真实浏览器测试通过，独立安装包通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37648721025) 两项job通过；阶段快照为 [phase-p10](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p10)。原P09工作台与CLI保留，阶段历史见标签。
+**基于证据的售后工单处理系统：多 Agent 调查与审核、人工审批、持久恢复和可追溯的业务执行。**
 
-000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
+面向电商客服的物流延迟、签收未收到和退货申请，将订单调查、政策核算、建议生成与人工确认串成完整处理链路。客户补资料，操作员审核具体动作，系统保存依据、版本和执行回执，支持刷新、重启与请求重试。
 
-- [技术方案](docs/technical-design.md)：业务范围、系统架构、Agent 职责、状态与数据、工具规则、恢复与幂等、API 和评估。
-- [实施计划](plan.md)：P00～P10 的任务、测试、演示和验收条件，后续逐阶段更新。
-- [第 001 轮学习记录](docs/rounds/001.md)：实现步骤、验证方法和本轮要理解的概念。
-- [第 002 轮学习记录](docs/rounds/002.md)：工具输入、可信上下文、规则计算、证据与错误边界。
-- [第 003 轮学习记录](docs/rounds/003.md)：实际工具循环、结构化建议、有限修复、代码复算和运行记录。
-- [第 004 轮学习记录](docs/rounds/004.md)：主图状态、有限路由、专员工具与上下文隔离、结构化交接。
-- [第 005 轮学习记录](docs/rounds/005.md)：审核反馈、定向返工、interrupt、版本绑定和人工输入。
-- [第 006 轮学习记录](docs/rounds/006.md)：跨进程恢复、事务边界、动作幂等、执行前复核与业务状态。
-- [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
-- [第 008 轮学习记录](docs/rounds/008.md)：HTTP 启动步骤、演示身份、请求幂等、后台队列、审批/重启边界；[ADR 008](docs/decisions/008-durable-http-admission.md)。
-- [第 009 轮学习记录](docs/rounds/009.md)：工作台启动、三条页面演示、刷新/重试/旧审批边界、浏览器验收；[ADR 009](docs/decisions/009-browser-workbench-and-public-evidence.md)。
-- [第 010 轮学习记录](docs/rounds/010.md)：公平基线、先保存再评分、真实故障、安全反例和重复结果；[ADR010](docs/decisions/010-independent-offline-comparison.md)、[对照图](docs/graphs/p10-comparison.mmd)。
-- [模拟资料与案例](fixtures/README.md)：数据来源、20 个开发案例与 10 个留出案例。
+当前发布使用离线脚本模型和虚构业务资料，无需 API 密钥即可演示完整流程。框架执行真实的工具调用、图调度、暂停恢复和 SQLite 事务；支付动作是模拟记录。真实模型适配器尚未实现。
 
-第一版使用本地模拟订单、物流与虚构售后政策，输出建议与回复草稿；durable 入口会在人工确认后执行模拟业务动作。用户选择当前仅使用离线脚本模型；真实模型适配器和网络 smoke test 暂缓。
+[快速启动](#快速启动) · [演示指南](docs/demo.md) · [系统架构](docs/technical-design.md) · [API](docs/api.md) · [验证报告](docs/quality.md) · [文档中心](docs/README.md)
 
-## 本地运行
+![售后协作桌面工作台：证据、人工审批与协作时间线](docs/screenshots/workbench-desktop.png)
 
-快速体验工作台（临时演示库，停止后清理）：
+## 业务场景
+
+| 场景 | 调查与判断 | 处理结果 |
+| --- | --- | --- |
+| 物流延迟 | 对照预计送达时间和物流记录，区分正常运输与超期 | 回复进度，或经确认登记物流调查 |
+| 签收未收到 | 核验签收凭证、物流调查和客户陈述；缺资料时追问 | 有明确丢件依据且满足政策时，经确认登记模拟退款 |
+| 退货申请 | 核验收货时间、商品类别/状态、历史申请和政策版本 | 经确认登记退货申请，业务状态进入“待客户寄回” |
+
+## 核心能力
+
+- **有据可查的建议**：结论绑定证据 ID 与来源版本；客户陈述和工具事实分别处理，规则由代码复算。
+- **职责明确的 Agent 协作**：协调、订单调查、政策核算与审核拥有独立上下文和工具权限；订单与候选政策可并行调查，再核验依赖。
+- **绑定具体方案的人工审批**：确认包含身份、待办、输入/方案版本和动作哈希；修改退款金额后重新审核和确认。
+- **持久恢复与幂等执行**：图检查点、人工回答、HTTP 请求回执和动作账本各自持久化；动作提交后进程退出，恢复返回已有回执。
+- **有限执行**：全运行共享模型/工具调用、返工、并发、token 预留和活动时间预算，恢复不会重置额度。
+- **可操作的工作台**：工单创建、筛选、补资料、审批、取消、恢复、证据摘要与执行时间线，支持窄屏。
+- **可复现的架构对照**：单 Agent 和多 Agent 共用业务规则、审批与动作保障；先保存观察，再读取独立预期评分。
+
+## 快速启动
+
+需要 **Python 3.12、[uv](https://docs.astral.sh/uv/getting-started/installation/)、macOS 或 Linux**。
 
 ```bash
+git clone https://github.com/weiwei-cup/after-sales-multi-agent.git
+cd after-sales-multi-agent
 uv sync --locked --python 3.12
-uv run --locked python scripts/demo_p09.py --port 8000
+uv run --locked after-sales demo --port 8000
 ```
 
-打开 [本地工作台](http://127.0.0.1:8000/)。客户 A 新建“签收未收到”工单，开始处理后补充 `ORD-004`，切换操作员核对并确认，即可看到模拟退款回执。客户 B 可体验 `T-DELAY-002` 和 `T-RETURN-001`。演示业务时间固定为 2026-10-02，正常 HTTP app 使用真实时间。详细操作与浏览器测试命令见 [第 009 轮](docs/rounds/009.md)。
+打开 [工作台](http://127.0.0.1:8000/) 或 [交互式 API 文档](http://127.0.0.1:8000/docs)。默认使用临时资料，正常停止后清理；不需要模型密钥。
 
-需要 Python 3.12 和 [uv](https://docs.astral.sh/uv/getting-started/installation/)。在项目根目录执行：
+**第一条演示路径**：客户 A → `T-NOTRECEIVED-002` → 开始处理 → 切换操作员 → 核对 ¥100.00、订单与政策 → 勾选确认并提交 → 查看模拟退款回执。刷新页面不会重复登记退款。更多路径见 [5 分钟演示指南](docs/demo.md)。
+
+需要保存工单与审批，使用固定目录启动；再次执行同一命令可以继续处理：
 
 ```bash
-uv sync --locked --python 3.12
-uv run --locked after-sales doctor
-uv run --locked after-sales doctor --json
+uv run --locked after-sales demo --data-dir var/demo --port 8000
 ```
 
-默认不需要密钥，也不会发送模型请求。可将 `.env.example` 复制为 `.env` 修改配置；环境变量以 `AFTER_SALES_` 开头。`doctor` 检查依赖和配置，不创建业务数据库，也不验证模型连通性。
+演示时钟固定为 2026-10-02 12:00 Asia/Shanghai，使资料中的时间窗口可重复。采用实际时钟的服务启动、配置和备份见 [运行指南](docs/operations.md)。
 
-初始化并查询售后业务资料：
+## 系统架构
 
-```bash
-uv run --locked after-sales seed --dataset demo
-uv run --locked after-sales ticket list
-uv run --locked after-sales ticket show T-DELAY-001
-uv run --locked after-sales ticket show T-NOTRECEIVED-001
-uv run --locked after-sales ticket show T-RETURN-001
-uv run --locked after-sales order show ORD-005 --customer CUST-B --json
-uv run --locked after-sales policy list --intent return_request --json
-uv run --locked after-sales policy show RETURN-STANDARD --version 2 --json
-uv run --locked after-sales inspect --ticket T-RETURN-001
-uv run --locked after-sales inspect --ticket T-CONFLICT-001 --json
-uv run --locked after-sales inspect --ticket T-CROSS-001 --json
+```mermaid
+flowchart LR
+    UI[客户 / 操作员工作台] --> API[FastAPI · 身份与请求幂等]
+    API --> APP[应用服务 · 持久任务队列]
+    APP --> GRAPH[LangGraph · 分派 / 并行 / 审核 / 暂停恢复]
+    GRAPH --> AGENT[LangChain Agents · 独立工具与上下文]
+    AGENT --> TOOLS[只读工具 · 证据快照]
+    TOOLS --> RULES[确定性政策规则]
+    GRAPH --> HUMAN[客户补资料 / 操作员确认]
+    HUMAN --> EXEC[执行前复核 · 事务动作账本]
+    APP --> DB[(业务 SQLite)]
+    EXEC --> DB
+    GRAPH --> CP[(SQLite 检查点)]
 ```
 
-默认业务时间固定为 2026-10-02 12:00（Asia/Shanghai），JSON 和数据库统一 UTC。`inspect` 使用与后续 Agent 相同的工具服务，返回事实、条件、候选资格和证据；模型调用为 0。已有申请返回 `existing_application`，资料不全返回 `needs_information`，政策冲突返回 `policy_conflict`，跨客户查询返回 `NOT_OWNED`。
+Agent 负责调查与建议；代码核验事实、权限和政策，操作员批准动作，事务执行器产生业务效果。单机服务使用一个 HTTP 进程和有界执行线程；业务库与检查点库共同支持恢复。[完整架构与取舍](docs/technical-design.md)。
 
-`eligible` 表示代码条件满足，输出始终为 `candidate_only`，不登记退货或执行退款。P02 证据保存在本次调查会话内存中，`--json` 可导出快照；durable 运行会随 run 持久保存并恢复证据。默认工具查询时限 3 秒，单次工具结果上限 12000 UTF-8 字节，均可通过 `.env.example` 中的配置修改。
+## 验证结果
 
-运行单 Agent 基线：
+发布前验证包含 **556 项离线测试、12 项真实 Chromium 测试**。独立评估使用 30 个案例、两种架构、每例三次重复，共 180 次观察：
 
-```bash
-uv run --locked after-sales run --ticket T-DELAY-001 --architecture single --model scripted
-uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --model scripted
-uv run --locked after-sales run --ticket T-RETURN-001 --model scripted
-uv run --locked after-sales run --ticket T-MISSING-001 --model scripted
-uv run --locked after-sales live-smoke --json
-```
+| 数据集 | 单 Agent | 多 Agent |
+| --- | --- | --- |
+| 开发集 | 54/60（90%） | 51/60（85%） |
+| 留出集 | 27/30（90%） | 27/30（90%） |
 
-每次运行保存到 `var/runs/运行ID.json`，终端打印具体路径。把路径代入以下命令回看结果或事件：
-
-```bash
-uv run --locked after-sales report show var/runs/运行ID.json
-uv run --locked after-sales report show var/runs/运行ID.json --events-only
-```
-
-可用 `run --output 新文件路径 --json` 指定结果文件，已有文件不会被覆盖。文件包含工单输入、框架/规则/资料版本、原始建议、通过校验的建议、证据、模型与工具消息、事件和调用统计。`completed` 表示调查与建议生成结束；`candidate_only=true`、`executable=false`，执行动作数为 0。这是可读取的静态运行记录；P05 的交互式入口支持同进程人工输入，durable 入口支持跨进程恢复。
-
-脚本根据真实 `ToolMessage` 生成下一步调用及建议，不读取 gold；它验证框架和业务约束，不能衡量真实模型的语言理解能力。默认最多 20 次模型调用、30 次业务工具调用（含代码复算），schema 最多修复 1 次，模型请求时限 30 秒。脚本未报告 token usage 时保存 `null`，不填假 token 或费用。`live-smoke` 和显式 `run --model live` 显示 `skipped / LIVE_PROVIDER_DEFERRED`，不发网络请求；不要将保留的 live 配置当作已可用的适配器。
-
-运行串行多 Agent：
-
-```bash
-uv run --locked after-sales run --ticket T-DELAY-001 --architecture multi --model scripted
-uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --model scripted
-uv run --locked after-sales run --ticket T-RETURN-001 --architecture multi --model scripted
-uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --model scripted
-uv run --locked after-sales run --ticket T-CROSS-001 --architecture multi --model scripted
-```
-
-正常节点为 `intake → order → policy → draft → validate`。缺订单号、未知意图跳过专员；订单不可访问时跳过政策。每个角色只看到显式投影的输入，交接只传结构化事实/错误和证据，内部 messages 不传给其他角色。`multi-run-v1` 文件另含主图状态、节点轨迹、角色输入/输出及统计、实际 Mermaid 图，沿用 `report show` 回看；仍只生成候选，没有暂停、恢复或执行动作。
-
-本轮离线协调按工单声明的类型和订单引用整理槽位/调查计划，不评价自由文本意图识别。专员摘要必须匹配实际工具结果与快照，不能凭客服文字猜收货时间。全运行共用 20/30 次调用上限和默认 1 次 schema 修复，角色切换不重置预算；reviewed 入口另有共享审核返工计数。主图和三类实测轨迹分别保存在 [Mermaid](docs/graphs/p04-serial.mmd) 与 [轨迹 JSON](docs/graphs/p04-demo-traces.json)。
-
-运行带审核及人工介入的多 Agent：
-
-```bash
-uv run --locked after-sales run --ticket T-DELAY-001 --architecture multi --workflow reviewed
-uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --workflow reviewed --interactive
-uv run --locked after-sales run --ticket T-RETURN-001 --architecture multi --workflow reviewed --interactive
-uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow reviewed --interactive
-```
-
-缺订单号样例输入 `ORD-019`，查看退货候选后选 `approve` / `reject`。退款样例可选 `revise`，输入 `9000` 分，查看新版本后再次确认。只有必要信息缺失才追问；客户回答保留为陈述，补订单号后重新核验归属。四角色的代码校验、审核和金额修改共享最多两次返工，纯措辞只改写，凭证失败只定向补查；默认调用预算跨恢复累计。
-
-`--interactive` 保持 `InMemoryReviewRun` 和 `InMemorySaver` 存活，使用真实 interrupt / Command resume。普通 reviewed 命令遇到待办会保存 paused JSON 并退出；关闭进程后无法恢复，文件仅用于回看。人工输入绑定身份、待办、输入/方案版本和动作内容；金额改变时旧批准被拒绝。当前身份只用于本地演示，中文措辞校验采用受控模板，真实模型语义评估未实现。
-
-review-run-v1 保存审核、共享返工计数、待办历史、确认记录及图状态，沿用 report show 查看。completed 表示建议和必要确认完成，业务执行数仍为 0。该入口保留 P05 行为；当前 durable 入口实现持久恢复、执行前最新资料与时钟复核、模拟动作。详见 [第 005 轮](docs/rounds/005.md)、[ADR 005](docs/decisions/005-bounded-review-and-human-input.md)、[实际图](docs/graphs/p05-reviewed.mmd)。
-
-运行持久审核与模拟动作：
-
-```bash
-uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow durable --run-id learning-006
-# 退出后在另一终端继续；看清动作明细后输入 approve。
-uv run --locked after-sales resume --run learning-006 --model scripted
-uv run --locked after-sales resume --run learning-006 --json
-uv run --locked after-sales ticket show T-NOTRECEIVED-002
-uv run --locked after-sales order show ORD-004 --customer CUST-A --json
-```
-
-持久恢复从 business.sqlite 和 checkpoints.sqlite 载入可信记录。每次另存静态报告；JSON 文件不能恢复图。客户补充信息和操作员回答均先持久化，再进入 Command；已保存的回答遇到崩溃会自动重放。已有活跃运行的工单必须 resume，不能另开 run 绕过待办或预算。
-
-批准动作在同一事务中复核最新事实、有效政策及执行时钟，并写入动作账本、模拟 history、金额/状态和动作事件。同 key、同 payload 返回原回执，同 key 换金额冲突；提交后图未保存时恢复也不会重复退款。退货登记后业务状态 waiting_return，模拟退款后 resolved，物流调查登记后 processing；图均可以 completed。
-
-P06 默认使用实际 UTC 时钟，退货资格会随 fixture 日期过去失效。测试与学习轨迹注入固定时钟；`uv run --locked python scripts/demo_p06.py` 在临时数据库和独立进程中复现三类动作、客户补订单和提交后强制退出恢复。身份仍为本地演示；当前文件锁支持 macOS/Linux。详细步骤见 [第 006 轮](docs/rounds/006.md)、[ADR 006](docs/decisions/006-durable-review-and-action-ledger.md)。
-
-`seed` 自动迁移数据库；可用 `after-sales db migrate` 单独创建 schema。重复 seed 保留已经变化的工单状态；业务 v1 可以迁移到 v2，原数据保留。显式 `after-sales seed --dataset demo --reset` 恢复配置指向的演示业务库，要求本应用与 demo 标记且只有已知表；检查点库不受此命令处理；reset 会清除 durable 的应用资料和动作账本，旧 thread ID 不允许作为新 run 重用。
-
-若本机的 uv 安装在本项目的 `.tools/uv` 隔离目录，可将以上 `uv` 换成 `./scripts/dev`。该脚本优先使用 PATH 中的 uv，再使用项目内工具，并将默认缓存放在忽略目录 `.tools/uv-cache`。
-
-## 验证
+180 次观察中，实际跨客户读取、未确认写入、重复业务动作和超额退款四类关键错误均为 0；21 次业务评分失败完整保留。离线脚本结果体现流程行为，不证明真实模型质量或生产收益。实际 token 与费用未报告，保留为 `null`。[验证方法、已知问题与报告](docs/quality.md)。
 
 ```bash
 uv run --locked ruff check .
 uv run --locked ruff format --check .
+uv run --locked python scripts/check_docs.py
 uv run --locked pytest
 ```
 
-默认测试禁止互联网 socket 访问，允许 asyncio 所需的本机 Unix socket，并排除 `live` 与 `e2e`。P00 验证配置错误和密钥隐藏、CLI 启动、最小 StateGraph 执行，以及关闭连接后从 SQLite 读取检查点。
+浏览器测试和完整评估的安装与复现命令见 [评估说明](evals/README.md)。
 
-P01 新增金额与时间校验、归属与外键、资料引用、重复初始化、失败回滚、受限重置、政策版本、CLI 及开发 / 留出案例结构测试。业务评估 runner 已在 P10 实现，见评估说明。
+## 项目结构
 
-P02 新增 72 个测试实例，覆盖七天整点与超一秒、未收货与收货时间缺失、部分退款余额、超额及负金额、已有申请、冲突政策遗漏、伪造事实与证据、跨客户访问、真实 LangChain `ToolMessage`、超时与有界查询、结果长度和 IPv4/IPv6 禁网。测试使用临时数据库，不改动日常演示数据。
-
-P03 新增 69 个测试实例，完整套件 201 passed：实际 `create_agent` 循环和 call ID 关联、20 个工单的基础事实路径、改动事实后建议相应改变、缺订单号、有限 schema 修复、超余额退款与伪造引用被拦截、调用上限含复算、模型超时、查询失败、JSON 保存/读取与禁止覆盖、live 跳过。案例名含故障的工单在这 20 条测试中只验证基础事实，故障行为由单独的受控脚本/查询替换测试；尚未实现通用案例故障执行器。
-
-P04 新增 49 个测试实例，完整套件 250 passed：三类串行路径、缺订单号/未知意图/不可访问订单的分支、实际角色工具白名单和越界调用、输入投影与独立 messages、摘要事实/引用伪造、跨角色预算与修复上限、查询错误保留、提前结束后的 schema 修复、部分状态诊断、JSON / LangGraph 序列化、单/多 Agent 契约一致、CLI 保存和回看。测试运行前后业务库 dump 一致；安装包在独立环境运行多 Agent 退货样例通过。
-
-## 按阶段学习与保存
-
-P05 新增 85 个测试实例，完整套件 370 passed：定向补查和事实保留、依赖政策重算、共享返工上限、硬规则覆盖模型接受、真实 interrupt/resume、输入身份/版本/内容错配、重复及并发消费、金额修改与重新展示、无业务写入、静态报告一致性、交互式 CLI 和 live 跳过。安装包在独立环境验证补订单批准/拒绝、退款改金额后批准及旧 single / serial 入口。
-
-P06 新增 59 个测试实例，完整套件 429 passed：真实进程退出与持久恢复、事务回滚/重放、同动作重复与并发、不同金额冲突、两个工单并发退款、资料及执行时钟变化、版本拒绝与数据保留、预算延续、业务状态、CLI 和 v1→v2 迁移。日常演示数据库未用于测试。
-
-建议先阅读技术方案第 1～5 节，再按照实施计划逐阶段推进。每阶段执行“实现 → 测试 → 更新计划 → 提交与推送 → CI 验证 → 阶段标签”。
-
-仓库：[weiwei-cup/after-sales-multi-agent](https://github.com/weiwei-cup/after-sales-multi-agent)。每个完成阶段保留 `phase-p00`～`phase-p10` 标签，可在独立目录检出对应标签学习。
-
-只上传代码、模拟资料和文档。运行时数据库、`.env`、密钥和虚拟环境由 `.gitignore` 排除。
-
-
-P07 学习入口：
-
-```bash
-uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture multi --workflow parallel --run-id learning-007 --json
-uv run --locked after-sales resume --run learning-007
-uv run --locked after-sales cancel --run learning-007 --json
-uv run --locked after-sales resume --run learning-007 --json
-uv run --locked python scripts/demo_p07.py
+```text
+src/after_sales/
+  agents/        Agent 工具循环、角色、审核与结构化输出
+  workflows/     单 / 多 Agent 图、并行汇合、人工介入与恢复
+  domain/        业务模型与确定性政策规则
+  tools/         可信工具上下文、证据快照与有界查询
+  repositories/  SQLite 迁移、运行记录、调用预算和动作账本
+  services/      应用服务、工作流分派与公开结果投影
+  api/           HTTP 接口、身份范围与请求契约
+  web/           中文工单工作台
+  evaluation/    故障执行、观察保存与独立评分
+tests/           业务、契约、恢复、并发、HTTP 与浏览器验证
+fixtures/        版本化模拟业务输入
+evals/           独立预期、留出案例与归档报告
+docs/            架构、演示、运行、API、设计决策与开发历史
 ```
 
-cancel 提交信号，暂停运行在下一次 resume 应用。已提交退款仍保留回执与余额。unknown usage 保留 token 预留，实际用量及费用为 null。候选与订单并行不保证每次都更快；实测时间线与教学注入延迟详见第 007 轮记录。
+## 文档与后续
 
-## P08 HTTP 服务
+- [演示指南](docs/demo.md)：三类业务、金额修改、刷新与重启。
+- [架构说明](docs/technical-design.md) / [设计决策](docs/decisions/README.md)：状态、证据、审批、事务与评估取舍。
+- [运行指南](docs/operations.md) / [API 说明](docs/api.md)：配置、持久数据、协议与运行边界。
+- [技术展示提纲](docs/showcase.md)：适合面试的项目介绍、代码入口与现场演示顺序。
+- [路线图](docs/roadmap.md) / [变更记录](CHANGELOG.md) / [贡献指南](CONTRIBUTING.md)。
 
-可重复的全流程演示使用临时库和固定模拟时钟：
-
-```bash
-uv run --locked python scripts/demo_p08.py
-```
-
-手动启动使用单独的 P08 数据库：
-
-```bash
-export AFTER_SALES_MODEL_MODE=scripted
-export AFTER_SALES_BUSINESS_DB_PATH=var/p08-business.sqlite
-export AFTER_SALES_CHECKPOINT_DB_PATH=var/p08-checkpoints.sqlite
-uv run --locked after-sales seed --json
-uv run --locked uvicorn after_sales.api.app:app --host 127.0.0.1 --port 8000 --workers 1
-```
-
-接口文档在 `http://127.0.0.1:8000/docs`。本地演示令牌：`demo-customer-a`、`demo-customer-b`、`demo-operator`；请求使用 Bearer 身份，所有 POST 要求 Idempotency-Key。处理请求返回 202，轮询 run 查询待办/结果；客户回答，操作员审批。queued 重启后自动执行，interrupted 使用 resume，paused 使用 responses。完整字段、状态码、退出窗口与测试说明见 [第 008 轮](docs/rounds/008.md)。
-
-
-## P10 离线对照评估
-
-```bash
-uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture single --workflow single --run-id learning-010 --json
-uv run --locked after-sales resume --run learning-010
-export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright-browsers"
-uv run --locked playwright install chromium
-uv run --locked after-sales eval run --repetitions 3 --browser --output-dir evals/output/my-p10 --json
-uv run --locked after-sales eval score --observations evals/output/my-p10 --output-dir evals/output/my-rescore --json
-```
-
-single持久入口与parallel共用审批、预算、规则和动作账本；原静态单Agent入口保留。评估每格使用新临时库，30案例输入和gold来自仓库，保存全部观察后才读取gold。C16真进程退出恢复、C19真实HTTP重复请求、C20真实浏览器刷新/非零游标重连。完整运行需锁定开发依赖与Chromium；省略浏览器时明确C20未覆盖。每次选择新输出路径。
-
-本机脚本测试中单Agent调用更少、耗时更低，不能推断真实模型下的质量或成本收益。C11/C14预算耗尽、C17多Agent证据缺口与H10全额退款后的错误调查均记录为失败；没有修改gold或用留出结果调优。实际token和费用未知为null。引用语义核对由Codex完成，真人标注pending；`eval run --model live`显示skipped。原始输出、截图与SHA256已压缩归档，可按[评估说明](evals/README.md)解压重新评分。
+当前可运行范围是单机演示与工程验证：公开演示令牌、模拟业务动作、离线模型。真实认证、真实模型、支付对接和分布式部署列入路线图。开发记录与原实施计划保存在 [历史归档](docs/history/README.md)，阶段标签保留用于追溯。

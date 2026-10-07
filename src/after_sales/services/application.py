@@ -10,6 +10,7 @@ from uuid import uuid4
 
 from pydantic import TypeAdapter
 
+from after_sales import __version__
 from after_sales.agents.contracts import PendingInput, ResumeInput
 from after_sales.agents.review import digest
 from after_sales.api.contracts import Accepted, EventPage, EventView, RunView, TicketView
@@ -48,7 +49,7 @@ class ApplicationService:
         if not 1 <= workers <= 4 or not 1 <= capacity <= 1000:
             raise ValueError("executor workers must be 1–4 and queue capacity 1–1000")
         if settings.model_mode != "scripted":
-            raise ValueError("P08 supports scripted model only")
+            raise ValueError("HTTP service supports scripted model only")
         self.repository, self.settings = repository, settings
         self.workers, self.capacity = workers, capacity
         self.clock = clock or (lambda: datetime.now(UTC))
@@ -359,7 +360,7 @@ class ApplicationService:
         def operation(db):
             row = self._run(db, run_id, principal)
             if not db.execute("SELECT 1 FROM run_control WHERE run_id=?", (run_id,)).fetchone():
-                raise conflict("取消仅支持 P07 parallel 运行。")
+                raise conflict("当前运行未启用持久取消控制。")
             BudgetStore(self.repository.path, run_id, self.settings).cancel(connection=db)
             if (
                 row["status"] in ("paused", "interrupted")
@@ -477,4 +478,10 @@ class ApplicationService:
             db.execute("SELECT 1").fetchone()
         if not self.lease or self.stop.is_set() or not all(t.is_alive() for t in self.threads):
             raise ApplicationError(503, "NOT_READY", "执行器未就绪。")
-        return {"status": "ok", "phase": "P10", "model_mode": "scripted"}
+        return {
+            "status": "ok",
+            "service": "after-sales",
+            "version": __version__,
+            "phase": "P10",  # Retained for existing clients and report compatibility.
+            "model_mode": "scripted",
+        }

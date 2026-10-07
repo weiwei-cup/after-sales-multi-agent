@@ -78,7 +78,11 @@ def server(tmp_path, request):
 
 @pytest.fixture
 def artifact_dir(tmp_path, request):
-    destination = Path(os.environ.get("P09_ARTIFACT_DIR", str(tmp_path / "browser"))).resolve()
+    destination = Path(
+        os.environ.get(
+            "BROWSER_ARTIFACT_DIR", os.environ.get("P09_ARTIFACT_DIR", str(tmp_path / "browser"))
+        )
+    ).resolve()
     directory = destination / request.node.name
     directory.mkdir(parents=True, exist_ok=True)
     return directory

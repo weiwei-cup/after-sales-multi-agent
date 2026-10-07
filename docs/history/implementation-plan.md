@@ -1,12 +1,14 @@
+> 开发历史归档（2026-10-08）。本文保留当时的计划、验证结果和表述；当前功能与使用方法见 [项目首页](../../README.md) 和 [文档中心](../README.md)。
+
 # 售后工单多 Agent 工作台：分阶段实施计划
 
 日期：2026-10-02
 
-技术方案：[docs/technical-design.md](docs/technical-design.md)
+技术方案：[docs/technical-design.md](../technical-design.md)
 
 当前状态：P00～P10离线工程已完成并上传；P10的180次对照评估安全关键错误0，554项离线/12项真实浏览器、独立wheel与归档重评分通过；[实现CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37648721025)两项job成功。阶段快照phase-p10，达到离线M4。真实模型继续按用户选择延期，真人引用标注待完成；不声明真实模型M4验收。
 
-前次 000～004 复核已完成。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
+前次 000～004 复核已完成。详见 [复核记录](../reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
 
 ## 1. 使用方式
 
@@ -189,7 +191,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：关键规则和工具集成测试通过；这一步不调用模型。需要理解：tool schema、运行时上下文、确定性规则与证据溯源。
 
-本轮实现与边界：[学习记录](docs/rounds/002.md)、[ADR 002](docs/decisions/002-trusted-tools-and-evidence.md)。证据目前为会话内存快照，P06 才持久化；查询超时不产生业务事实，后台只读任务占用固定工作槽直至结束。
+本轮实现与边界：[学习记录](../rounds/002.md)、[ADR 002](../decisions/002-trusted-tools-and-evidence.md)。证据目前为会话内存快照，P06 才持久化；查询超时不产生业务事实，后台只读任务占用固定工作槽直至结束。
 
 ## 7. P03：单 Agent 基线
 
@@ -224,7 +226,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 演示：`uv run after-sales run --ticket T-DELAY-001 --architecture single --model scripted`。
 
-已实现与验证：[第 003 轮记录](docs/rounds/003.md)、[ADR 003](docs/decisions/003-offline-agent-baseline.md)。69 个新增测试实例，完整套件 201 passed；代码复算计入工具预算，JSON 记录可跨进程读取但不能恢复 Agent。schema 修复默认 1 次，与 P05 的审核返工分开计数。
+已实现与验证：[第 003 轮记录](../rounds/003.md)、[ADR 003](../decisions/003-offline-agent-baseline.md)。69 个新增测试实例，完整套件 201 passed；代码复算计入工具预算，JSON 记录可跨进程读取但不能恢复 Agent。schema 修复默认 1 次，与 P05 的审核返工分开计数。
 
 验收门槛：离线基线可重复运行，结果和事件可读取。live smoke 状态单独记录，不把离线通过写成真实模型通过。达到 M1。
 
@@ -258,7 +260,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：串行多 Agent 流程与结构化交接通过图集成测试。需要理解：State、Node、Edge、subgraph 和上下文隔离。
 
-实现与验证：[第 004 轮记录](docs/rounds/004.md)、[ADR 004](docs/decisions/004-serial-role-handoffs.md)、[实际主图](docs/graphs/p04-serial.mmd)、[实测轨迹](docs/graphs/p04-demo-traces.json)。本轮新增 49 个测试实例，完整套件 250 passed；同一运行的调用和 schema 修复预算覆盖全部角色，状态只有可序列化资料，不含依赖对象或专员 messages。暂停、审核与动作仍留给 P05 / P06。
+实现与验证：[第 004 轮记录](../rounds/004.md)、[ADR 004](../decisions/004-serial-role-handoffs.md)、[实际主图](../graphs/p04-serial.mmd)、[实测轨迹](../graphs/p04-demo-traces.json)。本轮新增 49 个测试实例，完整套件 250 passed；同一运行的调用和 schema 修复预算覆盖全部角色，状态只有可序列化资料，不含依赖对象或专员 messages。暂停、审核与动作仍留给 P05 / P06。
 
 ## 9. P05：审核、返工、追问与人工确认
 
@@ -287,7 +289,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 演示：`uv run after-sales run --ticket T-MISSING-001 --architecture multi --workflow reviewed --interactive`，输入 `ORD-019` 后查看退货候选，再选 `approve` / `reject`。
 
-实现与验证：[第 005 轮记录](docs/rounds/005.md)、[ADR 005](docs/decisions/005-bounded-review-and-human-input.md)、[实际图](docs/graphs/p05-reviewed.mmd)、[实测轨迹](docs/graphs/p05-demo-traces.json)。新增 85 个测试实例，完整本地套件 370 passed。代码、审核和操作员金额修改共享最多两次返工；身份只用于本地演示，中文措辞只验证受控模板。静态 JSON 不能恢复，数据库无业务变更。
+实现与验证：[第 005 轮记录](../rounds/005.md)、[ADR 005](../decisions/005-bounded-review-and-human-input.md)、[实际图](../graphs/p05-reviewed.mmd)、[实测轨迹](../graphs/p05-demo-traces.json)。新增 85 个测试实例，完整本地套件 370 passed。代码、审核和操作员金额修改共享最多两次返工；身份只用于本地演示，中文措辞只验证受控模板。静态 JSON 不能恢复，数据库无业务变更。
 
 验收门槛：四种职责闭环通过；当前只保证同进程暂停恢复，不能宣称已支持重启。需要理解：evaluator feedback、有限循环、interrupt、人工输入契约。
 
@@ -322,7 +324,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 演示：`uv run after-sales resume --run RUN-ID --model scripted`；查询模拟退款或退货记录数量。
 
-本地验收：429 passed，其中新增 59 项；真实独立进程退出/恢复、动作重复与并发、资料变更和金额上界通过；安装包和远端交付记录见 [第 006 轮](docs/rounds/006.md)。远端实现 CI 已通过，M2 完成；phase-p06 在最终文档提交 CI 通过后建立，历史标签保留。
+本地验收：429 passed，其中新增 59 项；真实独立进程退出/恢复、动作重复与并发、资料变更和金额上界通过；安装包和远端交付记录见 [第 006 轮](../rounds/006.md)。远端实现 CI 已通过，M2 完成；phase-p06 在最终文档提交 CI 通过后建立，历史标签保留。
 
 验收门槛：跨进程恢复、幂等和金额并发测试通过。达到 M2。需要理解：检查点与业务事务的区别、节点重放、动作幂等和实际业务完成状态。
 
@@ -355,7 +357,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：并发状态、预算竞争和错误处理验证通过；真实耗时变化单独记录。需要理解：fan-out / join、reducers、共享预算和调用成本。
 
-实现与验证：[第 007 轮](docs/rounds/007.md)、[ADR 007](docs/decisions/007-parallel-joins-and-durable-budgets.md)、[实际图](docs/graphs/p07-parallel.mmd)、[教学观测](docs/graphs/p07-demo-traces.json)。完整本地回归 488 passed（新增 59 项）；真实 barrier、SQLite 额度竞争、os._exit 恢复、暂停时间与取消提交边界通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) completed/success；阶段交付标签为 phase-p07。
+实现与验证：[第 007 轮](../rounds/007.md)、[ADR 007](../decisions/007-parallel-joins-and-durable-budgets.md)、[实际图](../graphs/p07-parallel.mmd)、[教学观测](../graphs/p07-demo-traces.json)。完整本地回归 488 passed（新增 59 项）；真实 barrier、SQLite 额度竞争、os._exit 恢复、暂停时间与取消提交边界通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) completed/success；阶段交付标签为 phase-p07。
 
 ## 12. P08：HTTP 应用服务
 
@@ -386,7 +388,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：API 集成和同工单并发验证通过。需要理解：agent runtime 与 HTTP 生命周期、业务身份和幂等请求。
 
-实现与验证：[第 008 轮](docs/rounds/008.md)、[ADR 008](docs/decisions/008-durable-http-admission.md)、[真实 HTTP 演示](docs/graphs/p08-demo-http.json)。516 项离线测试通过（新增 28 项），Ruff、独立进程退出/恢复、同工单并发、容量/取消边界和项目外 wheel 验证通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37620606885) completed/success；阶段快照为 phase-p08。
+实现与验证：[第 008 轮](../rounds/008.md)、[ADR 008](../decisions/008-durable-http-admission.md)、[真实 HTTP 演示](../graphs/p08-demo-http.json)。516 项离线测试通过（新增 28 项），Ruff、独立进程退出/恢复、同工单并发、容量/取消边界和项目外 wheel 验证通过。[实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37620606885) completed/success；阶段快照为 phase-p08。
 
 ## 13. P09：工单工作台页面
 
@@ -415,7 +417,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：核心浏览器测试和视觉检查通过。达到 M3。需要理解：用户动作与 Agent 状态、事件展示和暂停待办。
 
-实现与验证：[第 009 轮](docs/rounds/009.md)、[ADR 009](docs/decisions/009-browser-workbench-and-public-evidence.md)、[真实浏览器记录](docs/graphs/p09-demo-browser.json)。519 项默认离线回归、12 项独立浏览器验收、桌面/窄窗口人工检查与项目外 wheel 验证通过；[CI 37640417752](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752) completed/success，阶段快照为 phase-p09。
+实现与验证：[第 009 轮](../rounds/009.md)、[ADR 009](../decisions/009-browser-workbench-and-public-evidence.md)、[真实浏览器记录](../graphs/p09-demo-browser.json)。519 项默认离线回归、12 项独立浏览器验收、桌面/窄窗口人工检查与项目外 wheel 验证通过；[CI 37640417752](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752) completed/success，阶段快照为 phase-p09。
 
 ## 14. P10：对照评估与最终交付
 
@@ -530,7 +532,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 核心结果：两个新库资料一致；重复 seed 不覆盖已变化的工单；迁移可重复；初始化与重置失败回滚；未标记或其他应用数据库不能重置；跨客户查询不返回对方资料。
 - 演示：三类工单查询、政策当前 / 未来版本、跨客户工单无订单资料均通过；本地演示库已初始化，文件保持在 Git 忽略目录。
 - 打包：wheel 构建通过；独立环境使用锁文件安装依赖再安装 wheel，在另一个工作目录成功执行 seed 和查询。安装包包含业务资料，不包含 gold、数据库、测试或工具缓存。
-- 学习记录：[docs/rounds/001.md](docs/rounds/001.md)；设计变更：[ADR 001](docs/decisions/001-fixture-and-order-references.md)，区分用户订单引用与可信关联，业务资料随包分发。
+- 学习记录：[docs/rounds/001.md](../rounds/001.md)；设计变更：[ADR 001](../decisions/001-fixture-and-order-references.md)，区分用户订单引用与可信关联，业务资料随包分发。
 - 限制：P01 只有业务资料和查询；政策计算、证据、故障注入执行与 Agent 业务处理尚未实现，60 个测试通过不代表 30 个 Agent 场景已通过。
 - GitHub：实现提交 `5c871a329bdc4ff9ae5a41dcb394ec3adc61acc4` 已推送，[P01 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37012389696) 为 success；阶段快照为 `phase-p01`，包含本轮学习记录与完成状态。
 
@@ -542,7 +544,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 演示与打包：20 个既有工单完成只读调查，18 个资料查询成功，缺订单号与跨客户 2 个保留明确错误；所有 assessment 输入引用通过校验。独立锁文件环境重新安装 wheel，在项目外工作目录运行 inspect 通过；安装包包含 P02 模块与业务资料，不包含 gold 或运行时数据库。
 - 查询边界：跨客户与猜测其他订单被阻止；输入不接受自造事实；明确缺凭证、尚未采集凭证、查询失败与超时分别返回；超时无证据、迟到结果不注册证据；查询工作槽最多 2 个，满时立即返回 `TOOL_BUSY`。
 - 测试环境：按 pytest-socket 的 Unix socket 例外支持 asyncio；IPv4/IPv6 禁网回归通过。保持默认离线与临时数据库隔离。
-- 文档：[docs/rounds/002.md](docs/rounds/002.md)、[ADR 002](docs/decisions/002-trusted-tools-and-evidence.md)；技术方案同步实际接口。
+- 文档：[docs/rounds/002.md](../rounds/002.md)、[ADR 002](../decisions/002-trusted-tools-and-evidence.md)；技术方案同步实际接口。
 - 限制：证据在会话内存中，未实现跨进程恢复或动作；仅验证代码规则和工具，不代表真实 Agent 的提示注入抵抗能力。全局并发/预算与运行事件按后续阶段实现。
 - GitHub：实现提交 `86fa6a49e0094b19f313fd0cecfeff3030f3cefd` 已推送，[P02 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37014887512) 为 success，完成 Linux 新环境安装、132 个离线测试、普通与冲突工单 inspect 演示、wheel 构建；阶段快照为 [phase-p02](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p02)，包含完成状态与学习记录。
 
@@ -552,7 +554,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 验证：201 passed（新增 69 个实例），ruff、格式检查通过；20 个既有工单的基础事实路径通过，单独注入无效 schema、过量退款、伪造事实/引用/政策/订单、模型异常和查询失败。测试前后业务库 dump 一致。
 - 演示：物流进度答复、丢件退款候选、退货候选、政策冲突转人工均通过；退货 8 次模型/8 次工具（含 1 次复算），退款 9/9（含 1 次复算），无动作执行。缺订单号不猜订单且不调业务工具。
 - 打包：构建并在独立锁文件环境重新安装 wheel；另一个工作目录运行退货基线通过。安装包包含 8 个 agents Python 模块与业务资料，不含 gold、运行库、测试或工具缓存。
-- 文档：[docs/rounds/003.md](docs/rounds/003.md)、[ADR 003](docs/decisions/003-offline-agent-baseline.md)，技术方案同步实际契约和当前预算行为。
+- 文档：[docs/rounds/003.md](../rounds/003.md)、[ADR 003](../decisions/003-offline-agent-baseline.md)，技术方案同步实际契约和当前预算行为。
 - 限制：脚本不评价真实模型质量；live provider 与网络 smoke 延期且显示 skipped。JSON 是静态报告，不是恢复检查点；复算依据本轮事实快照，动作前刷新留给 P06。自然语言草稿的完整语义审核在 P05，通用案例故障执行器及全局预算在 P07。
 - GitHub：实现提交 `573e1548c994d71696137ccd2d87f39468229756` 已推送，[P03 实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37018494445) 为 success，完成 Linux 锁定安装、201 个离线测试、三类单 Agent 演示、live 延期状态与 wheel 构建。阶段快照为 [phase-p03](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p03)，包含本轮记录与完成状态。达到 M1 的离线范围，真实模型项仍为延期。
 
@@ -572,7 +574,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 实现：AsyncSqliteSaver、持久运行/证据/预算/方案/待办/人工答复、CLI resume、事务动作账本、物流调查/退货/模拟退款、最新资料与写锁内执行时钟复核、版本拒绝和真实业务状态。
 - 验证：429 passed（新增 59 项），Ruff 格式/lint 通过。真实临时 SQLite、独立进程 os._exit 的人工输入/事务/图检查点空隙、同动作重复并发、同 key 不同金额、两个工单争余额、资料/政策/时钟变更、预算延续、旧 schema 数据保留与 v1→v2 迁移通过。
 - 打包：37 模块 wheel＋demo JSON，实际归档排除缓存/业务库/测试。独立环境项目外 CLI 验证旧入口、持久退款与物流登记、另一进程恢复、金额查询及静态回看。生成图和教学轨迹的可复现脚本只使用临时库。
-- 文档：[第 006 轮](docs/rounds/006.md)、[ADR 006](docs/decisions/006-durable-review-and-action-ledger.md)、[实际图](docs/graphs/p06-durable.mmd)、[独立进程轨迹](docs/graphs/p06-demo-traces.json)。
+- 文档：[第 006 轮](../rounds/006.md)、[ADR 006](../decisions/006-durable-review-and-action-ledger.md)、[实际图](../graphs/p06-durable.mmd)、[独立进程轨迹](../graphs/p06-demo-traces.json)。
 - GitHub：实现提交 0b00a0fc29360eebfcc47fe4fe85dbafc3f7a7e4 已推送，[CI 37041984137](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37041984137) completed/success；Linux 429 项、旧入口、durable 跨进程批准/恢复/回看/业务查询和 wheel 构建通过。最终文档提交验证后建立 phase-p06，P00～P05 与复核标签不移动。
 - 范围：达到离线 M2；POSIX 文件锁支持 macOS/Linux，本地模拟身份；不接真实退款/模型，没有取消、分布式租约或旧 workflow 的自动迁移。P07 再做有界并行、token 预算与事件完善。
 

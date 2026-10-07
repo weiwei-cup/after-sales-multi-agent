@@ -1,4 +1,4 @@
-"""Small command-line entry point, extended one phase at a time."""
+"""Workbench demos, workflow operations, diagnostics and reproducible evaluation."""
 
 import argparse
 import asyncio
@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 from pydantic import TypeAdapter, ValidationError
 
+from after_sales import __version__
 from after_sales.agents.contracts import REPORT_ADAPTER
 from after_sales.agents.runner import run_baseline, save_run
 from after_sales.config import Settings
@@ -31,9 +32,26 @@ def _json_flag(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--json", action="store_true", help="输出结构化结果（时间为 UTC）")
 
 
+def _port(value: str) -> int:
+    try:
+        port = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("端口必须为 1～65535 的整数") from error
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError("端口必须为 1～65535 的整数")
+    return port
+
+
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="after-sales", description="售后工单学习项目")
+    parser = argparse.ArgumentParser(
+        prog="after-sales", description="售后协作 · 多 Agent 工单工作台"
+    )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
+    demo = commands.add_parser("demo", help="启动完整工作台演示，使用隔离资料和固定业务时间")
+    demo.add_argument("--port", type=_port, default=8000)
+    demo.add_argument("--data-dir", type=Path, help="保留演示资料与运行记录；默认使用临时目录")
+    demo.set_defaults(json=False)
     doctor = commands.add_parser("doctor", help="检查本地配置与依赖，不调用模型")
     _json_flag(doctor)
 
@@ -48,25 +66,25 @@ def _parser() -> argparse.ArgumentParser:
         "--workflow",
         choices=["serial", "reviewed", "durable", "parallel", "single"],
         default="serial",
-        help="执行图；single 为 P10 单 Agent 持久审批，默认保留 P03/P04 入口",
+        help="执行图；parallel 为持久多 Agent，single 为持久单 Agent；默认 serial 仅生成建议",
     )
+    run.add_argument("--interactive", action="store_true", help="交互式回答追问、确认或修改动作")
     run.add_argument(
-        "--interactive", action="store_true", help="P05 同进程内回答追问、确认或修改动作"
-    )
-    run.add_argument(
-        "--model", choices=["scripted", "live"], help="默认使用配置；本轮 live 显示 skipped"
+        "--model",
+        choices=["scripted", "live"],
+        help="默认使用配置；live 适配器尚未实现，显示 skipped",
     )
     run.add_argument("--output", type=Path, help="结果文件；默认 var/runs/运行ID.json，禁止覆盖")
-    run.add_argument("--run-id", help="P06 的稳定运行 ID")
+    run.add_argument("--run-id", help="持久工作流的稳定运行 ID")
     _json_flag(run)
 
-    resume = commands.add_parser("resume", help="P06 从可信数据库恢复运行")
+    resume = commands.add_parser("resume", help="从可信数据库恢复持久运行")
     resume.add_argument("--run", required=True)
     resume.add_argument("--model", choices=["scripted"], default="scripted")
     resume.add_argument("--response-file", type=Path, help="完整待办答复 JSON，绑定身份与版本")
     resume.add_argument("--output", type=Path, help="另存静态报告，禁止覆盖")
     _json_flag(resume)
-    cancel = commands.add_parser("cancel", help="P07 请求取消；已提交动作保留")
+    cancel = commands.add_parser("cancel", help="请求取消持久单 Agent / 并行运行；已提交动作保留")
     cancel.add_argument("--run", required=True)
     _json_flag(cancel)
 
@@ -97,7 +115,7 @@ def _parser() -> argparse.ArgumentParser:
     report_show.add_argument("--events-only", action="store_true")
     _json_flag(report_show)
 
-    live = commands.add_parser("live-smoke", help="报告真实模型验证状态；用户选择本轮延期")
+    live = commands.add_parser("live-smoke", help="报告真实模型适配器状态；当前尚未实现")
     _json_flag(live)
 
     seed = commands.add_parser("seed", help="原子初始化模拟业务数据，重复执行保留已有数据")
@@ -123,7 +141,7 @@ def _parser() -> argparse.ArgumentParser:
     order_show = order_commands.add_parser("show", help="查询属于指定客户的订单")
     order_show.add_argument("order_id")
     order_show.add_argument(
-        "--customer", required=True, help="演示身份；P02 工具将从可信上下文注入"
+        "--customer", required=True, help="演示身份；Agent 工具从可信上下文注入身份"
     )
     _json_flag(order_show)
 
@@ -179,7 +197,7 @@ def _render_ticket(view: dict[str, object]) -> None:
 
 
 def _render_inspection(report: dict[str, object]) -> None:
-    print(f"工单 {report['ticket_id']} | P02 只读调查")
+    print(f"工单 {report['ticket_id']} | 只读调查")
     print(f"业务时间（Asia/Shanghai）：{_local_time(report['as_of_time'])}")
     print("模型调用：0；仅计算条件和动作候选。")
     for name, result in report["results"].items():
@@ -203,7 +221,7 @@ def _render_inspection(report: dict[str, object]) -> None:
             print(f"{name}：{json.dumps(result['data'], ensure_ascii=False)}")
         for ref in result["evidence_refs"]:
             print(f"  证据：{ref['evidence_id']} | 来源版本 {ref['source_version']}")
-    print(f"证据快照：{len(report['evidence'])}；本轮保存在调查会话内存，--json 可导出。")
+    print(f"证据快照：{len(report['evidence'])}；保存在调查会话内存，--json 可导出。")
 
 
 def _render_run(report: dict[str, object]) -> None:
@@ -235,7 +253,7 @@ def _render_run(report: dict[str, object]) -> None:
         pending = report["pending_input"]
         if pending:
             print(f"等待 {pending['kind']}：{pending['pending_id']}；仅同进程可恢复。")
-            print("使用 --interactive 演示恢复；保存的 JSON 用于查看，跨进程恢复留给 P06。")
+            print("使用 --interactive 同进程继续；跨进程恢复请使用 durable / parallel / single。")
             print(f"待确认草稿：{report['proposal']['customer_reply_draft']}")
             for question in pending["questions"]:
                 print(f"待补资料：{question['field']} | {question['question']}")
@@ -312,7 +330,7 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
             "status": "skipped",
             "code": "LIVE_PROVIDER_DEFERRED",
             "model_calls": 0,
-            "reason": "用户选择 P03 仅使用离线脚本模型；真实模型适配与 smoke 验证待后续确定。",
+            "reason": "当前使用离线脚本模型；真实模型适配器与连通性验证尚未实现。",
         }
     if args.command == "report":
         report = REPORT_ADAPTER.validate_json(args.path.read_text(encoding="utf-8")).model_dump(
@@ -422,6 +440,11 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
 
     try:
+        if args.command == "demo":
+            from after_sales.demo import run_demo
+
+            run_demo(port=args.port, data_dir=args.data_dir)
+            return 0
         settings = (
             Settings(_env_file=None, model_mode="scripted")
             if args.command == "eval"
@@ -479,7 +502,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
-        print(f"本地检查：{'通过' if report['ok'] else '失败'}（{report['phase']}）")
+        print(f"本地检查：{'通过' if report['ok'] else '失败'}（v{report['version']}）")
         print(f"Python: {report['python']}；运行模式: {report['model_mode']}")
         for name, installed_version in report["packages"].items():
             print(f"  {name}: {installed_version}")

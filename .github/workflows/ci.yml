@@ -21,6 +21,10 @@ jobs:
       - run: uv sync --locked
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
+      - name: Documentation links and release metadata
+        run: uv run --locked python scripts/check_docs.py
+      - run: uv run --locked after-sales --version
+      - run: uv run --locked after-sales demo --help
       - run: uv run --locked pytest
       - run: uv run --locked after-sales doctor --json
       - run: uv run --locked after-sales seed --dataset demo --json
@@ -49,7 +53,7 @@ jobs:
       - run: uv run --locked after-sales ticket show T-NOTRECEIVED-002
       - run: uv run --locked after-sales order show ORD-004 --customer CUST-A --json
       - run: uv run --locked after-sales live-smoke --json
-      - name: P07 parallel resume and cancellation
+      - name: Durable parallel resume and cancellation
         env:
           AFTER_SALES_BUSINESS_DB_PATH: var/p07-business.sqlite
           AFTER_SALES_CHECKPOINT_DB_PATH: var/p07-checkpoints.sqlite
@@ -62,7 +66,7 @@ jobs:
           uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --workflow parallel --run-id ci-parallel-cancel --json
           uv run --locked after-sales cancel --run ci-parallel-cancel --json
           uv run --locked after-sales resume --run ci-parallel-cancel --json
-      - name: P08 real local HTTP create, answer and approve
+      - name: Real local HTTP create, answer and approve
         run: uv run --locked python scripts/demo_p08.py
       - run: uv build --wheel
 
@@ -71,7 +75,7 @@ jobs:
     timeout-minutes: 15
     env:
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/playwright-browsers
-      P09_ARTIFACT_DIR: ${{ github.workspace }}/test-results/p09
+      BROWSER_ARTIFACT_DIR: ${{ github.workspace }}/test-results/browser
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -81,16 +85,16 @@ jobs:
       - run: uv python install 3.12
       - run: uv sync --locked
       - run: uv run --locked playwright install --with-deps chromium
-      - name: P09 real browser flows
+      - name: Real browser flows
         run: uv run --locked pytest -m e2e --allow-hosts=127.0.0.1 tests/test_workbench_e2e.py
-      - name: P10 offline comparison, all 30 cases, three repetitions, actual browser reconnect
-        run: uv run --locked after-sales eval run --repetitions 3 --browser --output-dir evals/output/ci-p10 --json
+      - name: Offline comparison, all 30 cases, three repetitions, actual browser reconnect
+        run: uv run --locked after-sales eval run --repetitions 3 --browser --output-dir evals/output/ci-comparison --json
       - name: Save browser screenshots, requests and replay traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: p09-p10-observations
+          name: browser-and-evaluation-observations
           path: |
-            test-results/p09
-            evals/output/ci-p10
+            test-results/browser
+            evals/output/ci-comparison
           retention-days: 7

@@ -3,6 +3,7 @@
 import platform
 from importlib.metadata import PackageNotFoundError, version
 
+from after_sales import __version__
 from after_sales.config import Settings
 
 PACKAGES = (
@@ -30,6 +31,7 @@ def build_report(settings: Settings) -> dict[str, object]:
     return {
         "ok": python_ok and not missing,
         "phase": "P10",
+        "version": __version__,
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
@@ -40,9 +42,9 @@ def build_report(settings: Settings) -> dict[str, object]:
             "resume_scope": "cross_process",
             "checkpointer": "AsyncSqliteSaver",
             "business_writes": "approved_mock_actions_via_transactional_ledger",
-            "identity": "P08_fixed_demo_bearer_tokens; production_auth_deferred",
+            "identity": "fixed_demo_bearer_tokens; production_auth_pending",
         },
-        "live_smoke": "skipped_provider_deferred_by_user",
+        "live_smoke": "skipped_provider_not_implemented",
         "workbench": {
             "url": "/",
             "transport": "same_origin_HTTP_polling",
@@ -74,12 +76,12 @@ def build_report(settings: Settings) -> dict[str, object]:
             "review_repairs": settings.review_repair_limit,
             "concurrency": settings.max_concurrency,
             "token_reservation_limit": settings.token_budget,
-            "enforcement": "P07_atomic_attempt_ledger_shared_concurrency_and_token_reservations",
-            "call_limits": "P07_call_reservations_authoritative_across_restart",
+            "enforcement": "atomic_attempt_ledger_shared_concurrency_and_token_reservations",
+            "call_limits": "call_reservations_authoritative_across_restart",
             "active_time_budget_seconds": settings.active_time_budget_seconds,
             "transient_retry_limit": settings.transient_retry_limit,
             "token_usage": "unknown_keeps_reservation; monetary_price_unknown",
-            "review_repair_enforcement": "P05_shared_by_code_review_and_operator_edits",
+            "review_repair_enforcement": "shared_by_code_review_and_operator_edits",
             "proposal_schema_repairs": settings.proposal_repair_limit,
             "model_timeout_seconds": settings.model_timeout_seconds,
         },

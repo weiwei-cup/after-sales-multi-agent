@@ -134,7 +134,7 @@ def summarize(rows):
 
 def markdown_report(document):
     lines = [
-        "# P10 离线对照评估",
+        "# 单 / 多 Agent 离线对照评估",
         "",
         "模型：ScriptedChatModel；同一业务资料、判断时间、规则、审批和动作服务。"
         "单 Agent 使用代码审核，多 Agent 另有模型审核；共享确定性审核下限。",

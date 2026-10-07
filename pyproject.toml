@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "after-sales-multi-agent"
-version = "0.1.0"
-description = "A step-by-step LangGraph and LangChain after-sales learning project"
+version = "0.10.0"
+description = "Evidence-based after-sales workflows with multi-agent collaboration and human approval"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
@@ -17,6 +17,11 @@ dependencies = [
   "pydantic-settings>=2,<3",
   "uvicorn>=0.30,<1",
 ]
+
+[project.urls]
+Repository = "https://github.com/weiwei-cup/after-sales-multi-agent"
+Documentation = "https://github.com/weiwei-cup/after-sales-multi-agent/tree/main/docs"
+Issues = "https://github.com/weiwei-cup/after-sales-multi-agent/issues"
 
 [project.scripts]
 after-sales = "after_sales.cli:main"

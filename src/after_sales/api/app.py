@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException
 
+from after_sales import __version__
 from after_sales.api.contracts import (
     Accepted,
     CreateTicket,
@@ -33,7 +34,7 @@ from after_sales.domain.models import Identifier
 from after_sales.repositories.sqlite import BusinessRepository
 from after_sales.services.application import ApplicationError, ApplicationService
 
-# Public local demo credentials. Keep real deployment authentication outside this learning phase.
+# Public local demo credentials; production authentication requires a separate adapter.
 DEMO_IDENTITIES = {
     "demo-customer-a": Principal(role="customer", actor_id="CUST-A"),
     "demo-customer-b": Principal(role="customer", actor_id="CUST-B"),
@@ -77,11 +78,11 @@ def create_app(settings=None, *, service=None):
 
     errors = {code: {"model": ErrorView} for code in (401, 403, 404, 409, 422, 500, 503)}
     app = FastAPI(
-        title="售后多 Agent 本地服务",
-        version="0.10.0",
+        title="售后协作 API",
+        version=__version__,
         lifespan=lifespan,
         responses=errors,
-        description="P10：售后工作台、单/多 Agent 对照、固定演示身份、单进程执行器。",
+        description="基于证据的售后工单处理、人工审批和持久恢复。使用演示身份与模拟业务动作。",
     )
     assets = Path(__file__).resolve().parent.parent / "web"
     app.mount("/assets", StaticFiles(directory=assets), name="assets")
