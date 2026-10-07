@@ -415,7 +415,7 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 验收门槛：核心浏览器测试和视觉检查通过。达到 M3。需要理解：用户动作与 Agent 状态、事件展示和暂停待办。
 
-实现与本地验证：[第 009 轮](docs/rounds/009.md)、[ADR 009](docs/decisions/009-browser-workbench-and-public-evidence.md)、[真实浏览器记录](docs/graphs/p09-demo-browser.json)。519 项默认离线回归、12 项独立浏览器验收、桌面/窄窗口人工检查与项目外 wheel 验证通过；GitHub CI 和 phase-p09 待验证。
+实现与验证：[第 009 轮](docs/rounds/009.md)、[ADR 009](docs/decisions/009-browser-workbench-and-public-evidence.md)、[真实浏览器记录](docs/graphs/p09-demo-browser.json)。519 项默认离线回归、12 项独立浏览器验收、桌面/窄窗口人工检查与项目外 wheel 验证通过；[CI 37640417752](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752) completed/success，阶段快照为 phase-p09。
 
 ## 14. P10：对照评估与最终交付
 
@@ -603,3 +603,4 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 文档：第009轮、ADR009、README 与实施清单已更新；CI 增加独立 Chromium job 和7天观测资料。GitHub提交、CI和 phase-p09 待验证。
 - 首轮远端：实现 e99bd348415bf81176621699da3f7791748017c3 的 CI37639269862 浏览器 12 项通过，默认套件两处旧 doctor P08 断言失败；同步为 P09 后最终本地完整回归 519 passed in91.11s，补修远端验收待验证。
 - 范围：达到离线 M3；尚未开始 P10 对照评估、真实模型、生产认证、多进程 HTTP 或外部支付。
+- GitHub最终验收：补修提交 980242ddd6fd46da6c4e5ff3181d93f6b925797e 的 [CI37640417752](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752) completed/success，两项job均通过；Linux519 passed in184.39s、12 E2E passed in61.24s，旧CLI、真实HTTP8步、wheel和浏览器资料上传通过。phase-p09在最终文档CI通过后建立，历史10个标签不移动。
