@@ -4,7 +4,7 @@
 
 技术方案：[docs/technical-design.md](docs/technical-design.md)
 
-当前状态：P00～P06 已完成并上传；P06 本地 429 个离线测试与 [实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37041984137) 通过，达到 M2。阶段交付标签为 phase-p06。下一轮为 P07。继续仅用离线脚本模型。
+当前状态：P00～P09 已完成并上传；P09 的 519 个离线测试、12 个真实浏览器测试与 [验收 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752) 通过，达到离线 M3。阶段交付标签为 phase-p09。下一轮为 P10。继续仅用离线脚本模型。
 
 前次 000～004 复核已完成。详见 [复核记录](docs/reviews/000-004.md)：已修正不适用政策 / 无效金额、拒绝及已有申请依据、静态报告一致性；规则记录升级 rules-v2，复核时完整回归 285 passed，[补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 通过，原有阶段标签保留。P05 在复核版本上继续实现。
 
@@ -495,10 +495,10 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P06：恢复与模拟动作。
 - [x] P07：并行、预算和事件。
 - [x] P08：HTTP 服务。
-- [ ] P09：工单页面。
+- [x] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 008 轮 / P08 已完成并上传 GitHub；下一轮为 P09 工单工作台。真实模型接入仍按用户选择延期。
+第 009 轮 / P09 已完成并上传 GitHub；下一轮为 P10 对照评估与交付整理。真实模型接入仍按用户选择延期。
 
 ### 已完成工作记录
 
@@ -600,7 +600,8 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 验证：519 项默认离线回归；12 项真实 Chromium E2E（37.06s）；最终阶段/文案后受影响 API/CLI/契约 28 项和三类核心路径/窄窗口 4 项追加通过。Ruff、JavaScript 语法、项目外 wheel/旧 CLI/HTTP 批准重放通过。
 - 演示：物流调查→processing，退货登记→waiting_return，签收未收到→刷新补充 ORD-004→1 条模拟退款。桌面/390 像素待办与时间线人工检查通过，3 条浏览器轨迹和 2 张截图已保存。
 - 数据：默认离线测试继续禁止网络，E2E 单独允许 loopback；测试/预览独立临时库。日常库 schema_migrations=[1]、ORD-004 退款0、T-NOTRECEIVED-002 new 保持原状。旧 P08 公开结果兼容，无新 schema 迁移。
-- 文档：第009轮、ADR009、README 与实施清单已更新；CI 增加独立 Chromium job 和7天观测资料。GitHub提交、CI和 phase-p09 待验证。
-- 首轮远端：实现 e99bd348415bf81176621699da3f7791748017c3 的 CI37639269862 浏览器 12 项通过，默认套件两处旧 doctor P08 断言失败；同步为 P09 后最终本地完整回归 519 passed in91.11s，补修远端验收待验证。
+- 文档：第009轮、ADR009、README 与实施清单已更新；CI 增加独立 Chromium job 和7天观测资料。代码及文档已上传，验收见下方 GitHub 记录。
+- 首轮远端：实现 e99bd348415bf81176621699da3f7791748017c3 的 CI37639269862 浏览器 12 项通过，默认套件两处旧 doctor P08 断言失败；同步为 P09 后最终本地完整回归 519 passed in91.11s，补修远端完整回归也通过。
 - 范围：达到离线 M3；尚未开始 P10 对照评估、真实模型、生产认证、多进程 HTTP 或外部支付。
 - GitHub最终验收：补修提交 980242ddd6fd46da6c4e5ff3181d93f6b925797e 的 [CI37640417752](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752) completed/success，两项job均通过；Linux519 passed in184.39s、12 E2E passed in61.24s，旧CLI、真实HTTP8步、wheel和浏览器资料上传通过。phase-p09在最终文档CI通过后建立，历史10个标签不移动。
+- 文档核对：提交 5b32b2608d30fff3365aa72666248e9ee75202b5 的 [CI37641336873](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37641336873) 两项job均成功；随后同步本文件顶部状态与总进度，统一为 P09 已完成、P10 未开始。首次标签上传收到 GitHub Internal Server Error，远程确认未创建，最终阶段快照在本次文档提交验证后上传。
