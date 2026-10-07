@@ -1,0 +1,12 @@
+flowchart TD
+    Cases[案例输入 cases-v1] --> Matrix[案例 × 架构 × 重复\n固定业务时间 / 每格临时库]
+    Matrix --> Single[SingleReviewRun\n单个调查 Agent]
+    Matrix --> Multi[ParallelReviewRun\n协调 / 订单 / 政策 / 草稿 / 审核]
+    Single --> Guard[共用代码规则 / 审核下限 / 预算]
+    Multi --> Guard
+    Guard --> Pending[持久客户补充 / 操作员确认]
+    Pending --> Actions[最新事实复核 / 事务动作账本]
+    Actions --> Observations[所有运行输出 + 数据库效果\n执行矩阵 + SHA256]
+    Observations --> Verify[完整性验证后独立评分]
+    Gold[独立 gold-v1] --> Verify
+    Verify --> Report[结果 / 证据 / 安全 / 调用 / 耗时\n失败与未覆盖保留 / usage 未知为 null]

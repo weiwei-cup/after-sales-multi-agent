@@ -80,7 +80,7 @@ def answer(pending, **payload):
 
 
 def test_health_no_model_and_openapi_contract(client, storage):
-    assert client.get("/health").json()["phase"] == "P09"
+    assert client.get("/health").json()["phase"] == "P10"
     with read_database(storage[0].path) as db:
         assert db.execute("SELECT count(*) FROM call_reservations").fetchone()[0] == 0
     schema = client.get("/openapi.json").json()

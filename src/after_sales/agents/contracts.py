@@ -615,12 +615,20 @@ class StoredParallelRunReport(StoredPersistentRunReport):
         return self
 
 
+class StoredSingleReviewRunReport(StoredParallelRunReport):
+    schema_version: Literal["single-review-run-v1"]
+    phase: Literal["P10"]
+    architecture: Literal["single"]
+    checkpoint_schema: Literal["single-review-state-v1"]
+
+
 RunReport = Annotated[
     StoredRunReport
     | StoredMultiRunReport
     | StoredReviewRunReport
     | StoredPersistentRunReport
-    | StoredParallelRunReport,
+    | StoredParallelRunReport
+    | StoredSingleReviewRunReport,
     Field(discriminator="schema_version"),
 ]
 REPORT_ADAPTER = TypeAdapter(RunReport)

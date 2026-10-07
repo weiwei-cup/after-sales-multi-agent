@@ -27,7 +27,7 @@ class CreateTicket(DomainModel):
 
 
 class StartRun(DomainModel):
-    workflow: Literal["parallel"] = "parallel"
+    workflow: Literal["parallel", "single"] = "parallel"
     expected_input_revision: PositiveInt | None = None
 
 

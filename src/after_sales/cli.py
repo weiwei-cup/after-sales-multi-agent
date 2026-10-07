@@ -46,9 +46,9 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--architecture", choices=["single", "multi"], default="single")
     run.add_argument(
         "--workflow",
-        choices=["serial", "reviewed", "durable", "parallel"],
+        choices=["serial", "reviewed", "durable", "parallel", "single"],
         default="serial",
-        help="multi 的执行图；默认保留 P04 串行入口",
+        help="执行图；single 为 P10 单 Agent 持久审批，默认保留 P03/P04 入口",
     )
     run.add_argument(
         "--interactive", action="store_true", help="P05 同进程内回答追问、确认或修改动作"
@@ -69,6 +69,26 @@ def _parser() -> argparse.ArgumentParser:
     cancel = commands.add_parser("cancel", help="P07 请求取消；已提交动作保留")
     cancel.add_argument("--run", required=True)
     _json_flag(cancel)
+
+    evaluation = commands.add_parser("eval", help="在临时资料库对照评估；先保存结果再读 gold")
+    evaluation.add_argument("operation", choices=["run", "score"])
+    evaluation.add_argument("--suite-root", type=Path, default=Path("."))
+    evaluation.add_argument("--split", choices=["all", "dev", "holdout"], default="all")
+    evaluation.add_argument(
+        "--architectures", nargs="+", choices=["single", "multi"], default=["single", "multi"]
+    )
+    evaluation.add_argument("--repetitions", type=int, default=1)
+    evaluation.add_argument("--case", dest="case_ids", action="append", default=[])
+    evaluation.add_argument("--output-dir", type=Path)
+    evaluation.add_argument("--observations", type=Path)
+    evaluation.add_argument("--model", choices=["scripted", "live"], default="scripted")
+    evaluation.add_argument(
+        "--browser", action="store_true", help="使用 Chromium 验证 C20，需 loopback"
+    )
+    evaluation.add_argument(
+        "--price-config", type=Path, help="用户价格快照；未报告 token 不计算费用"
+    )
+    _json_flag(evaluation)
 
     reports = commands.add_parser("report", help="读取已保存的运行结果与事件")
     report_commands = reports.add_subparsers(dest="operation", required=True)
@@ -227,7 +247,11 @@ def _render_run(report: dict[str, object]) -> None:
                 )
         if report["graph_state"]["reason"]:
             print(f"转人工原因：{report['graph_state']['reason']}")
-    if report["phase"] == "P06":
+    if report["schema_version"] in {
+        "persistent-run-v1",
+        "parallel-run-v1",
+        "single-review-run-v1",
+    }:
         print(
             f"业务状态：{report['business_status']}；已提交动作：{len(report['executed_actions'])}"
         )
@@ -246,6 +270,40 @@ def _render_run(report: dict[str, object]) -> None:
 
 
 def _business_command(args: argparse.Namespace, settings: Settings) -> object:
+    if args.command == "eval":
+        from after_sales.evaluation.runner import (
+            PriceSnapshot,
+            default_output,
+            evaluate,
+            score_saved,
+        )
+
+        output = args.output_dir or default_output()
+        price = (
+            PriceSnapshot.model_validate_json(args.price_config.read_text()).model_dump(mode="json")
+            if args.price_config
+            else None
+        )
+        if args.operation == "score":
+            if args.observations is None:
+                raise ValueError("eval score requires --observations")
+            return score_saved(
+                args.suite_root.resolve(), args.observations.resolve(), output, price=price
+            )
+        return asyncio.run(
+            evaluate(
+                args.suite_root.resolve(),
+                output,
+                settings,
+                split=args.split,
+                architectures=tuple(args.architectures),
+                repetitions=args.repetitions,
+                case_ids=tuple(args.case_ids),
+                browser=args.browser,
+                mode=args.model,
+                price=price,
+            )
+        )
     repository = BusinessRepository(settings.business_db_path)
     if args.command in {"run", "resume"} and args.output and args.output.exists():
         raise FileExistsError("result file already exists; choose a new --output")
@@ -264,16 +322,18 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
     if args.command == "run":
         if args.workflow in {"reviewed", "durable", "parallel"} and args.architecture != "multi":
             raise ValueError("reviewed/durable 工作流要求 --architecture multi")
+        if args.workflow == "single" and args.architecture != "single":
+            raise ValueError("single 工作流要求 --architecture single")
         if args.interactive and (
-            args.workflow not in {"reviewed", "durable", "parallel"} or args.json
+            args.workflow not in {"reviewed", "durable", "parallel", "single"} or args.json
         ):
             raise ValueError("--interactive 要求 reviewed/durable，且不能与 --json 同用")
-        if args.run_id and args.workflow not in {"durable", "parallel"}:
+        if args.run_id and args.workflow not in {"durable", "parallel", "single"}:
             raise ValueError("--run-id 要求 --workflow durable")
         runner = run_multi if args.architecture == "multi" else run_baseline
         if args.workflow == "reviewed":
             runner = run_interactive if args.interactive else run_reviewed
-        if args.workflow in {"durable", "parallel"}:
+        if args.workflow in {"durable", "parallel", "single"}:
             report = asyncio.run(_durable_command(repository, settings, args))
         else:
             report = asyncio.run(
@@ -362,7 +422,11 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
 
     try:
-        settings = Settings()
+        settings = (
+            Settings(_env_file=None, model_mode="scripted")
+            if args.command == "eval"
+            else Settings()
+        )
         if args.command == "doctor":
             report = build_report(settings)
         else:
@@ -375,6 +439,11 @@ def main(argv: list[str] | None = None) -> int:
                 _render_ticket(result)
             else:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
+            if args.command == "eval" and (
+                result.get("critical_error_total", 0)
+                or not result.get("safety_observation_complete", True)
+            ):
+                return 1
             if args.command in {"run", "resume"} and result["status"] in {
                 "failed",
                 "validation_failed",

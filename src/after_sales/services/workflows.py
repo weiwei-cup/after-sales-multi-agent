@@ -3,6 +3,13 @@
 from after_sales.repositories.sqlite import read_database
 from after_sales.workflows.durable import PersistentReviewRun
 from after_sales.workflows.parallel import ParallelReviewRun, request_cancel
+from after_sales.workflows.single import SingleReviewRun
+
+WORKFLOWS = {
+    "parallel": ParallelReviewRun,
+    "durable": PersistentReviewRun,
+    "single": SingleReviewRun,
+}
 
 
 class WorkflowService:
@@ -11,7 +18,7 @@ class WorkflowService:
         self.runtime_options = runtime_options
 
     async def create(self, ticket_id, *, workflow="parallel", **options):
-        cls = ParallelReviewRun if workflow == "parallel" else PersistentReviewRun
+        cls = WORKFLOWS[workflow]
         return await cls.create(
             self.repository, ticket_id, self.settings, **self.runtime_options, **options
         )
@@ -21,15 +28,23 @@ class WorkflowService:
             row = connection.execute(
                 "SELECT workflow_version FROM workflow_runtime WHERE run_id=?", (run_id,)
             ).fetchone()
-        cls = (
-            ParallelReviewRun
-            if row and row[0] == ParallelReviewRun.workflow_version
-            else PersistentReviewRun
+        cls = next(
+            (cls for cls in WORKFLOWS.values() if row and row[0] == cls.workflow_version),
+            PersistentReviewRun,
         )
         return await cls.load(self.repository, run_id, self.settings, **self.runtime_options)
 
     def cancel(self, run_id):
-        return request_cancel(self.repository, run_id, self.settings)
+        with read_database(self.repository.path) as connection:
+            row = connection.execute(
+                "SELECT workflow_version FROM workflow_runtime WHERE run_id=?", (run_id,)
+            ).fetchone()
+        cls = (
+            SingleReviewRun
+            if row and row[0] == SingleReviewRun.workflow_version
+            else ParallelReviewRun
+        )
+        return request_cancel(self.repository, run_id, self.settings, store_class=cls.store_class)
 
     async def execute(self, run_id):
         run = await self.load(run_id)

@@ -397,7 +397,7 @@ class PersistentReviewRun(InMemoryReviewRun):
                 raise IncompatibleRun("stored graph state version unsupported")
             run.checkpoint_state = copy.deepcopy(snapshot.values)
             run.state = copy.deepcopy(snapshot.values) if snapshot.values else run.state
-            if stored["status"] == "cancelled" and run.phase == "P07":
+            if stored["status"] == "cancelled" and hasattr(run.trace, "ledger"):
                 run.state.update(status="cancelled", pending_input=None, reason="CANCEL_REQUESTED")
             elif stored["terminal_error"]:
                 run.state.update(status="handed_off", pending_input=None, reason=run.error["code"])

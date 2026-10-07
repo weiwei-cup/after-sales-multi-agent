@@ -40,10 +40,12 @@ const actions = {
   issue_mock_refund: "登记模拟退款",
 };
 const roles = {
+  single_agent: "调查 Agent",
   coordinator: "协调员",
   order_specialist: "订单专员",
   policy_specialist: "政策专员",
   reviewer: "审核员",
+  validator: "代码核验",
   application: "流程调度",
   executor: "模拟动作执行器",
 };
@@ -484,7 +486,7 @@ function renderTicket(ticket) {
         .join(" · ")
     : run?.execution_error_code
       ? `执行中断：${run.execution_error_code}。可以恢复处理。`
-      : "订单与政策专员调查后，建议会经过代码校验与审核。";
+      : "调查订单与政策后，建议会经过代码校验与审核。";
   $("reply").textContent = result?.customer_reply || "回复草稿将在调查和审核后显示。";
   $("gaps").replaceChildren(...(result?.gaps || []).map((q) => el("p", q.question, "gap")));
   $("receipts").replaceChildren(
@@ -772,7 +774,7 @@ function renderEvents() {
   $("all-events").hidden = state.events.length <= 60 || state.allEvents;
   $("roles").replaceChildren(
     ...Object.entries(roles)
-      .filter(([key]) => key !== "application")
+      .filter(([key]) => key !== "application" && state.events.some((e) => e.role === key))
       .map(([key, label]) => {
         const latest = state.events.findLast((e) => e.role === key);
         return el(

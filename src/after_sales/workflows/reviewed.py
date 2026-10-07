@@ -755,7 +755,7 @@ class InMemoryReviewRun:
             self.trace.event(
                 "run_started",
                 role="application",
-                architecture="multi",
+                architecture=getattr(self, "architecture", "multi"),
                 workflow=getattr(self, "workflow_version", "review-v1"),
                 ticket_id=self.ticket.id,
             )
@@ -800,10 +800,12 @@ class InMemoryReviewRun:
             "phase": "P05",
             "run_id": self.run_id,
             "ticket_id": self.ticket.id,
-            "architecture": "multi",
+            "architecture": getattr(self, "architecture", "multi"),
             "model_mode": self.mode,
             "workflow_version": "review-v1",
-            "script_version": "review-roles-v1" if self.mode == "scripted" else None,
+            "script_version": getattr(self, "script_version", "review-roles-v1")
+            if self.mode == "scripted"
+            else None,
             "rules_version": RULES_VERSION,
             "dataset_version": session.context.dataset_version,
             "as_of_time": session.context.model_dump(mode="json")["as_of_time"],

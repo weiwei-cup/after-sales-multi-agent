@@ -400,7 +400,7 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 这些是初始工程参数，不是已经验证的性能承诺。模型和工具调用次数是硬上限；token 预算采用估算预留和 usage 对账，存在误差，属于软上限，不能宣称严格限制实际计费 token。无法获得实际 token usage 时标记 unknown / estimated，不能填 0。费用基于用户配置的价格快照计算，无价格配置则不显示货币估算。
 
-当前执行 P02 查询容量/超时、P03 全局调用/schema 修复/模型时限和 P05 共享审核返工上限；全局并发、活动时长、token 预留/对账等在后续阶段实现。P03 保存模型提供的 usage，未报告时为 null / not_reported，不生成金额估计。recursion_limit 只作框架兜底。
+P02实现查询容量/超时，P03实现全局调用/schema修复/模型时限，P05实现共享审核返工上限；P07持久运行已实现全局并发、活动时长、token预留/对账，P10持久单Agent共用这些保障。P03 保存模型提供的 usage，未报告时为 null / not_reported，不生成金额估计。recursion_limit 只作框架兜底。
 
 并发预算由统一控制器原子预留，恢复时从调用账本校正累计值。`recursion_limit` 作为兜底，不能代替业务预算。provider 的隐式重试需要关闭或纳入明确记录。
 
@@ -479,7 +479,9 @@ P04 增加父图节点开始/结束/失败、角色开始/结束和角色调用�
 
 准备 30 个版本化案例，20 个开发案例、10 个留出案例。三类正常工单，加上缺信息、政策矛盾、不可访问订单、工具异常、无效引用、过期确认、重复提交和恢复案例。评估 gold 记录合法结果集合、必要证据、禁止动作和允许待办，不强制唯一自然语言答案。
 
-P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预期。业务 JSON 放在 `src/after_sales/data/` 随包分发；开发输入在 `fixtures/`，留出请求与 gold 在 `evals/`。留出请求使用开发工单以外的订单，P10 在临时库创建评估工单。当前只验证资料完整性，业务行为与故障注入按后续阶段实现。
+P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预期。业务 JSON 放在 `src/after_sales/data/` 随包分发；开发输入在 `fixtures/`，留出请求与 gold 在 `evals/`。P10 在每个独立临时库创建留出工单并实际执行业务及故障；全部输出保存/哈希与矩阵验证后才读取 gold。架构与评分协议见 [ADR010](decisions/010-independent-offline-comparison.md) 和 [实际对照图](graphs/p10-comparison.mmd)。
+
+P10新增持久 `SingleReviewRun`：一个调查Agent、代码协调/审核，共用多Agent的规则、审核下限、预算、人工输入、最新事实复核与动作账本。CLI用 `--architecture single --workflow single`，HTTP启动body可用 `workflow: single`；默认parallel不变。workflow=`single-review-v1`，state=`single-review-state-v1`，report=`single-review-run-v1`。三轮离线对照报告分别保存开发/留出结果、失败、实际安全、调用与耗时；未知tokens/费用为null。真实模型和真人引用标注延期，未据留出结果调优。
 
 真实模型评估先输出结果，暂不因小样本波动阻塞早期阶段；P10 再按目标验收：
 

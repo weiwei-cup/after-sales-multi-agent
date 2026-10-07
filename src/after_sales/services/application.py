@@ -18,7 +18,7 @@ from after_sales.repositories.budgets import BudgetStore, RunCancelled
 from after_sales.repositories.run_store import DurableInputConflict, validate_bindings
 from after_sales.repositories.sqlite import _ticket, migrate, read_database, transaction
 from after_sales.services.public import pending_view, redact, result_view
-from after_sales.services.workflows import WorkflowService
+from after_sales.services.workflows import WORKFLOWS, WorkflowService
 from after_sales.tools.evidence import canonical
 from after_sales.workflows.parallel import ParallelReviewRun
 
@@ -241,7 +241,9 @@ class ApplicationService:
                 and request.expected_input_revision != ticket.input_revision
             ):
                 raise conflict("工单输入版本已改变。")
-            run = ParallelReviewRun(self.repository, ticket_id, self.settings, clock=self.clock)
+            run = WORKFLOWS[request.workflow](
+                self.repository, ticket_id, self.settings, clock=self.clock
+            )
             try:
                 run.store.register(
                     ticket,
@@ -475,4 +477,4 @@ class ApplicationService:
             db.execute("SELECT 1").fetchone()
         if not self.lease or self.stop.is_set() or not all(t.is_alive() for t in self.threads):
             raise ApplicationError(503, "NOT_READY", "执行器未就绪。")
-        return {"status": "ok", "phase": "P09", "model_mode": "scripted"}
+        return {"status": "ok", "phase": "P10", "model_mode": "scripted"}

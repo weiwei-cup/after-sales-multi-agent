@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 009 轮 / P09：工单工作台**已完成并上传 GitHub：**519 个离线测试＋12 个真实浏览器测试**、[验收 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37640417752)、三类业务闭环、桌面/窄窗口视觉检查和项目外安装包验证通过。阶段快照为 [phase-p09](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p09)。页面支持创建/查询、开始/恢复/取消、客户补充、版本绑定的人工确认，以及建议、证据摘要和执行时间线。达到离线 M3，保留原 CLI；下一轮为 P10 对照评估。
+当前 **第 010 轮 / P10：离线对照评估**已实现：补齐持久单 Agent，30 个案例×两种架构×三次重复共180次，实际越权读取、未审批写入、重复动作、超额退款均0。开发集单 Agent 90%、多 Agent 85%；留出集各90%，未通过案例保留。详见 [对照报告](evals/reports/p10-offline-v1/report.md)、[第010轮](docs/rounds/010.md) 和 [评估说明](evals/README.md)。离线工程交付；真实模型和真人标注仍延期。554 个离线测试与12个真实浏览器测试通过，独立安装包通过。原P09工作台与CLI保留，阶段历史见标签。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 
@@ -17,6 +17,7 @@
 - [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
 - [第 008 轮学习记录](docs/rounds/008.md)：HTTP 启动步骤、演示身份、请求幂等、后台队列、审批/重启边界；[ADR 008](docs/decisions/008-durable-http-admission.md)。
 - [第 009 轮学习记录](docs/rounds/009.md)：工作台启动、三条页面演示、刷新/重试/旧审批边界、浏览器验收；[ADR 009](docs/decisions/009-browser-workbench-and-public-evidence.md)。
+- [第 010 轮学习记录](docs/rounds/010.md)：公平基线、先保存再评分、真实故障、安全反例和重复结果；[ADR010](docs/decisions/010-independent-offline-comparison.md)、[对照图](docs/graphs/p10-comparison.mmd)。
 - [模拟资料与案例](fixtures/README.md)：数据来源、20 个开发案例与 10 个留出案例。
 
 第一版使用本地模拟订单、物流与虚构售后政策，输出建议与回复草稿；durable 入口会在人工确认后执行模拟业务动作。用户选择当前仅使用离线脚本模型；真实模型适配器和网络 smoke test 暂缓。
@@ -143,7 +144,7 @@ uv run --locked pytest
 
 默认测试禁止互联网 socket 访问，允许 asyncio 所需的本机 Unix socket，并排除 `live` 与 `e2e`。P00 验证配置错误和密钥隐藏、CLI 启动、最小 StateGraph 执行，以及关闭连接后从 SQLite 读取检查点。
 
-P01 新增金额与时间校验、归属与外键、资料引用、重复初始化、失败回滚、受限重置、政策版本、CLI 及开发 / 留出案例结构测试。业务评估 runner 在 P10 实现。
+P01 新增金额与时间校验、归属与外键、资料引用、重复初始化、失败回滚、受限重置、政策版本、CLI 及开发 / 留出案例结构测试。业务评估 runner 已在 P10 实现，见评估说明。
 
 P02 新增 72 个测试实例，覆盖七天整点与超一秒、未收货与收货时间缺失、部分退款余额、超额及负金额、已有申请、冲突政策遗漏、伪造事实与证据、跨客户访问、真实 LangChain `ToolMessage`、超时与有界查询、结果长度和 IPv4/IPv6 禁网。测试使用临时数据库，不改动日常演示数据。
 
@@ -195,3 +196,19 @@ uv run --locked uvicorn after_sales.api.app:app --host 127.0.0.1 --port 8000 --w
 ```
 
 接口文档在 `http://127.0.0.1:8000/docs`。本地演示令牌：`demo-customer-a`、`demo-customer-b`、`demo-operator`；请求使用 Bearer 身份，所有 POST 要求 Idempotency-Key。处理请求返回 202，轮询 run 查询待办/结果；客户回答，操作员审批。queued 重启后自动执行，interrupted 使用 resume，paused 使用 responses。完整字段、状态码、退出窗口与测试说明见 [第 008 轮](docs/rounds/008.md)。
+
+
+## P10 离线对照评估
+
+```bash
+uv run --locked after-sales run --ticket T-NOTRECEIVED-002 --architecture single --workflow single --run-id learning-010 --json
+uv run --locked after-sales resume --run learning-010
+export PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright-browsers"
+uv run --locked playwright install chromium
+uv run --locked after-sales eval run --repetitions 3 --browser --output-dir evals/output/my-p10 --json
+uv run --locked after-sales eval score --observations evals/output/my-p10 --output-dir evals/output/my-rescore --json
+```
+
+single持久入口与parallel共用审批、预算、规则和动作账本；原静态单Agent入口保留。评估每格使用新临时库，30案例输入和gold来自仓库，保存全部观察后才读取gold。C16真进程退出恢复、C19真实HTTP重复请求、C20真实浏览器刷新/非零游标重连。完整运行需锁定开发依赖与Chromium；省略浏览器时明确C20未覆盖。每次选择新输出路径。
+
+本机脚本测试中单Agent调用更少、耗时更低，不能推断真实模型下的质量或成本收益。C11/C14预算耗尽、C17多Agent证据缺口与H10全额退款后的错误调查均记录为失败；没有修改gold或用留出结果调优。实际token和费用未知为null。引用语义核对由Codex完成，真人标注pending；`eval run --model live`显示skipped。原始输出、截图与SHA256已压缩归档，可按[评估说明](evals/README.md)解压重新评分。

@@ -29,7 +29,7 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P09",
+        "phase": "P10",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
@@ -47,6 +47,12 @@ def build_report(settings: Settings) -> dict[str, object]:
             "url": "/",
             "transport": "same_origin_HTTP_polling",
             "browser_checks": "separate_Playwright_e2e_suite",
+        },
+        "evaluation": {
+            "command": "after-sales eval run",
+            "gold": "read_after_saved_outputs",
+            "single": "durable_common_guards",
+            "live": "skipped_provider_deferred",
         },
         "readonly_tools": {
             "inspection": "after-sales inspect --ticket T-RETURN-001",

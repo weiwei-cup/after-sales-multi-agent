@@ -404,9 +404,9 @@ class ParallelReviewRun(PersistentReviewRun):
         return super().report(**kwargs)
 
 
-def request_cancel(repository, run_id, settings):
+def request_cancel(repository, run_id, settings, *, store_class=ParallelStore):
     # Explicit workflow validation; cancellation never loads or waits for the graph/process lock.
-    ParallelStore(repository.path, run_id).load(settings.checkpoint_db_path)
+    store_class(repository.path, run_id).load(settings.checkpoint_db_path)
     changed = BudgetStore(repository.path, run_id, settings).cancel()
     with read_database(repository.path) as db:
         row = db.execute(

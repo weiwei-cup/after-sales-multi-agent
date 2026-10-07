@@ -78,10 +78,10 @@ def create_app(settings=None, *, service=None):
     errors = {code: {"model": ErrorView} for code in (401, 403, 404, 409, 422, 500, 503)}
     app = FastAPI(
         title="售后多 Agent 本地服务",
-        version="0.9.0",
+        version="0.10.0",
         lifespan=lifespan,
         responses=errors,
-        description="P09：售后工单工作台、脚本模型、固定演示身份、单进程执行器。",
+        description="P10：售后工作台、单/多 Agent 对照、固定演示身份、单进程执行器。",
     )
     assets = Path(__file__).resolve().parent.parent / "web"
     app.mount("/assets", StaticFiles(directory=assets), name="assets")
