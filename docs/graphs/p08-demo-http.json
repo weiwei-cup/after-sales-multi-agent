@@ -1,0 +1,970 @@
+{
+  "phase": "P08",
+  "transport": "real_loopback_HTTP",
+  "temporary_database": true,
+  "trace": [
+    {
+      "operation": "health",
+      "http_status": 200,
+      "body": {
+        "status": "ok",
+        "phase": "P08",
+        "model_mode": "scripted"
+      }
+    },
+    {
+      "operation": "/tickets",
+      "http_status": 201,
+      "body": {
+        "ticket_id": "T-3fe9b58470f1428eb29ae066b8491789",
+        "type": "return_request",
+        "status": "new",
+        "supplied_order_id": null,
+        "input_revision": 1,
+        "messages": [
+          "我要退货"
+        ],
+        "latest_run": null
+      }
+    },
+    {
+      "operation": "/tickets/T-3fe9b58470f1428eb29ae066b8491789/runs",
+      "http_status": 202,
+      "body": {
+        "run_id": "run-9217186a1df3461e825efafa341156c9",
+        "job_id": "job-4da29f96879b4d628cabba99d30cdea6",
+        "accepted": true
+      }
+    },
+    {
+      "operation": "query",
+      "http_status": 200,
+      "body": {
+        "run_id": "run-9217186a1df3461e825efafa341156c9",
+        "ticket_id": "T-3fe9b58470f1428eb29ae066b8491789",
+        "status": "paused",
+        "cancel_requested": false,
+        "pending_input": {
+          "pending_id": "pending-34cc040c018761eea97334f3eb2367a2",
+          "kind": "customer_info",
+          "expected_role": "customer",
+          "input_revision": 1,
+          "proposal_revision": 1,
+          "proposal_hash": "28896d0101351482db6e0d6d77376049707158175df3aad393ff3dc719f89fe8",
+          "questions": [
+            {
+              "field": "order_id",
+              "question": "请提供需要处理的订单号。"
+            }
+          ],
+          "actions": [],
+          "can_respond": true
+        },
+        "result": {
+          "outcome": "paused",
+          "decision": "request_information",
+          "customer_reply": "为继续处理，需要补充或核验以下资料：请提供需要处理的订单号。",
+          "receipts": [],
+          "model_calls": 3,
+          "tool_calls": 0,
+          "error_code": null
+        },
+        "execution_error_code": null
+      }
+    },
+    {
+      "operation": "/runs/run-9217186a1df3461e825efafa341156c9/responses",
+      "http_status": 202,
+      "body": {
+        "run_id": "run-9217186a1df3461e825efafa341156c9",
+        "job_id": "job-4c5da80e326442ffbf0c62891a2c2924",
+        "accepted": true
+      }
+    },
+    {
+      "operation": "query",
+      "http_status": 200,
+      "body": {
+        "run_id": "run-9217186a1df3461e825efafa341156c9",
+        "ticket_id": "T-3fe9b58470f1428eb29ae066b8491789",
+        "status": "paused",
+        "cancel_requested": false,
+        "pending_input": {
+          "pending_id": "pending-4fbb36616d4812f0438b732c3ee528a8",
+          "kind": "operator_decision",
+          "expected_role": "operator",
+          "input_revision": 2,
+          "proposal_revision": 2,
+          "proposal_hash": "ba3a192fc9d7e40f297c18e9a895af75533f9eeff06f4651403553b87aa51d82",
+          "questions": [],
+          "actions": [
+            {
+              "action_id": "action-f2e1ae67f3ea93b4b605b2653ea8d2a9",
+              "content_hash": "82ec211e8344b0562df0a9d53d8cc6bdb893a9af39fb24c288924a8f195841e8",
+              "type": "create_return_request",
+              "order_id": "ORD-019",
+              "amount_cents": null
+            }
+          ],
+          "can_respond": false
+        },
+        "result": {
+          "outcome": "paused",
+          "decision": "propose_return",
+          "customer_reply": "资料满足演示退货条件，可提交退货申请候选，待操作员确认。",
+          "receipts": [],
+          "model_calls": 18,
+          "tool_calls": 10,
+          "error_code": null
+        },
+        "execution_error_code": null
+      }
+    },
+    {
+      "operation": "/runs/run-9217186a1df3461e825efafa341156c9/responses",
+      "http_status": 202,
+      "body": {
+        "run_id": "run-9217186a1df3461e825efafa341156c9",
+        "job_id": "job-614c79da924c4e7e9ab8553f1d366a47",
+        "accepted": true
+      }
+    },
+    {
+      "operation": "query",
+      "http_status": 200,
+      "body": {
+        "run_id": "run-9217186a1df3461e825efafa341156c9",
+        "ticket_id": "T-3fe9b58470f1428eb29ae066b8491789",
+        "status": "completed",
+        "cancel_requested": false,
+        "pending_input": null,
+        "result": {
+          "outcome": "completed",
+          "decision": "propose_return",
+          "customer_reply": "资料满足演示退货条件，可提交退货申请候选，待操作员确认。",
+          "receipts": [
+            {
+              "action_id": "action-f2e1ae67f3ea93b4b605b2653ea8d2a9",
+              "type": "create_return_request",
+              "order_id": "ORD-019",
+              "amount_cents": null,
+              "business_record_id": "act-7cbd051b875d087c5dea267af1c0a811",
+              "business_status": "waiting_return",
+              "committed_at": "2026-10-02T04:00:00Z"
+            }
+          ],
+          "model_calls": 18,
+          "tool_calls": 11,
+          "error_code": null
+        },
+        "execution_error_code": null
+      }
+    }
+  ],
+  "first_events_page": {
+    "events": [
+      {
+        "sequence": 1,
+        "kind": "node_started",
+        "role": "application",
+        "node": "intake",
+        "tool": null,
+        "elapsed_ms": 3.115
+      },
+      {
+        "sequence": 2,
+        "kind": "agent_started",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 4.206
+      },
+      {
+        "sequence": 3,
+        "kind": "call_reserved",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 10.55
+      },
+      {
+        "sequence": 4,
+        "kind": "model_started",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 11.623
+      },
+      {
+        "sequence": 5,
+        "kind": "model_finished",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 14.526
+      },
+      {
+        "sequence": 6,
+        "kind": "agent_finished",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 18.557
+      },
+      {
+        "sequence": 7,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "intake",
+        "tool": null,
+        "elapsed_ms": 22.671
+      },
+      {
+        "sequence": 8,
+        "kind": "node_started",
+        "role": "application",
+        "node": "draft",
+        "tool": null,
+        "elapsed_ms": 24.026
+      },
+      {
+        "sequence": 9,
+        "kind": "agent_started",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 24.969
+      },
+      {
+        "sequence": 10,
+        "kind": "call_reserved",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 33.695
+      },
+      {
+        "sequence": 11,
+        "kind": "model_started",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 34.722
+      },
+      {
+        "sequence": 12,
+        "kind": "model_finished",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 37.448
+      },
+      {
+        "sequence": 13,
+        "kind": "agent_finished",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 40.906
+      },
+      {
+        "sequence": 14,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "draft",
+        "tool": null,
+        "elapsed_ms": 46.342
+      },
+      {
+        "sequence": 15,
+        "kind": "node_started",
+        "role": "application",
+        "node": "validate",
+        "tool": null,
+        "elapsed_ms": 47.469
+      },
+      {
+        "sequence": 16,
+        "kind": "validation_started",
+        "role": "validator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 48.874
+      },
+      {
+        "sequence": 17,
+        "kind": "validation_finished",
+        "role": "validator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 49.589
+      },
+      {
+        "sequence": 18,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "validate",
+        "tool": null,
+        "elapsed_ms": 53.592
+      },
+      {
+        "sequence": 19,
+        "kind": "node_started",
+        "role": "application",
+        "node": "review",
+        "tool": null,
+        "elapsed_ms": 54.658
+      },
+      {
+        "sequence": 20,
+        "kind": "agent_started",
+        "role": "reviewer",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 55.852
+      },
+      {
+        "sequence": 21,
+        "kind": "call_reserved",
+        "role": "reviewer",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 64.733
+      },
+      {
+        "sequence": 22,
+        "kind": "model_started",
+        "role": "reviewer",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 65.903
+      },
+      {
+        "sequence": 23,
+        "kind": "model_finished",
+        "role": "reviewer",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 69.28
+      },
+      {
+        "sequence": 24,
+        "kind": "agent_finished",
+        "role": "reviewer",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 73.547
+      },
+      {
+        "sequence": 25,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "review",
+        "tool": null,
+        "elapsed_ms": 79.362
+      },
+      {
+        "sequence": 26,
+        "kind": "node_started",
+        "role": "application",
+        "node": "prepare_customer",
+        "tool": null,
+        "elapsed_ms": 80.564
+      },
+      {
+        "sequence": 27,
+        "kind": "pending_created",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 81.574
+      },
+      {
+        "sequence": 28,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "prepare_customer",
+        "tool": null,
+        "elapsed_ms": 87.584
+      },
+      {
+        "sequence": 29,
+        "kind": "node_started",
+        "role": "application",
+        "node": "wait_customer",
+        "tool": null,
+        "elapsed_ms": 88.833
+      },
+      {
+        "sequence": 30,
+        "kind": "node_interrupted",
+        "role": "application",
+        "node": "wait_customer",
+        "tool": null,
+        "elapsed_ms": 89.927
+      },
+      {
+        "sequence": 31,
+        "kind": "run_paused",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 108.314
+      },
+      {
+        "sequence": 32,
+        "kind": "node_started",
+        "role": "application",
+        "node": "wait_customer",
+        "tool": null,
+        "elapsed_ms": 109.77
+      },
+      {
+        "sequence": 33,
+        "kind": "pending_consumed",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 111.438
+      },
+      {
+        "sequence": 34,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "wait_customer",
+        "tool": null,
+        "elapsed_ms": 114.78
+      },
+      {
+        "sequence": 35,
+        "kind": "node_started",
+        "role": "application",
+        "node": "intake",
+        "tool": null,
+        "elapsed_ms": 116.142
+      },
+      {
+        "sequence": 36,
+        "kind": "agent_started",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 117.182
+      },
+      {
+        "sequence": 37,
+        "kind": "call_reserved",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 123.531
+      },
+      {
+        "sequence": 38,
+        "kind": "model_started",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 124.454
+      },
+      {
+        "sequence": 39,
+        "kind": "model_finished",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 126.845
+      },
+      {
+        "sequence": 40,
+        "kind": "agent_finished",
+        "role": "coordinator",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 132.763
+      },
+      {
+        "sequence": 41,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "intake",
+        "tool": null,
+        "elapsed_ms": 138.29
+      },
+      {
+        "sequence": 42,
+        "kind": "node_started",
+        "role": "application",
+        "node": "candidate_branch",
+        "tool": null,
+        "elapsed_ms": 139.747
+      },
+      {
+        "sequence": 43,
+        "kind": "branch_started",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 140.992
+      },
+      {
+        "sequence": 44,
+        "kind": "agent_started",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 141.587
+      },
+      {
+        "sequence": 45,
+        "kind": "node_started",
+        "role": "application",
+        "node": "order_branch",
+        "tool": null,
+        "elapsed_ms": 145.385
+      },
+      {
+        "sequence": 46,
+        "kind": "branch_started",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 147.132
+      },
+      {
+        "sequence": 47,
+        "kind": "agent_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 148.131
+      },
+      {
+        "sequence": 48,
+        "kind": "call_reserved",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 158.608
+      },
+      {
+        "sequence": 49,
+        "kind": "model_started",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 159.568
+      },
+      {
+        "sequence": 50,
+        "kind": "model_finished",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 163.842
+      },
+      {
+        "sequence": 51,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 168.716
+      },
+      {
+        "sequence": 52,
+        "kind": "model_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 169.754
+      },
+      {
+        "sequence": 53,
+        "kind": "model_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 174.186
+      },
+      {
+        "sequence": 54,
+        "kind": "call_reserved",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 179.806
+      },
+      {
+        "sequence": 55,
+        "kind": "tool_started",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": "search_policy_candidates",
+        "elapsed_ms": 181.51
+      },
+      {
+        "sequence": 56,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 188.984
+      },
+      {
+        "sequence": 57,
+        "kind": "tool_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_order",
+        "elapsed_ms": 190.245
+      },
+      {
+        "sequence": 58,
+        "kind": "tool_finished",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": "search_policy_candidates",
+        "elapsed_ms": 194.456
+      },
+      {
+        "sequence": 59,
+        "kind": "tool_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_order",
+        "elapsed_ms": 199.028
+      },
+      {
+        "sequence": 60,
+        "kind": "call_reserved",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 204.424
+      },
+      {
+        "sequence": 61,
+        "kind": "model_started",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 205.382
+      },
+      {
+        "sequence": 62,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 208.855
+      },
+      {
+        "sequence": 63,
+        "kind": "model_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 209.892
+      },
+      {
+        "sequence": 64,
+        "kind": "model_finished",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 212.095
+      },
+      {
+        "sequence": 65,
+        "kind": "model_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 215.951
+      },
+      {
+        "sequence": 66,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 222.776
+      },
+      {
+        "sequence": 67,
+        "kind": "tool_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_order_products",
+        "elapsed_ms": 223.668
+      },
+      {
+        "sequence": 68,
+        "kind": "tool_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_order_products",
+        "elapsed_ms": 226.307
+      },
+      {
+        "sequence": 69,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 232.843
+      },
+      {
+        "sequence": 70,
+        "kind": "model_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 233.912
+      },
+      {
+        "sequence": 71,
+        "kind": "model_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 236.859
+      },
+      {
+        "sequence": 72,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 244.438
+      },
+      {
+        "sequence": 73,
+        "kind": "tool_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_tracking",
+        "elapsed_ms": 245.465
+      },
+      {
+        "sequence": 74,
+        "kind": "tool_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_tracking",
+        "elapsed_ms": 248.777
+      },
+      {
+        "sequence": 75,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 255.437
+      },
+      {
+        "sequence": 76,
+        "kind": "model_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 256.41
+      },
+      {
+        "sequence": 77,
+        "kind": "model_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 258.662
+      },
+      {
+        "sequence": 78,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 263.883
+      },
+      {
+        "sequence": 79,
+        "kind": "tool_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_delivery_proof",
+        "elapsed_ms": 265.141
+      },
+      {
+        "sequence": 80,
+        "kind": "tool_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_delivery_proof",
+        "elapsed_ms": 271.382
+      },
+      {
+        "sequence": 81,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 276.748
+      },
+      {
+        "sequence": 82,
+        "kind": "model_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 277.679
+      },
+      {
+        "sequence": 83,
+        "kind": "model_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 280.353
+      },
+      {
+        "sequence": 84,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 286.211
+      },
+      {
+        "sequence": 85,
+        "kind": "tool_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_after_sales_history",
+        "elapsed_ms": 287.148
+      },
+      {
+        "sequence": 86,
+        "kind": "tool_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": "get_after_sales_history",
+        "elapsed_ms": 289.846
+      },
+      {
+        "sequence": 87,
+        "kind": "call_reserved",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 297.162
+      },
+      {
+        "sequence": 88,
+        "kind": "model_started",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 298.636
+      },
+      {
+        "sequence": 89,
+        "kind": "model_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 303.105
+      },
+      {
+        "sequence": 90,
+        "kind": "agent_finished",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 307.317
+      },
+      {
+        "sequence": 91,
+        "kind": "branch_finished",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 311.369
+      },
+      {
+        "sequence": 92,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "candidate_branch",
+        "tool": null,
+        "elapsed_ms": 314.585
+      },
+      {
+        "sequence": 93,
+        "kind": "agent_finished",
+        "role": "order_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 318.311
+      },
+      {
+        "sequence": 94,
+        "kind": "branch_finished",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 322.498
+      },
+      {
+        "sequence": 95,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "order_branch",
+        "tool": null,
+        "elapsed_ms": 326.44
+      },
+      {
+        "sequence": 96,
+        "kind": "node_started",
+        "role": "application",
+        "node": "join",
+        "tool": null,
+        "elapsed_ms": 328.234
+      },
+      {
+        "sequence": 97,
+        "kind": "join_decided",
+        "role": "application",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 329.51
+      },
+      {
+        "sequence": 98,
+        "kind": "node_finished",
+        "role": "application",
+        "node": "join",
+        "tool": null,
+        "elapsed_ms": 333.267
+      },
+      {
+        "sequence": 99,
+        "kind": "node_started",
+        "role": "application",
+        "node": "policy",
+        "tool": null,
+        "elapsed_ms": 334.579
+      },
+      {
+        "sequence": 100,
+        "kind": "agent_started",
+        "role": "policy_specialist",
+        "node": null,
+        "tool": null,
+        "elapsed_ms": 335.721
+      }
+    ],
+    "next_after_seq": 100,
+    "has_more": true
+  }
+}

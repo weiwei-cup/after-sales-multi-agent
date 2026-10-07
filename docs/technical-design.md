@@ -356,11 +356,11 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 ### 8.2 数据库职责
 
-`business.sqlite` 当前实现：原业务表，加 workflow_runtime、proposal_plans、pending_inputs、human_inputs、action_ledger、action_events。三类模拟业务记录共用 after_sales_history，其 operation_key 唯一且引用账本；HTTP request_idempotency 和独立履约表待后续接口扩展。
+`business.sqlite` 当前为 schema v4：原业务表，加 P06 runtime/方案/待办/答复/动作账本、P07 预算/调用/分支/事件，以及 P08 request_idempotency、execution_jobs、api_run_results。三类模拟业务记录共用 after_sales_history，其 operation_key 唯一且引用账本；独立履约表尚未拆分。
 
 `checkpoints.sqlite`：由框架管理图检查点，不手工修改内部表。两库分别持久化，不能假设业务提交和图检查点能原子提交。
 
-业务库启用外键、合适的 busy timeout 和明确事务。P06 CLI 的 run/工单执行器由 POSIX 文件锁与活跃 run 注册保护，支持独立进程恢复；同订单金额由业务事务保护。HTTP 请求租约与分布式执行器尚未实现。
+业务库启用外键、合适的 busy timeout 和明确事务。CLI 的 run/工单执行器由 POSIX 文件锁与活跃 run 注册保护；同订单金额由业务事务保护。P08 HTTP 用业务库旁的文件租约限制单服务进程，以事务保存请求回执与执行意图；分布式执行器尚未实现。
 
 ### 8.3 动作幂等
 
@@ -374,11 +374,11 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 
 ### 8.4 启动恢复与取消
 
-- 重新启动加载 queued run；原 running run 标记为 interrupted，提供恢复入口。
+- P08 重新启动加载 queued job；HTTP-owned running job/run 标记为 interrupted，提供恢复入口；独立 CLI-owned 执行不被 startup 改写。
 - paused run 显示对应待办，可补充信息或确认继续。
 - 已经完成的动作以账本为准，不因旧图状态再次执行。
 - schema / workflow 版本不兼容时保留数据并报告版本冲突，先做明确迁移。
-- 取消为后续目标，P06 尚未提供取消入口；已经提交的模拟动作不能通过图状态撤销。
+- P07 已实现取消信号与事务检查，P08 增加取消接口和闲置 run 投影；已经提交的模拟动作不能通过图状态撤销。
 
 ## 9. 错误、预算和可观察性
 
@@ -393,7 +393,7 @@ P02 报告的 `disposition` 为 `eligible`、`ineligible`、`needs_information`�
 | 并发专员 | 2 个 | 限制模型并发 |
 | 单模型请求超时 | 30 秒 | P03 到时停止并保存失败；后续对暂时性错误有限重试 |
 | 单工具调用超时 | 3 秒 | P02 已实现，标记资料未取得，不能伪造空结果 |
-| 活动执行时长 | 120 秒 | 在可安全停止的边界终止 |
+| 活动执行时长 | 300 秒 | P07 持久活动 segment 与调用 deadline；人工暂停不计入 |
 | 单 Agent 输入 | 估算最多 6,000 token | 保留必要事实、摘要和引用 |
 | 单次输出 | 最多 1,200 token，按 provider 能力配置 | 避免无界输出 |
 | 全 run token 预算 | 初始 50,000，按实际 provider 校准 | 使用估算预留和实际 usage 对账 |
@@ -556,3 +556,13 @@ P01 已保存 `demo-v1` 业务资料、`cases-v1` 输入和 `gold-v1` 独立预�
 业务 schema v3 新增 branch_results、run_budget、call_reservations、run_events、run_control；累计调用、schema/审核返工及事件以 SQL 为准。每次 attempt 先原子预留再等待模型/工具共用的 semaphore，validator/executor 和失败重试均计数。未知 token usage 保留预留额度、实际总量为 null，费用无已验证价格也为 null。正常人工暂停不计活动时间；异常开放 segment 保守计到恢复，可能包含停机。
 
 CLI `cancel --run` 不取得运行锁，仅提交信号；resume/节点/预留/人工输入事务/新动作事务检查信号。已提交动作先读账本，取消不逆转余额、业务回执与真实工单状态。详细事件、界限、测试和演示见 [第007轮](rounds/007.md) 和 [ADR007](decisions/007-parallel-joins-and-durable-budgets.md)。HTTP/鉴权和实际模型 token 上限、价格仍属于后续工作。
+
+### P08 实际 HTTP 边界
+
+FastAPI lifespan 创建 ApplicationService，业务库需先 seed；默认一个后台线程、32条等待任务，单业务库只允许一个 HTTP 服务进程。初始 run/runtime、queued job、request idempotency 同事务提交；人工答复先绑定认证演示身份/待办版本/动作hash，再把 human input 和 queued job 同事务提交。CLI 与 HTTP 执行器共用 WorkflowService，transport 不拼模型提示词。
+
+线程从业务库原子 claim，运行自己的 asyncio loop；模型和同步预算账本不占 HTTP event loop。startup 恢复 queued，HTTP-owned running 标记 interrupted，paused 保留待办；独立CLI-owned执行不被改写。查询在 job 结束后才展示可答 pending，避免checkpoint等待与执行器收尾竞争。队列满取消仍保存信号，空位出现后投影；失败取消不无限自动重试，已提交回执保留。
+
+全部POST要求 Idempotency-Key，按actor＋method/path＋key隔离，同键不同规范化正文409。固定本地公开Bearer令牌注入customer/operator；正文不能自定身份。public DTO不返回graph、内部模型消息、证据payload、operation key或令牌；事件allowlist支持sequence游标分页，文本做常见电话/邮箱/令牌脱敏。生产认证、分布式调度、实际provider和支付尚未接入。
+
+本地516项离线测试、强制退出窗口、真实HTTP与项目外wheel验证通过。实际接口、启动方式、限制和学习问题见[第008轮](rounds/008.md)、[ADR008](decisions/008-durable-http-admission.md)。

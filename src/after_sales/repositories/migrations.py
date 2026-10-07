@@ -171,7 +171,27 @@ SCHEMA_V3 = (
     )""",
 )
 
-MIGRATIONS = {1: SCHEMA_V1, 2: SCHEMA_V2, 3: SCHEMA_V3}
+SCHEMA_V4 = (
+    """CREATE TABLE request_idempotency (
+        actor_id TEXT NOT NULL, scope TEXT NOT NULL, request_key TEXT NOT NULL,
+        payload_hash TEXT NOT NULL, response_json TEXT NOT NULL CHECK(json_valid(response_json)),
+        PRIMARY KEY(actor_id,scope,request_key)
+    )""",
+    """CREATE TABLE execution_jobs (
+        id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(id),
+        intent TEXT NOT NULL CHECK(intent IN ('recover','cancel')),
+        status TEXT NOT NULL CHECK(status IN ('queued','running','done','interrupted')),
+        created_at TEXT NOT NULL, error_code TEXT
+    )""",
+    "CREATE UNIQUE INDEX idx_active_job ON execution_jobs(run_id) "
+    "WHERE status IN ('queued','running')",
+    """CREATE TABLE api_run_results (
+        run_id TEXT PRIMARY KEY REFERENCES runs(id),
+        payload_json TEXT NOT NULL CHECK(json_valid(payload_json))
+    )""",
+)
+
+MIGRATIONS = {1: SCHEMA_V1, 2: SCHEMA_V2, 3: SCHEMA_V3, 4: SCHEMA_V4}
 
 
 def ensure_application_database(connection: sqlite3.Connection) -> None:

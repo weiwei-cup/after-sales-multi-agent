@@ -2,7 +2,7 @@
 
 通过物流延迟、签收未收到、退货申请三个业务场景，逐步学习 LangGraph＋LangChain 的工具调用、Agent 分工、审核返工、人工介入、持久恢复和并行协作。
 
-当前 **第 007 轮 / P07：有界并行与预算**已完成并上传 GitHub；本地 **488 个离线测试**与 [实现 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) 通过，阶段标签为 [phase-p07](https://github.com/weiwei-cup/after-sales-multi-agent/tree/phase-p07)。订单调查与独立政策候选检索并行，适用性等待事实齐备后计算；调用/usage/活动时间与返工额度从持久账本恢复，取消保留已提交动作。保留 single、serial、reviewed、durable 入口；下一轮为 P08 HTTP 服务。
+当前 **第 008 轮 / P08：HTTP 应用服务**已通过本地验收：**516 个离线测试**、真实本地 HTTP 全流程和项目外安装包验证通过。支持创建/查询工单、后台处理、版本绑定的回答与审批、恢复、取消和增量事件；请求幂等、身份范围与有界队列已接入。保留原 CLI 入口，GitHub CI 与 phase-p08 待远端验收后补记；下一轮为 P09 工单工作台。
 
 000～004 复核已完成。[复核记录](docs/reviews/000-004.md) 列出要求覆盖、3 类已修复问题及延期边界。当前代码使用 `rules-v2`，复核时的 285 项回归与 [补修 CI](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37025757749) 均通过；P05 在该版本上继续。原有阶段标签保留历史实现。
 
@@ -15,6 +15,7 @@
 - [第 005 轮学习记录](docs/rounds/005.md)：审核反馈、定向返工、interrupt、版本绑定和人工输入。
 - [第 006 轮学习记录](docs/rounds/006.md)：跨进程恢复、事务边界、动作幂等、执行前复核与业务状态。
 - [第 007 轮学习记录](docs/rounds/007.md)：独立分支、reducers、原子预算、有限重试、恢复与取消；[实际图](docs/graphs/p07-parallel.mmd)。
+- [第 008 轮学习记录](docs/rounds/008.md)：HTTP 启动步骤、演示身份、请求幂等、后台队列、审批/重启边界；[ADR 008](docs/decisions/008-durable-http-admission.md)。
 - [模拟资料与案例](fixtures/README.md)：数据来源、20 个开发案例与 10 个留出案例。
 
 第一版使用本地模拟订单、物流与虚构售后政策，输出建议与回复草稿；durable 入口会在人工确认后执行模拟业务动作。用户选择当前仅使用离线脚本模型；真实模型适配器和网络 smoke test 暂缓。
@@ -164,3 +165,23 @@ uv run --locked python scripts/demo_p07.py
 ```
 
 cancel 提交信号，暂停运行在下一次 resume 应用。已提交退款仍保留回执与余额。unknown usage 保留 token 预留，实际用量及费用为 null。候选与订单并行不保证每次都更快；实测时间线与教学注入延迟详见第 007 轮记录。
+
+## P08 HTTP 服务
+
+可重复的全流程演示使用临时库和固定模拟时钟：
+
+```bash
+uv run --locked python scripts/demo_p08.py
+```
+
+手动启动使用单独的 P08 数据库：
+
+```bash
+export AFTER_SALES_MODEL_MODE=scripted
+export AFTER_SALES_BUSINESS_DB_PATH=var/p08-business.sqlite
+export AFTER_SALES_CHECKPOINT_DB_PATH=var/p08-checkpoints.sqlite
+uv run --locked after-sales seed --json
+uv run --locked uvicorn after_sales.api.app:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+接口文档在 `http://127.0.0.1:8000/docs`。本地演示令牌：`demo-customer-a`、`demo-customer-b`、`demo-operator`；请求使用 Bearer 身份，所有 POST 要求 Idempotency-Key。处理请求返回 202，轮询 run 查询待办/结果；客户回答，操作员审批。queued 重启后自动执行，interrupted 使用 resume，paused 使用 responses。完整字段、状态码、退出窗口与测试说明见 [第 008 轮](docs/rounds/008.md)。

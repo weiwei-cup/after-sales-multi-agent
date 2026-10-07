@@ -1,6 +1,7 @@
 """Durable application records; graph checkpoints live in their separate SQLite file."""
 
 import json
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 
@@ -60,8 +61,8 @@ class RunStore:
     def register_extra(self, connection):
         pass
 
-    def register(self, ticket, context, checkpoint_path, limits, runtime):
-        with transaction(self.path) as connection:
+    def register(self, ticket, context, checkpoint_path, limits, runtime, *, connection=None):
+        with nullcontext(connection) if connection else transaction(self.path) as connection:
             if connection.execute("SELECT 1 FROM runs WHERE id=?", (self.run_id,)).fetchone():
                 raise DurableInputConflict("run ID already exists; use resume")
             active = connection.execute(
@@ -101,7 +102,7 @@ class RunStore:
         with read_database(self.path) as connection:
             if connection.execute("SELECT max(version) FROM schema_migrations").fetchone()[
                 0
-            ] not in (2, 3):
+            ] not in (2, 3, 4):
                 raise IncompatibleRun(
                     "P06 requires business schema v2; use db migrate before starting"
                 )
@@ -113,6 +114,15 @@ class RunStore:
             if row is None:
                 raise RecordNotFound("persistent run not found; a JSON report cannot restore it")
             values = dict(row)
+            has_jobs = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='execution_jobs' AND type='table'"
+            ).fetchone()
+            values["http_admitted"] = bool(
+                has_jobs
+                and connection.execute(
+                    "SELECT 1 FROM execution_jobs WHERE run_id=?", (self.run_id,)
+                ).fetchone()
+            )
         if (values["workflow_version"], values["schema_version"], values["model_mode"]) != (
             self.workflow_version,
             self.state_version,
@@ -239,11 +249,11 @@ class RunStore:
                 )
         return results
 
-    def accept(self, request: ResumeInput, ticket: Ticket, now: datetime):
+    def accept(self, request: ResumeInput, ticket: Ticket, now: datetime, *, connection=None):
         from after_sales.repositories.budgets import check_cancelled
 
         encoded = canonical(request.model_dump(mode="json"))
-        with transaction(self.path) as connection:
+        with nullcontext(connection) if connection else transaction(self.path) as connection:
             check_cancelled(connection, self.run_id)
             row = connection.execute(
                 "SELECT * FROM pending_inputs WHERE pending_id=? AND run_id=?",

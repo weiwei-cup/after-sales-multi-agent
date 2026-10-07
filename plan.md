@@ -363,14 +363,14 @@ GitHub 提交 / 阶段标签 / CI 结果：
 
 实现清单：
 
-- [ ] P08.1 增加 FastAPI app、启动生命周期、健康检查和错误 DTO。
-- [ ] P08.2 实现工单创建 / 列表 / 详情和 run 启动 / 查询。
-- [ ] P08.3 实现 pending response、interrupted resume、取消和增量事件接口。
-- [ ] P08.4 写入 queued run 后交给有上限的本地单进程执行器；同工单禁止并发处理。
-- [ ] P08.5 增加请求 Idempotency-Key，与动作 operation key 分开管理。
-- [ ] P08.6 注入预设 customer/operator 身份，并按角色和工单范围校验。
-- [ ] P08.7 重启时恢复 queued，标记原 running 为 interrupted，paused 显示待办。
-- [ ] P08.8 OpenAPI 与 CLI 共用 service，API 不直接拼模型提示词。
+- [x] P08.1 增加 FastAPI app、启动生命周期、健康检查和错误 DTO。
+- [x] P08.2 实现工单创建 / 列表 / 详情和 run 启动 / 查询。
+- [x] P08.3 实现 pending response、interrupted resume、取消和增量事件接口。
+- [x] P08.4 写入 queued run 后交给有上限的本地单进程执行器；同工单禁止并发处理。
+- [x] P08.5 增加请求 Idempotency-Key，与动作 operation key 分开管理。
+- [x] P08.6 注入预设 customer/operator 身份，并按角色和工单范围校验。
+- [x] P08.7 重启时恢复 queued，标记原 running 为 interrupted，paused 显示待办。
+- [x] P08.8 OpenAPI 与 CLI 共用 service，API 不直接拼模型提示词。
 
 关键验证：
 
@@ -385,6 +385,8 @@ GitHub 提交 / 阶段标签 / CI 结果：
 演示：本地启动后，通过 HTTP 完成创建→启动→查询→回答→确认→结果。
 
 验收门槛：API 集成和同工单并发验证通过。需要理解：agent runtime 与 HTTP 生命周期、业务身份和幂等请求。
+
+实现与验证：[第 008 轮](docs/rounds/008.md)、[ADR 008](docs/decisions/008-durable-http-admission.md)、[真实 HTTP 演示](docs/graphs/p08-demo-http.json)。516 项离线测试通过（新增 28 项），Ruff、独立进程退出/恢复、同工单并发、容量/取消边界和项目外 wheel 验证通过。GitHub CI 与 phase-p08 待远端验收。
 
 ## 13. P09：工单工作台页面
 
@@ -490,11 +492,11 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - [x] P05：审核与人工介入。
 - [x] P06：恢复与模拟动作。
 - [x] P07：并行、预算和事件。
-- [ ] P08：HTTP 服务。
+- [x] P08：HTTP 服务。
 - [ ] P09：工单页面。
 - [ ] P10：评估与交付。
 
-第 007 轮 / P07 已完成并上传，下一轮为 P08 HTTP 服务。真实模型接入仍按用户选择延期。
+第 008 轮 / P08 本地验收完成，GitHub 交付正在验证；下一轮为 P09 工单工作台。真实模型接入仍按用户选择延期。
 
 ### 已完成工作记录
 
@@ -580,3 +582,11 @@ GitHub 提交 / 阶段标签 / CI 结果：
 - 观测：同一 case 无延迟串行 227.100 ms / 并行 424.178 ms；各注入 500 ms 的两条独立读取串行 1273.111 ms / 并行 958.988 ms。单次教学观测不代表真实 provider 性能。
 - 文档：第 007 轮、ADR 007、实际图、可复现演示与观测 JSON 已保存；安装包含 41 个模块与 demo JSON，隔离环境旧入口及 P07 跨进程批准/回看/取消通过；实现提交 f5f299181b69d66b6ae3cc3996e562a939083be2 已推送，[CI 37051776146](https://github.com/weiwei-cup/after-sales-multi-agent/actions/runs/37051776146) completed/success；phase-p07 指向最终文档提交，历史标签不移动。
 - 范围：继续离线脚本模型；未开始 P08 HTTP/鉴权，也未接入真实支付。
+
+2026-10-07，第 008 轮 / P08 本地验收：
+
+- 实现：FastAPI 生命周期/健康/OpenAPI/统一错误；工单创建与范围查询；queued admission、有界线程执行器、幂等回执；待办回答/审批、interrupted resume、取消、公开增量事件；CLI 与 HTTP 执行器共用 WorkflowService。
+- 验证：516 passed in 91.29s（新增28项）；Ruff 通过；同工单竞争、同 key 并发、角色/版本/金额/字段、容量回滚、队列满取消、强制退出恢复与动作重放通过。
+- 演示：真实 loopback HTTP 完成创建→启动→补充→审批→结果；独立临时库，演示时钟固定2026-10-02，日常服务真实UTC。项目外安装wheel48模块，旧CLI和HTTP退款批准/重放通过。
+- 文档：第008轮、ADR008、HTTP轨迹已保存；CI增加真实HTTP演示。日常库只读确认schema1、ORD-004退款0、T-NOTRECEIVED-002 new。
+- 范围：单机POSIX、单HTTP进程、固定公开演示身份、离线模型与模拟业务；未开始P09页面、生产鉴权、分布式队列或外部支付。GitHub CI 与 phase-p08 待远端验证。

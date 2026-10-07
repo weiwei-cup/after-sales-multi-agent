@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     model_api_key: SecretStr | None = Field(default=None, exclude=True)
     business_db_path: Path = Path("var/business.sqlite")
     checkpoint_db_path: Path = Path("var/checkpoints.sqlite")
+    api_workers: int = Field(default=1, ge=1, le=4)
+    api_queue_capacity: int = Field(default=32, ge=1, le=1000)
     max_model_calls: int = Field(default=20, gt=0)
     max_tool_calls: int = Field(default=30, gt=0)
     review_repair_limit: int = Field(default=2, ge=0, le=2)

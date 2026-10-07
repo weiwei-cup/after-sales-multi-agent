@@ -1,6 +1,7 @@
 """Atomic reservations and cancellation are independent of graph checkpoints."""
 
 import json
+from contextlib import nullcontext
 from datetime import UTC, datetime
 
 from after_sales.agents.telemetry import CallLimitExceeded, SchemaRepairExceeded
@@ -169,8 +170,8 @@ class BudgetStore:
             )
             return count + 1
 
-    def event(self, kind, **data):
-        with transaction(self.path) as db:
+    def event(self, kind, *, connection=None, **data):
+        with nullcontext(connection) if connection else transaction(self.path) as db:
             sequence = db.execute(
                 "SELECT coalesce(max(sequence),0)+1 FROM run_events WHERE run_id=?", (self.run_id,)
             ).fetchone()[0]
@@ -211,8 +212,8 @@ class BudgetStore:
             "events": events,
         }
 
-    def cancel(self, reason="operator_requested"):
-        with transaction(self.path) as db:
+    def cancel(self, reason="operator_requested", *, connection=None):
+        with nullcontext(connection) if connection else transaction(self.path) as db:
             row = db.execute("SELECT status FROM runs WHERE id=?", (self.run_id,)).fetchone()
             if row is None:
                 raise IncompatibleRun("run absent")
@@ -229,5 +230,5 @@ class BudgetStore:
                 "UPDATE run_control SET cancel_requested=1,cancel_reason=? WHERE run_id=?",
                 (reason, self.run_id),
             )
-        self.event("cancel_requested", role="application", reason=reason)
+            self.event("cancel_requested", connection=db, role="application", reason=reason)
         return True

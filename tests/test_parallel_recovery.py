@@ -163,7 +163,7 @@ def test_crashed_open_segment_is_conservatively_charged_and_exhaustion_handoffs(
     asyncio.run(scenario())
 
 
-def test_business_v2_to_v3_preserves_a_p06_pending_run(tmp_path, monkeypatch):
+def test_business_v2_to_current_preserves_a_p06_pending_run(tmp_path, monkeypatch):
     from after_sales.repositories.migrations import MIGRATIONS
 
     async def scenario():
@@ -173,6 +173,7 @@ def test_business_v2_to_v3_preserves_a_p06_pending_run(tmp_path, monkeypatch):
         )
         with monkeypatch.context() as patch:
             patch.delitem(MIGRATIONS, 3)
+            patch.delitem(MIGRATIONS, 4)
             seed_demo(settings.business_db_path)
             repo = BusinessRepository(settings.business_db_path)
             run = await PersistentReviewRun.create(

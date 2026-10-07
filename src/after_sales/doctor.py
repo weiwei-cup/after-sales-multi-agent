@@ -12,6 +12,8 @@ PACKAGES = (
     "langgraph-checkpoint-sqlite",
     "pydantic",
     "pydantic-settings",
+    "fastapi",
+    "uvicorn",
 )
 
 
@@ -27,7 +29,7 @@ def build_report(settings: Settings) -> dict[str, object]:
     python_ok = platform.python_version_tuple()[:2] == ("3", "12")
     return {
         "ok": python_ok and not missing,
-        "phase": "P07",
+        "phase": "P08",
         "python": platform.python_version(),
         "packages": packages,
         "model_mode": settings.model_mode,
@@ -38,7 +40,7 @@ def build_report(settings: Settings) -> dict[str, object]:
             "resume_scope": "cross_process",
             "checkpointer": "AsyncSqliteSaver",
             "business_writes": "approved_mock_actions_via_transactional_ledger",
-            "identity": "local_demo_customer_and_operator; authenticated_transport_from_P08",
+            "identity": "P08_fixed_demo_bearer_tokens; production_auth_deferred",
         },
         "live_smoke": "skipped_provider_deferred_by_user",
         "readonly_tools": {

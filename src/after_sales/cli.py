@@ -18,12 +18,11 @@ from after_sales.doctor import build_report
 from after_sales.domain.models import TicketType, UtcTime
 from after_sales.repositories.errors import RepositoryError
 from after_sales.repositories.seed import seed_demo
-from after_sales.repositories.sqlite import BusinessRepository, migrate, read_database
+from after_sales.repositories.sqlite import BusinessRepository, migrate
+from after_sales.services.workflows import WorkflowService
 from after_sales.tools.inspection import inspect_ticket
 from after_sales.tools.service import ToolSession
-from after_sales.workflows.durable import PersistentReviewRun
 from after_sales.workflows.interactive import interact, run_interactive
-from after_sales.workflows.parallel import ParallelReviewRun, request_cancel
 from after_sales.workflows.reviewed import run_reviewed
 from after_sales.workflows.serial import run_multi
 
@@ -293,7 +292,7 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
         save_run(report, path)
         return report
     if args.command == "cancel":
-        return request_cancel(repository, args.run, settings)
+        return WorkflowService(repository, settings).cancel(args.run)
     if args.command == "inspect":
         session = ToolSession.for_ticket(
             repository,
@@ -336,23 +335,13 @@ def _business_command(args: argparse.Namespace, settings: Settings) -> object:
 
 
 async def _durable_command(repository, settings, args):
+    service = WorkflowService(repository, settings)
     if args.command == "resume":
-        with read_database(repository.path) as connection:
-            row = connection.execute(
-                "SELECT workflow_version FROM workflow_runtime WHERE run_id=?", (args.run,)
-            ).fetchone()
-        run_class = (
-            ParallelReviewRun
-            if row and row[0] == ParallelReviewRun.workflow_version
-            else PersistentReviewRun
-        )
-        run = await run_class.load(repository, args.run, settings)
+        run = await service.load(args.run)
     else:
-        run_class = ParallelReviewRun if args.workflow == "parallel" else PersistentReviewRun
-        run = await run_class.create(
-            repository,
+        run = await service.create(
             args.ticket,
-            settings,
+            workflow=args.workflow,
             mode=args.model or settings.model_mode,
             run_id=args.run_id,
         )

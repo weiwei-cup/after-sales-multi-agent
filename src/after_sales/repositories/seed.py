@@ -24,6 +24,9 @@ SEED_TABLES = (
     "after_sales_history",
 )
 RESET_TABLES = (
+    "request_idempotency",
+    "execution_jobs",
+    "api_run_results",
     "branch_results",
     "run_events",
     "call_reservations",

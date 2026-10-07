@@ -356,7 +356,11 @@ class PersistentReviewRun(InMemoryReviewRun):
     @classmethod
     async def load(cls, repository, run_id, settings, **kwargs):
         stored = cls.store_class(repository.path, run_id).load(settings.checkpoint_db_path)
-        checkpoint_file(settings.checkpoint_db_path, create=False)
+        # HTTP admission persists an initial queued runtime before any checkpoint exists.
+        checkpoint_file(
+            settings.checkpoint_db_path,
+            create=stored["status"] == "queued" and stored["http_admitted"],
+        )
         settings = settings.model_copy(update=stored["limits"])
         payload = stored["runtime"]
         run = cls(

@@ -162,7 +162,7 @@ def test_unknown_run_and_json_report_cannot_restore_graph(tmp_path, capsys):
 def test_durable_live_explicitly_unavailable_and_doctor_has_no_side_effects(tmp_path, capsys):
     assert main(["doctor", "--json"]) == 0
     report = json.loads(capsys.readouterr().out)
-    assert report["phase"] == "P07"
+    assert report["phase"] == "P08"
     assert report["human_input"]["checkpointer"] == "AsyncSqliteSaver"
     assert not (tmp_path / "var").exists()
     assert (

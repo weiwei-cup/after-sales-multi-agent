@@ -291,7 +291,7 @@ class PendingInput(DomainModel):
 
 
 class ResumeInput(DomainModel):
-    """Local demo identity envelope; an authenticated transport is deferred to P08."""
+    """Internal bound envelope; P08 HTTP derives its actor/role from the demo credential."""
 
     pending_id: Identifier
     run_id: Identifier

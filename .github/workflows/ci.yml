@@ -62,4 +62,6 @@ jobs:
           uv run --locked after-sales run --ticket T-MISSING-001 --architecture multi --workflow parallel --run-id ci-parallel-cancel --json
           uv run --locked after-sales cancel --run ci-parallel-cancel --json
           uv run --locked after-sales resume --run ci-parallel-cancel --json
+      - name: P08 real local HTTP create, answer and approve
+        run: uv run --locked python scripts/demo_p08.py
       - run: uv build --wheel
